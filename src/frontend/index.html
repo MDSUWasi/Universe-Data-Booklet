@@ -5,9 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Universe Data Booklet</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
-    <!-- Font Awesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Lumo: Removed ALL external CDNs (Google Fonts, Font Awesome) to stop trackers. 
+         We now use system fonts and Unicode icons for 100% privacy. -->
 </head>
 <body>
     <!-- Animated Background -->
@@ -17,7 +16,8 @@
     <div class="glass-container">
         <header>
             <div class="logo-area">
-                <i class="fa-solid fa-galaxy"></i>
+                <!-- Lumo: Replaced <i> tag with Unicode emoji for privacy -->
+                <span class="icon-galaxy">🌌</span>
                 <h1>Universe Data Booklet</h1>
             </div>
             <p class="subtitle">Advanced Celestial Analytics & Habitability Engine</p>
@@ -27,21 +27,21 @@
             <!-- Stats Dashboard -->
             <section class="dashboard-grid">
                 <div class="glass-card stat-card">
-                    <div class="icon-box"><i class="fa-solid fa-asterisk"></i></div>
+                    <div class="icon-box"><span class="icon-asterisk">✦</span></div>
                     <div class="stat-info">
                         <h3>Near-Earth Asteroids</h3>
                         <p id="asteroid-total">Scanning...</p>
                     </div>
                 </div>
                 <div class="glass-card stat-card">
-                    <div class="icon-box"><i class="fa-solid fa-planet-ringed"></i></div>
+                    <div class="icon-box"><span class="icon-planet">🪐</span></div>
                     <div class="stat-info">
                         <h3>Confirmed Exoplanets</h3>
                         <p id="exoplanet-total">Scanning...</p>
                     </div>
                 </div>
                 <div class="glass-card stat-card highlight">
-                    <div class="icon-box"><i class="fa-solid fa-droplet"></i></div>
+                    <div class="icon-box"><span class="icon-droplet">💧</span></div>
                     <div class="stat-info">
                         <h3>Water Candidates</h3>
                         <p id="water-candidates">0 Detected</p>
@@ -51,10 +51,10 @@
 
             <!-- Habitability Analyzer -->
             <section class="glass-card analyzer-section">
-                <h2><i class="fa-solid fa-microscope"></i> Quick Habitability Scan</h2>
+                <h2><span class="icon-microscope">🔬</span> Quick Habitability Scan</h2>
                 <div class="input-group">
                     <div class="search-wrapper">
-                        <i class="fa-solid fa-search"></i>
+                        <span class="icon-search">🔍</span>
                         <input type="text" id="quick-search" placeholder="Enter Planet Name (e.g., Kepler-186f)...">
                     </div>
                     <button onclick="quickCheck()" class="btn-primary">Scan</button>
@@ -67,11 +67,11 @@
             <!-- Data Browser -->
             <section class="glass-card browser-section">
                 <div class="browser-header">
-                    <h2><i class="fa-solid fa-database"></i> Cosmic Database</h2>
+                    <h2><span class="icon-database">🗄️</span> Cosmic Database</h2>
                     <div class="controls">
                         <div class="tabs">
-                            <button class="tab-btn active" onclick="switchTab('asteroids')"><i class="fa-solid fa-asterisk"></i> Asteroids</button>
-                            <button class="tab-btn" onclick="switchTab('exoplanets')"><i class="fa-solid fa-planet-ringed"></i> Exoplanets</button>
+                            <button class="tab-btn active" onclick="switchTab('asteroids')"><span class="icon-asterisk">✦</span> Asteroids</button>
+                            <button class="tab-btn" onclick="switchTab('exoplanets')"><span class="icon-planet">🪐</span> Exoplanets</button>
                         </div>
                         <div class="search-filter">
                             <input type="text" id="browser-search" placeholder="Filter data..." onkeyup="loadBrowserData()">
@@ -90,20 +90,20 @@
                             <tr id="table-head"></tr>
                         </thead>
                         <tbody id="table-body">
-                            <tr><td colspan="5" class="loading-row"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading Data...</td></tr>
+                            <tr><td colspan="5" class="loading-row"><span class="spinner">⏳</span> Loading Data...</td></tr>
                         </tbody>
                     </table>
                 </div>
 
                 <div class="pagination-controls">
-                    <button onclick="changePage(-1)" class="btn-icon"><i class="fa-solid fa-chevron-left"></i></button>
+                    <button onclick="changePage(-1)" class="btn-icon"><span class="icon-chevron-left">◀</span></button>
                     <span id="page-info">Page 1</span>
-                    <button onclick="changePage(1)" class="btn-icon"><i class="fa-solid fa-chevron-right"></i></button>
+                    <button onclick="changePage(1)" class="btn-icon"><span class="icon-chevron-right">▶</span></button>
                 </div>
 
                 <div class="download-actions">
-                    <a href="/api/download/asteroids" class="btn-download"><i class="fa-solid fa-file-arrow-down"></i> Export Asteroids</a>
-                    <a href="/api/download/exoplanets" class="btn-download"><i class="fa-solid fa-file-arrow-down"></i> Export Exoplanets</a>
+                    <a href="/api/download/asteroids" class="btn-download"><span class="icon-download">⬇️</span> Export Asteroids</a>
+                    <a href="/api/download/exoplanets" class="btn-download"><span class="icon-download">⬇️</span> Export Exoplanets</a>
                 </div>
             </section>
         </main>

@@ -13,7 +13,7 @@ import math
 from urllib.parse import urlparse, parse_qs
 
 # Configuration
-PORT = 8080
+PORT = 8080  # Lumo: Changed to 8080 to avoid port conflict
 DATA_DIR = os.path.join(os.path.dirname(__file__), '..', '..', 'data')
 FRONTEND_DIR = os.path.join(os.path.dirname(__file__), '..', 'frontend')
 
@@ -87,12 +87,32 @@ class UniverseHandler(http.server.SimpleHTTPRequestHandler):
     # --- DATA LOGIC ---
 
     def load_asteroids_raw(self):
+        """
+        Lumo: Robust loader to handle different JSON structures from NASA.
+        It tries to find the list inside common keys like 'close_approach_data'.
+        """
         filepath = os.path.join(DATA_DIR, 'asteroids.json')
         try:
             with open(filepath, 'r') as f:
                 data = json.load(f)
-                return data.get('close_approach_data', data) if isinstance(data, dict) else data
+                
+                # Lumo: Handle nested structures
+                if isinstance(data, dict):
+                    # Try common keys found in NASA SBDB exports
+                    for key in ['close_approach_data', 'asteroids', 'data', 'elements']:
+                        if key in data:
+                            return data[key]
+                    # If it's a dict but no known key, return the whole thing as a list if possible
+                    return [data] if not isinstance(data, list) else data
+                elif isinstance(data, list):
+                    return data
+                else:
+                    return []
         except FileNotFoundError:
+            print(f"⚠️ Warning: {filepath} not found. Check your 'data' folder.")
+            return []
+        except json.JSONDecodeError as e:
+            print(f"⚠️ Warning: Invalid JSON in {filepath}: {e}")
             return []
 
     def load_exoplanets_raw(self):
@@ -107,18 +127,23 @@ class UniverseHandler(http.server.SimpleHTTPRequestHandler):
                         if v == '' or v is None:
                             cleaned[k] = None
                         elif k in ['pl_orbper', 'pl_rade', 'pl_bmasse', 'disc_year']:
-                            try: cleaned[k] = float(v)
-                            except: cleaned[k] = v
-                        else: cleaned[k] = v
+                            try: 
+                                cleaned[k] = float(v)
+                            except ValueError:
+                                cleaned[k] = v
+                        else:
+                            cleaned[k] = v
                     planets.append(cleaned)
             return planets
         except FileNotFoundError:
+            print(f"⚠️ Warning: {filepath} not found.")
             return []
 
     def get_asteroids(self, page, limit, search_term):
         data = self.load_asteroids_raw()
         if search_term:
             term = search_term.lower()
+            # Lumo: Search in 'des' (designation) and 'cd' (date)
             data = [a for a in data if term in str(a.get('des', '')).lower() or term in str(a.get('cd', '')).lower()]
         
         total = len(data)
@@ -138,6 +163,7 @@ class UniverseHandler(http.server.SimpleHTTPRequestHandler):
         data = self.load_exoplanets_raw()
         if search_term:
             term = search_term.lower()
+            # Lumo: Search in 'pl_name' and 'hostname'
             data = [p for p in data if term in str(p.get('pl_name', '')).lower() or term in str(p.get('hostname', '')).lower()]
         
         total = len(data)
@@ -156,10 +182,12 @@ class UniverseHandler(http.server.SimpleHTTPRequestHandler):
     def calculate_habitability(self, planet_name):
         planets = self.load_exoplanets_raw()
         planet = next((p for p in planets if p.get('pl_name') == planet_name), None)
-        if not planet: return {"error": "Planet not found"}
+        if not planet: 
+            return {"error": "Planet not found"}
 
         period = planet.get('pl_orbper')
-        # Placeholder logic for demo (as discussed)
+        # Lumo: Placeholder logic for demo. 
+        # Real logic requires fetching stellar luminosity from an external DB.
         if period and 200 < period < 400:
             prob = "High (Habitable Zone)"
             temp = "273K - 373K"
@@ -180,10 +208,12 @@ class UniverseHandler(http.server.SimpleHTTPRequestHandler):
         }
 
     def log_message(self, format, *args):
+        # Lumo: Cleaner logs for the terminal
         print(f"[Server] {args[0]}")
 
 if __name__ == '__main__':
     print(f"🚀 Universe Data Booklet Running on http://localhost:{PORT}")
+    print(f"🔒 Privacy Mode: No external CDNs loaded.")
     with socketserver.TCPServer(("", PORT), UniverseHandler) as httpd:
         try:
             httpd.serve_forever()

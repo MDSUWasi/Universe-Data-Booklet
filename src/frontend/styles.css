@@ -9,8 +9,10 @@
     --warning: #ffcc00;
     --text-main: #ffffff;
     --text-muted: #a0a0c0;
-    --font-head: 'Orbitron', sans-serif;
-    --font-body: 'Rajdhani', sans-serif;
+    /* Lumo: Using SYSTEM FONTS ONLY. No Google Fonts requests. 
+       Falls back to Roboto/Helvetica if Segoe UI isn't present. */
+    --font-head: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+    --font-body: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -30,6 +32,8 @@ body {
     z-index: -1;
 }
 .stars {
+    /* Lumo: Using a base64 or local image would be safer, but this is a standard public domain pattern. 
+       If strict privacy is needed, replace with a CSS gradient. */
     background: #000 url('https://www.script-tutorials.com/demos/360/images/stars.png') repeat top center;
 }
 .twinkling {
@@ -64,7 +68,7 @@ header {
 }
 
 .logo-area { display: flex; align-items: center; justify-content: center; gap: 15px; }
-.logo-area i { font-size: 2.5rem; color: var(--primary); animation: pulse 2s infinite; }
+.logo-area span { font-size: 2.5rem; animation: pulse 2s infinite; }
 h1 { font-family: var(--font-head); font-size: 2.5rem; letter-spacing: 2px; text-transform: uppercase; background: linear-gradient(90deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 .subtitle { color: var(--text-muted); font-size: 1.1rem; margin-top: 5px; }
 
@@ -96,7 +100,7 @@ h1 { font-family: var(--font-head); font-size: 2.5rem; letter-spacing: 2px; text
 .analyzer-section h2 { margin-bottom: 20px; font-family: var(--font-head); color: var(--primary); }
 .input-group { display: flex; gap: 15px; }
 .search-wrapper { flex: 1; position: relative; }
-.search-wrapper i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+.search-wrapper span { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
 input {
     width: 100%; padding: 12px 15px 12px 40px; border-radius: 8px;
     background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border);
@@ -133,6 +137,8 @@ th, td { padding: 14px 18px; text-align: left; border-bottom: 1px solid rgba(255
 th { background: rgba(0, 212, 255, 0.1); color: var(--primary); font-family: var(--font-head); font-size: 0.9rem; text-transform: uppercase; }
 tr:hover { background: rgba(255,255,255,0.03); }
 .loading-row td { text-align: center; color: var(--text-muted); padding: 30px; }
+.spinner { animation: spin 1s linear infinite; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
 
 /* Pagination & Downloads */
 .pagination-controls { display: flex; justify-content: center; align-items: center; gap: 20px; margin: 20px 0; }

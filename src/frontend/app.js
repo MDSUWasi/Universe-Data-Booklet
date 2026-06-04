@@ -3,6 +3,8 @@ let currentPage = 1;
 let currentLimit = 20;
 let currentSearch = '';
 
+// Lumo: Defined columns for both datasets. 
+// If asteroids.json keys change, update these 'key' values to match the JSON.
 const columns = {
     asteroids: [
         { key: 'des', label: 'Designation' },
@@ -34,7 +36,7 @@ async function loadStats() {
         const expoData = await expoRes.json();
         document.getElementById('exoplanet-total').innerText = expoData.total.toLocaleString();
         
-        // Mock water candidates for demo (real logic would scan all)
+        // Lumo: Placeholder for water candidates. Real logic needs full scan.
         document.getElementById('water-candidates').innerText = "Scanning...";
         setTimeout(() => {
             document.getElementById('water-candidates').innerText = "12 Potential";
@@ -63,12 +65,17 @@ async function loadBrowserData() {
     try {
         const res = await fetch(url);
         const data = await res.json();
+        
+        // Lumo: DEBUG LOG - This helps us see exactly what the server sent.
+        console.log(`[${currentTab}] API Response:`, data);
+        console.log(`[${currentTab}] Data array length:`, data.data?.length);
 
         renderTableHeaders();
         renderTableRows(data.data);
         updatePagination(data);
     } catch (err) {
-        document.getElementById('table-body').innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--danger)">Error loading data</td></tr>';
+        console.error(`[${currentTab}] Error loading data:`, err);
+        document.getElementById('table-body').innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--danger)">Error loading data. Check console for details.</td></tr>';
     }
 }
 
@@ -86,7 +93,7 @@ function renderTableRows(rows) {
     const tbody = document.getElementById('table-body');
     tbody.innerHTML = '';
 
-    if (rows.length === 0) {
+    if (!rows || rows.length === 0) {
         tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted)">No results found</td></tr>';
         return;
     }
@@ -121,14 +128,14 @@ async function quickCheck() {
 
     const container = document.getElementById('quick-result');
     container.classList.remove('hidden');
-    container.innerHTML = '<div style="text-align:center; padding:20px;"><i class="fa-solid fa-circle-notch fa-spin fa-2x" style="color:var(--primary)"></i><br>Scanning...</div>';
+    container.innerHTML = '<div style="text-align:center; padding:20px;"><span class="spinner">⏳</span><br>Scanning...</div>';
 
     try {
         const res = await fetch(`/api/habitability?planet_name=${encodeURIComponent(name)}`);
         const data = await res.json();
 
         if (data.error) {
-            container.innerHTML = `<div style="color:var(--danger); text-align:center;"><i class="fa-solid fa-triangle-exclamation"></i> ${data.error}</div>`;
+            container.innerHTML = `<div style="color:var(--danger); text-align:center;"><span class="icon-warning">⚠️</span> ${data.error}</div>`;
             return;
         }
 
