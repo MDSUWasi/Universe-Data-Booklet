@@ -33,8 +33,23 @@ body { background-color: var(--bg-color); color: var(--text-main); font-family: 
 .glass-panel:hover { transform: translateY(-5px); box-shadow: var(--glow); }
 
 header { text-align: center; padding: 40px 20px; border-bottom: 1px solid var(--glass-border); }
-h1 { font-size: 3rem; text-transform: uppercase; letter-spacing: 4px; background: linear-gradient(90deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 20px rgba(0, 212, 255, 0.5); }
-
+/* Update this section in style.css */
+h1 {
+    font-size: 3rem;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    /* Fallback color for browsers that don't support gradient text */
+    color: var(--primary); 
+    /* Gradient Text */
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-fill-color: transparent;
+    /* Glow effect */
+    text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+    margin-bottom: 10px;
+}
 .controls { display: flex; justify-content: center; gap: 15px; margin: 20px 0; flex-wrap: wrap; }
 .theme-btn { background: transparent; border: 2px solid var(--primary); color: var(--primary); padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: bold; transition: 0.3s; }
 .theme-btn:hover, .theme-btn.active { background: var(--primary); color: #000; box-shadow: var(--glow); }

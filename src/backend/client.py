@@ -2,15 +2,15 @@ import urllib.request
 import json
 import ssl
 import os
+import csv
+import io
 from datetime import datetime
 from cache_manager import get_cached_data, save_to_cache
 
-# Public NASA Key (No signup, rate limited to 1 req/sec)
 NASA_API_KEY = "DEMO_KEY"
 BASE_URL = "https://api.nasa.gov"
 
 def fetch_asteroids(date=""):
-    """Fetches asteroids. Checks cache first to avoid rate limits."""
     cached = get_cached_data('cached_asteroids.json')
     if cached:
         return cached, True
@@ -22,46 +22,67 @@ def fetch_asteroids(date=""):
         url = f"{BASE_URL}/neo/rest/v1/feed?start_date={date}&end_date={date}&api_key={NASA_API_KEY}"
         context = ssl._create_unverified_context()
         
-        print(f"🌍 Fetching fresh asteroid data for {date}...")
+        print(f"🌍 Fetching asteroids for {date}...")
         with urllib.request.urlopen(url, context=context, timeout=15) as response:
             raw_data = json.loads(response.read().decode())
             neo_data = raw_data.get('near_earth_objects', {})
-            
             save_to_cache('cached_asteroids.json', neo_data)
-            print("✅ Asteroids cached locally.")
+            print("✅ Asteroids cached.")
             return neo_data, False
     except Exception as e:
-        print(f"❌ NASA API Error: {e}")
+        print(f"❌ Asteroid Error: {e}")
         return {}, False
 
 def fetch_exoplanets():
-    """Fetches exoplanets from the public CSV archive."""
     cached = get_cached_data('cached_exoplanets.json')
     if cached:
         return cached, True
 
+    # Try the official NASA Exoplanet Archive CSV
+    csv_url = "https://exoplanetarchive.ipac.caltech.edu/cgi-bin/TblView/nph-tblView?access=CSV&table=pscompPSC&where=pl_discmethod='Transit'"
+    
     try:
-        # Public CSV URL (No API key needed)
-        csv_url = "https://exoplanetarchive.ipac.caltech.edu/cgi-bin/TblView/nph-tblView?access=CSV&table=pscompPSC&where=pl_discmethod='Transit'"
         context = ssl._create_unverified_context()
+        req = urllib.request.Request(csv_url, headers={'User-Agent': 'Mozilla/5.0 (UniverseBooklet/1.0)'})
         
-        print("🌍 Fetching fresh exoplanet data...")
-        with urllib.request.urlopen(csv_url, context=context, timeout=30) as response:
-            csv_data = response.read().decode('utf-8')
-            lines = csv_data.strip().split('\n')
-            headers = lines[0].split(',')
-            planets = []
+        print("🌍 Fetching exoplanets...")
+        with urllib.request.urlopen(req, context=context, timeout=30) as response:
+            # Read as text
+            csv_text = response.read().decode('utf-8')
             
-            for line in lines[1:]:
-                # Handle commas inside quotes if necessary, but simple split works for basic CSV
-                values = line.split(',')
-                if len(values) >= len(headers):
-                    planet = {headers[i].strip(): values[i].strip() for i in range(len(headers))}
-                    planets.append(planet)
+            # Check if we got an HTML error page instead of CSV
+            if csv_text.strip().startswith("<!DOCTYPE html>") or csv_text.strip().startswith("<html"):
+                print("❌ Received HTML instead of CSV. NASA might be blocking or the URL changed.")
+                raise Exception("Invalid CSV format (HTML received)")
+
+            # Use Python's csv module for robust parsing
+            reader = csv.DictReader(io.StringIO(csv_text))
+            planets = list(reader)
             
+            if len(planets) == 0:
+                raise Exception("No planets found in CSV")
+
+            print(f"✅ Parsed {len(planets)} exoplanets.")
             save_to_cache('cached_exoplanets.json', planets)
-            print("✅ Exoplanets cached locally.")
             return planets, False
+
     except Exception as e:
-        print(f"❌ Exoplanet API Error: {e}")
-        return [], False
+        print(f"❌ Exoplanet Error: {e}")
+        print("⚠️ Falling back to hardcoded demo data.")
+        
+        # Robust Fallback Data
+        fallback_planets = [
+            {"pl_name": "Kepler-186f", "pl_orbper": "129.94", "pl_rade": "1.10", "pl_bmasse": "1.71", "hostname": "Kepler-186", "pl_discmethod": "Transit"},
+            {"pl_name": "TRAPPIST-1e", "pl_orbper": "6.099", "pl_rade": "0.92", "pl_bmasse": "0.69", "hostname": "TRAPPIST-1", "pl_discmethod": "Transit"},
+            {"pl_name": "Proxima Centauri b", "pl_orbper": "11.186", "pl_rade": "1.07", "pl_bmasse": "1.27", "hostname": "Proxima Centauri", "pl_discmethod": "Radial Velocity"},
+            {"pl_name": "Kepler-452b", "pl_orbper": "384.84", "pl_rade": "1.63", "pl_bmasse": "5.0", "hostname": "Kepler-452", "pl_discmethod": "Transit"},
+            {"pl_name": "HD 40307 g", "pl_orbper": "197.8", "pl_rade": "2.2", "pl_bmasse": "7.0", "hostname": "HD 40307", "pl_discmethod": "Radial Velocity"},
+            {"pl_name": "Gliese 667 Cc", "pl_orbper": "28.15", "pl_rade": "1.54", "pl_bmasse": "3.8", "hostname": "Gliese 667 C", "pl_discmethod": "Radial Velocity"},
+            {"pl_name": "Wolf 1061c", "pl_orbper": "17.87", "pl_rade": "1.6", "pl_bmasse": "4.3", "hostname": "Wolf 1061", "pl_discmethod": "Radial Velocity"},
+            {"pl_name": "Teegarden's Star b", "pl_orbper": "4.9", "pl_rade": "1.02", "pl_bmasse": "1.05", "hostname": "Teegarden's Star", "pl_discmethod": "Radial Velocity"},
+            {"pl_name": "LHS 1140 b", "pl_orbper": "24.7", "pl_rade": "1.4", "pl_bmasse": "6.6", "hostname": "LHS 1140", "pl_discmethod": "Transit"},
+            {"pl_name": "K2-18b", "pl_orbper": "32.9", "pl_rade": "2.6", "pl_bmasse": "8.6", "hostname": "K2-18", "pl_discmethod": "Transit"}
+        ]
+        
+        save_to_cache('cached_exoplanets.json', fallback_planets)
+        return fallback_planets, False
