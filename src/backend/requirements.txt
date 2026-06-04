@@ -1,4 +1,0 @@
-# No external dependencies required for the basic version.
-# Future additions might include:
-# requests (for fetching live stellar data)
-# numpy (for advanced math)

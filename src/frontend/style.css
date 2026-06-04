@@ -1,0 +1,47 @@
+:root {
+    --bg-color: #050510;
+    --glass-bg: rgba(20, 25, 40, 0.7);
+    --glass-border: rgba(0, 212, 255, 0.3);
+    --primary: #00d4ff;
+    --secondary: #7000ff;
+    --accent: #00ff9d;
+    --text-main: #ffffff;
+    --text-muted: #a0a0c0;
+    --font-main: 'Segoe UI', 'Roboto', sans-serif;
+    --glow: 0 0 15px var(--primary);
+}
+
+[data-theme="solar"] { --bg-color: #1a0500; --primary: #ff4d00; --secondary: #ffcc00; --accent: #ff0055; --glass-border: rgba(255, 80, 0, 0.3); --glow: 0 0 15px var(--primary); }
+[data-theme="nebula"] { --bg-color: #0f001a; --primary: #d400ff; --secondary: #00ffcc; --accent: #ff00cc; --glass-border: rgba(212, 0, 255, 0.3); --glow: 0 0 15px var(--primary); }
+[data-theme="sunset"] { --bg-color: #2b1055; --primary: #ff99cc; --secondary: #ffcc00; --accent: #00d4ff; --glass-border: rgba(255, 153, 204, 0.3); --glow: 0 0 15px var(--primary); }
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background-color: var(--bg-color); color: var(--text-main); font-family: var(--font-main); overflow-x: hidden; min-height: 100vh; position: relative; }
+
+#cosmos-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 20px;
+    margin: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+.glass-panel:hover { transform: translateY(-5px); box-shadow: var(--glow); }
+
+header { text-align: center; padding: 40px 20px; border-bottom: 1px solid var(--glass-border); }
+h1 { font-size: 3rem; text-transform: uppercase; letter-spacing: 4px; background: linear-gradient(90deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 20px rgba(0, 212, 255, 0.5); }
+
+.controls { display: flex; justify-content: center; gap: 15px; margin: 20px 0; flex-wrap: wrap; }
+.theme-btn { background: transparent; border: 2px solid var(--primary); color: var(--primary); padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+.theme-btn:hover, .theme-btn.active { background: var(--primary); color: #000; box-shadow: var(--glow); }
+
+table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+th, td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
+th { color: var(--primary); text-transform: uppercase; font-size: 0.8rem; }
+tr:hover { background: rgba(255,255,255,0.05); }
+
+.disclaimer { text-align: center; font-size: 0.8rem; color: var(--text-muted); margin-top: 20px; padding: 10px; border-top: 1px dashed var(--glass-border); }

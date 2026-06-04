@@ -1,6 +1,5 @@
-<<<<<<< HEAD
 # Universe-Data-Booklet
-=======
+
 # 🌌 Universe Data Booklet
 
 > **An interactive, privacy-focused explorer for Near-Earth Asteroids and Exoplanets.**
@@ -44,4 +43,3 @@ UniverseDataBooklet/
 ├── assets/                # Images and animation assets
 ├── .gitignore             # Git exclusion rules
 └── README.md              # This file
->>>>>>> 95932e4 (Base Structure Version 0.001)

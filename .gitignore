@@ -1,0 +1,3 @@
+data/*.json
+src/backend/*.pyc
+src/backend/__pycache__

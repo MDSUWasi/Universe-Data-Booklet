@@ -1,166 +1,215 @@
+// State Management
 let currentTab = 'asteroids';
-let currentPage = 1;
-let currentLimit = 20;
-let currentSearch = '';
+let currentData = [];
+let isLoading = false;
 
-// Lumo: Defined columns for both datasets. 
-// If asteroids.json keys change, update these 'key' values to match the JSON.
-const columns = {
-    asteroids: [
-        { key: 'des', label: 'Designation' },
-        { key: 'cd', label: 'Date (UTC)' },
-        { key: 'dist', label: 'Distance (AU)' },
-        { key: 'v_rel', label: 'Velocity (km/s)' }
-    ],
-    exoplanets: [
-        { key: 'pl_name', label: 'Planet Name' },
-        { key: 'hostname', label: 'Host Star' },
-        { key: 'pl_orbper', label: 'Orbital Period (Days)' },
-        { key: 'pl_rade', label: 'Radius (R⊕)' },
-        { key: 'pl_bmasse', label: 'Mass (M⊕)' }
-    ]
-};
+// DOM Elements
+const dataContainer = document.getElementById('data-container');
+const statsDisplay = document.getElementById('stats-display');
+const habitabilityResult = document.getElementById('habitability-result');
 
-document.addEventListener('DOMContentLoaded', () => {
-    loadStats();
-    loadBrowserData();
-});
+// --- Theme Switcher ---
+function setTheme(themeName) {
+    document.documentElement.setAttribute('data-theme', themeName);
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.textContent.toLowerCase().includes(themeName.replace('void', '').replace('flare', '').replace('nebula', '').replace('sunset', ''))) {
+            btn.classList.add('active');
+        }
+    });
+    // Re-trigger animation color update
+    if(window.animateLoop) cancelAnimationFrame(window.animateLoop);
+    // Note: The animation loop reads CSS vars dynamically, so no restart needed.
+}
 
-async function loadStats() {
+// --- Data Fetching ---
+async function fetchData() {
+    if (isLoading) return;
+    isLoading = true;
+    dataContainer.innerHTML = '<div style="text-align:center; padding:20px; color:var(--primary);">🔄 Fetching Live Data...</div>';
+
     try {
-        const astroRes = await fetch('/api/asteroids?page=1&limit=1');
-        const astroData = await astroRes.json();
-        document.getElementById('asteroid-total').innerText = astroData.total.toLocaleString();
-
-        const expoRes = await fetch('/api/exoplanets?page=1&limit=1');
-        const expoData = await expoRes.json();
-        document.getElementById('exoplanet-total').innerText = expoData.total.toLocaleString();
+        const endpoint = currentTab === 'asteroids' ? '/api/asteroids' : '/api/exoplanets';
+        const response = await fetch(endpoint);
         
-        // Lumo: Placeholder for water candidates. Real logic needs full scan.
-        document.getElementById('water-candidates').innerText = "Scanning...";
-        setTimeout(() => {
-            document.getElementById('water-candidates').innerText = "12 Potential";
-        }, 1000);
-    } catch (err) {
-        console.error("Stats Error", err);
+        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+        
+        const result = await response.json();
+        
+        if (result.error) {
+            throw new Error(result.error);
+        }
+
+        currentData = result.data;
+        statsDisplay.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span>📊 Total Records: <strong>${result.count}</strong></span>
+                <span style="font-size:0.8rem; color:var(--text-muted);">
+                    Source: ${result.source} | ${result.cached ? '🟢 Cached' : '🔵 Fresh'}
+                </span>
+            </div>
+        `;
+
+        renderTable();
+        renderCharts(); // Trigger chart rendering
+    } catch (error) {
+        console.error("Fetch Error:", error);
+        dataContainer.innerHTML = `
+            <div style="text-align:center; padding:20px; color:var(--danger);">
+                ⚠️ <strong>Error Loading Data</strong><br>
+                ${error.message}<br>
+                <small>Please check console or try again later.</small>
+            </div>
+        `;
+        statsDisplay.innerHTML = '<span style="color:var(--danger)">Data Unavailable</span>';
+    } finally {
+        isLoading = false;
     }
 }
 
+// --- Tab Switching ---
 function switchTab(tab) {
     currentTab = tab;
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
-    currentPage = 1;
-    loadBrowserData();
-}
-
-async function loadBrowserData() {
-    const searchInput = document.getElementById('browser-search').value;
-    currentSearch = searchInput;
-    currentLimit = parseInt(document.getElementById('page-limit').value);
-
-    const endpoint = currentTab === 'asteroids' ? '/api/asteroids' : '/api/exoplanets';
-    const url = `${endpoint}?page=${currentPage}&limit=${currentLimit}&search=${encodeURIComponent(currentSearch)}`;
-
-    try {
-        const res = await fetch(url);
-        const data = await res.json();
-        
-        // Lumo: DEBUG LOG - This helps us see exactly what the server sent.
-        console.log(`[${currentTab}] API Response:`, data);
-        console.log(`[${currentTab}] Data array length:`, data.data?.length);
-
-        renderTableHeaders();
-        renderTableRows(data.data);
-        updatePagination(data);
-    } catch (err) {
-        console.error(`[${currentTab}] Error loading data:`, err);
-        document.getElementById('table-body').innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--danger)">Error loading data. Check console for details.</td></tr>';
-    }
-}
-
-function renderTableHeaders() {
-    const thead = document.getElementById('table-head');
-    thead.innerHTML = '';
-    columns[currentTab].forEach(col => {
-        const th = document.createElement('th');
-        th.innerText = col.label;
-        thead.appendChild(th);
+    document.querySelectorAll('.controls .theme-btn').forEach(btn => {
+        if (btn.onclick.toString().includes(tab)) btn.classList.add('active');
+        else btn.classList.remove('active');
     });
+    fetchData();
 }
 
-function renderTableRows(rows) {
-    const tbody = document.getElementById('table-body');
-    tbody.innerHTML = '';
-
-    if (!rows || rows.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted)">No results found</td></tr>';
+// --- Table Rendering ---
+function renderTable() {
+    if (currentData.length === 0) {
+        dataContainer.innerHTML = '<p style="text-align:center; padding:20px;">No data found.</p>';
         return;
     }
 
-    rows.forEach(row => {
-        const tr = document.createElement('tr');
-        columns[currentTab].forEach(col => {
-            const td = document.createElement('td');
-            let val = row[col.key];
-            if (val === null || val === undefined) val = '<span style="color:#555">-</span>';
-            td.innerHTML = val;
-            tr.appendChild(td);
+    let headers = [];
+    let rows = [];
+
+    if (currentTab === 'asteroids') {
+        headers = ['Name', 'Date', 'Diameter (km)', 'Velocity (km/h)', 'Hazardous'];
+        rows = currentData.map(item => [
+            item.name,
+            item.date,
+            item.diameter_km.toFixed(2),
+            item.velocity_kmh.toFixed(2),
+            item.hazardous ? '<span style="color:var(--danger)">⚠️ Yes</span>' : 'No'
+        ]);
+    } else {
+        // Exoplanets: Show top 5 fields
+        const sample = currentData[0];
+        headers = Object.keys(sample).slice(0, 5); // pl_name, pl_orbper, etc.
+        rows = currentData.slice(0, 50).map(item => {
+            return headers.map(key => {
+                let val = item[key];
+                if (val === null || val === undefined) return '-';
+                return val;
+            });
         });
-        tbody.appendChild(tr);
+    }
+
+    let html = `<table><thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>`;
+    
+    rows.forEach(row => {
+        html += `<tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`;
     });
+    
+    html += '</tbody></table>';
+    if (currentData.length > 50) {
+        html += `<p style="text-align:center; margin-top:10px; color:var(--text-muted);">Showing first 50 of ${currentData.length} records.</p>`;
+    }
+
+    dataContainer.innerHTML = html;
 }
 
-function updatePagination(data) {
-    const totalPages = Math.ceil(data.total / data.limit) || 1;
-    document.getElementById('page-info').innerText = `Page ${data.page} / ${totalPages}`;
-}
+// --- Habitability Scanner ---
+async function checkHabitability() {
+    const name = document.getElementById('planet-input').value.trim();
+    if (!name) {
+        alert("Please enter a planet name.");
+        return;
+    }
 
-function changePage(direction) {
-    currentPage += direction;
-    if (currentPage < 1) currentPage = 1;
-    loadBrowserData();
-}
-
-async function quickCheck() {
-    const name = document.getElementById('quick-search').value.trim();
-    if (!name) return alert("Please enter a planet name.");
-
-    const container = document.getElementById('quick-result');
-    container.classList.remove('hidden');
-    container.innerHTML = '<div style="text-align:center; padding:20px;"><span class="spinner">⏳</span><br>Scanning...</div>';
+    habitabilityResult.innerHTML = '<div style="text-align:center; color:var(--primary);">🔭 Scanning...</div>';
 
     try {
-        const res = await fetch(`/api/habitability?planet_name=${encodeURIComponent(name)}`);
+        const res = await fetch(`/api/habitability?name=${encodeURIComponent(name)}`);
         const data = await res.json();
 
         if (data.error) {
-            container.innerHTML = `<div style="color:var(--danger); text-align:center;"><span class="icon-warning">⚠️</span> ${data.error}</div>`;
+            habitabilityResult.innerHTML = `<div style="color:var(--danger); text-align:center;">❌ ${data.error}</div>`;
             return;
         }
 
-        const badgeColor = data.water_probability.includes("High") ? "var(--accent)" : 
-                           data.water_probability.includes("Hot") ? "var(--danger)" : "var(--warning)";
-        const badgeText = data.water_probability.includes("High") ? "LIQUID WATER POSSIBLE" : 
-                          data.water_probability.includes("Hot") ? "TOO HOT" : "TOO COLD";
-
-        container.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:start;">
-                <div>
-                    <h3 style="color:var(--primary); margin-bottom:5px;">${data.planet}</h3>
-                    <p style="color:var(--text-muted); font-size:0.9rem;">${data.status}</p>
-                </div>
-                <div style="text-align:right;">
-                    <span class="badge" style="background:${badgeColor}; color:#000;">${badgeText}</span>
-                </div>
+        const badgeColor = data.status.includes("High") ? "var(--accent)" : 
+                           data.status.includes("Hot") ? "var(--danger)" : "var(--warning)";
+        
+        habitabilityResult.innerHTML = `
+            <div style="background:rgba(0,0,0,0.3); padding:15px; border-radius:10px; border-left:4px solid ${badgeColor};">
+                <h3 style="color:var(--primary);">${data.planet}</h3>
+                <p><strong>Status:</strong> <span style="color:${badgeColor}; font-weight:bold;">${data.status}</span></p>
+                <p><strong>Orbital Period:</strong> ${data.period_days} days</p>
+                <p style="font-size:0.8rem; color:var(--text-muted); margin-top:5px;">${data.disclaimer}</p>
             </div>
-            <div style="margin-top:15px; display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:0.9rem;">
-                <div><strong>Temp:</strong> ${data.temperature_range}</div>
-                <div><strong>Period:</strong> ${data.data.pl_orbper || 'N/A'} days</div>
-            </div>
-            <p style="margin-top:10px; font-size:0.85rem; color:var(--text-muted); font-style:italic;">${data.note}</p>
         `;
     } catch (err) {
-        container.innerHTML = `<div style="color:var(--danger); text-align:center;">Connection Error</div>`;
+        habitabilityResult.innerHTML = `<div style="color:var(--danger); text-align:center;">Connection Error</div>`;
     }
 }
+
+// --- Simple Canvas Chart (Bar Chart for Asteroid Sizes) ---
+function renderCharts() {
+    // Only render for asteroids to keep it simple and fast
+    if (currentTab !== 'asteroids' || currentData.length === 0) return;
+
+    // Create a temporary canvas for the chart
+    const chartDiv = document.createElement('div');
+    chartDiv.style.marginTop = '20px';
+    chartDiv.style.textAlign = 'center';
+    
+    const canvas = document.createElement('canvas');
+    canvas.width = 600;
+    canvas.height = 200;
+    chartDiv.appendChild(canvas);
+    
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width;
+    const h = canvas.height;
+
+    // Clear
+    ctx.clearRect(0, 0, w, h);
+    
+    // Draw Title
+    ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--primary');
+    ctx.font = '14px sans-serif';
+    ctx.fillText('Asteroid Size Distribution (Top 20)', 20, 20);
+
+    // Sort by diameter
+    const sorted = [...currentData].sort((a, b) => b.diameter_km - a.diameter_km).slice(0, 20);
+    const maxVal = sorted[0].diameter_km || 1;
+    const barWidth = (w - 40) / 20;
+    const maxBarHeight = h - 40;
+
+    sorted.forEach((item, i) => {
+        const barHeight = (item.diameter_km / maxVal) * maxBarHeight;
+        const x = 20 + i * barWidth;
+        const y = h - 20 - barHeight;
+
+        // Bar
+        ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--secondary');
+        ctx.fillRect(x, y, barWidth - 2, barHeight);
+
+        // Label (Name truncated)
+        ctx.fillStyle = '#fff';
+        ctx.font = '10px sans-serif';
+        ctx.fillText(item.name.substring(0, 8), x, h - 5);
+    });
+
+    dataContainer.appendChild(chartDiv);
+}
+
+// Initial Load
+document.addEventListener('DOMContentLoaded', () => {
+    fetchData();
+});

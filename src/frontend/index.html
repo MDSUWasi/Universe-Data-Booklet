@@ -1,118 +1,55 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="neon">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universe Data Booklet</title>
-    <link rel="stylesheet" href="styles.css">
-    <!-- Lumo: Removed ALL external CDNs (Google Fonts, Font Awesome) to stop trackers. 
-         We now use system fonts and Unicode icons for 100% privacy. -->
+    <title>Universe Booklet | Live Data</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Animated Background -->
-    <div class="stars"></div>
-    <div class="twinkling"></div>
+    <canvas id="cosmos-canvas"></canvas>
 
-    <div class="glass-container">
+    <div class="container">
         <header>
-            <div class="logo-area">
-                <!-- Lumo: Replaced <i> tag with Unicode emoji for privacy -->
-                <span class="icon-galaxy">🌌</span>
-                <h1>Universe Data Booklet</h1>
+            <h1>🌌 Universe Booklet</h1>
+            <p>Live NASA Data • Anime Aesthetic • Privacy First</p>
+            <div class="controls">
+                <button class="theme-btn active" onclick="setTheme('neon')">Neon Void</button>
+                <button class="theme-btn" onclick="setTheme('solar')">Solar Flare</button>
+                <button class="theme-btn" onclick="setTheme('nebula')">Deep Nebula</button>
+                <button class="theme-btn" onclick="setTheme('sunset')">Anime Sunset</button>
             </div>
-            <p class="subtitle">Advanced Celestial Analytics & Habitability Engine</p>
         </header>
 
         <main>
-            <!-- Stats Dashboard -->
-            <section class="dashboard-grid">
-                <div class="glass-card stat-card">
-                    <div class="icon-box"><span class="icon-asterisk">✦</span></div>
-                    <div class="stat-info">
-                        <h3>Near-Earth Asteroids</h3>
-                        <p id="asteroid-total">Scanning...</p>
-                    </div>
-                </div>
-                <div class="glass-card stat-card">
-                    <div class="icon-box"><span class="icon-planet">🪐</span></div>
-                    <div class="stat-info">
-                        <h3>Confirmed Exoplanets</h3>
-                        <p id="exoplanet-total">Scanning...</p>
-                    </div>
-                </div>
-                <div class="glass-card stat-card highlight">
-                    <div class="icon-box"><span class="icon-droplet">💧</span></div>
-                    <div class="stat-info">
-                        <h3>Water Candidates</h3>
-                        <p id="water-candidates">0 Detected</p>
-                    </div>
-                </div>
-            </section>
+            <div class="glass-panel">
+                <h2>📊 Live Stats</h2>
+                <div id="stats-display">Loading...</div>
+            </div>
 
-            <!-- Habitability Analyzer -->
-            <section class="glass-card analyzer-section">
-                <h2><span class="icon-microscope">🔬</span> Quick Habitability Scan</h2>
-                <div class="input-group">
-                    <div class="search-wrapper">
-                        <span class="icon-search">🔍</span>
-                        <input type="text" id="quick-search" placeholder="Enter Planet Name (e.g., Kepler-186f)...">
-                    </div>
-                    <button onclick="quickCheck()" class="btn-primary">Scan</button>
+            <div class="glass-panel">
+                <div class="controls">
+                    <button class="theme-btn active" onclick="switchTab('asteroids')">Asteroids</button>
+                    <button class="theme-btn" onclick="switchTab('exoplanets')">Exoplanets</button>
                 </div>
-                <div id="quick-result" class="result-overlay hidden">
-                    <!-- Dynamic Result Here -->
-                </div>
-            </section>
+                <div id="data-container"><p>Loading data from NASA cache...</p></div>
+            </div>
 
-            <!-- Data Browser -->
-            <section class="glass-card browser-section">
-                <div class="browser-header">
-                    <h2><span class="icon-database">🗄️</span> Cosmic Database</h2>
-                    <div class="controls">
-                        <div class="tabs">
-                            <button class="tab-btn active" onclick="switchTab('asteroids')"><span class="icon-asterisk">✦</span> Asteroids</button>
-                            <button class="tab-btn" onclick="switchTab('exoplanets')"><span class="icon-planet">🪐</span> Exoplanets</button>
-                        </div>
-                        <div class="search-filter">
-                            <input type="text" id="browser-search" placeholder="Filter data..." onkeyup="loadBrowserData()">
-                            <select id="page-limit" onchange="loadBrowserData()">
-                                <option value="10">10</option>
-                                <option value="20" selected>20</option>
-                                <option value="50">50</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
+            <div class="glass-panel">
+                <h2>🔬 Habitability Scanner</h2>
+                <input type="text" id="planet-input" placeholder="Enter Planet Name (e.g., Kepler-186f)" style="width:100%; padding:10px; margin:10px 0; background:rgba(0,0,0,0.3); border:1px solid var(--primary); color:white;">
+                <button class="theme-btn" onclick="checkHabitability()">Scan</button>
+                <div id="habitability-result" style="margin-top:15px;"></div>
+            </div>
 
-                <div class="table-wrapper">
-                    <table id="data-table">
-                        <thead>
-                            <tr id="table-head"></tr>
-                        </thead>
-                        <tbody id="table-body">
-                            <tr><td colspan="5" class="loading-row"><span class="spinner">⏳</span> Loading Data...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="pagination-controls">
-                    <button onclick="changePage(-1)" class="btn-icon"><span class="icon-chevron-left">◀</span></button>
-                    <span id="page-info">Page 1</span>
-                    <button onclick="changePage(1)" class="btn-icon"><span class="icon-chevron-right">▶</span></button>
-                </div>
-
-                <div class="download-actions">
-                    <a href="/api/download/asteroids" class="btn-download"><span class="icon-download">⬇️</span> Export Asteroids</a>
-                    <a href="/api/download/exoplanets" class="btn-download"><span class="icon-download">⬇️</span> Export Exoplanets</a>
-                </div>
-            </section>
+            <div class="disclaimer">
+                ⚠️ <strong>Disclaimer:</strong> Data provided by NASA/JPL. All calculations are for educational purposes only. Not for navigation or mission planning.
+            </div>
         </main>
-
-        <footer>
-            <p>Powered by Python & Local Data | Privacy: No External Tracking | Data: NASA JPL & Exoplanet Archive</p>
-        </footer>
     </div>
 
+    <script src="animations.js"></script>
+    <script src="charts.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
