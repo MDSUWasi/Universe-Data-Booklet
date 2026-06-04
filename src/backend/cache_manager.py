@@ -6,7 +6,7 @@ from datetime import datetime
 # Paths relative to this file
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CACHE_DIR = os.path.join(BASE_DIR, '..', '..', 'data')
-CACHE_DURATION = 3600  # 1 Hour
+CACHE_DURATION =  7 * 24 * 60 * 60
 
 def ensure_cache_dir():
     if not os.path.exists(CACHE_DIR):
