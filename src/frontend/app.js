@@ -1,205 +1,225 @@
-// src/frontend/app.js - FULL REWRITE FOR STABILITY
+// src/frontend/app.js
+// I am the main application logic
 
-// --- State Management ---
+// --- 1. STATE MANAGEMENT ---
+// I track which tab is active (asteroids or exoplanets)
 let currentTab = 'asteroids';
+// I store the fetched data here
 let currentData = [];
+// I track if data is currently loading to prevent double-fetching
 let isLoading = false;
 
-// --- DOM Elements ---
+// --- 2. DOM ELEMENTS ---
+// I grab the HTML elements I need to update
 const dataContainer = document.getElementById('data-container');
 const statsDisplay = document.getElementById('stats-display');
 const habitabilityResult = document.getElementById('habitability-result');
-const tooltip = document.createElement('div');
-tooltip.className = 'tooltip';
-document.body.appendChild(tooltip);
 
-// --- Theme Switcher ---
+// --- 3. THEME SWITCHER ---
+// I change the CSS theme variable when a button is clicked
 function setTheme(themeName) {
     document.documentElement.setAttribute('data-theme', themeName);
+    // I update the active button style
     document.querySelectorAll('.theme-btn').forEach(btn => {
-        btn.classList.remove('active');
-        // Simple check for active button
-        if (btn.textContent.toLowerCase().includes(themeName.replace('void', '').replace('space', '').replace('lab', '').replace('solar', ''))) {
+        if (btn.textContent.toLowerCase().includes(themeName.toLowerCase())) {
             btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
         }
     });
 }
 
-// --- Data Fetching ---
+// --- 4. FETCH DATA (CORE LOGIC) ---
+// I fetch data from the backend API
 async function fetchData() {
+    // If already loading, I stop
     if (isLoading) return;
     isLoading = true;
     
-    dataContainer.innerHTML = '<div style="text-align:center; padding:20px; color:var(--primary); animation: pulse 1s infinite;">🔄 Syncing with NASA...</div>';
+    // I show a loading message
+    if (dataContainer) dataContainer.innerHTML = '<div style="text-align:center; padding:20px; color:var(--primary);">🔄 Syncing...</div>';
 
     try {
+        // I choose the correct API endpoint based on the tab
         const endpoint = currentTab === 'asteroids' ? '/api/asteroids' : '/api/exoplanets';
         const response = await fetch(endpoint);
         
-        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+        // I check if the response was successful
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         
+        // I parse the JSON data
         const result = await response.json();
-        
         if (result.error) throw new Error(result.error);
 
+        // I save the data
         currentData = result.data;
         
-        // Update Dashboard Status
-        const isCached = result.cached;
-        statsDisplay.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-                <div>
-                    <span style="font-size:1.2rem; font-weight:bold;">📊 ${result.count} Records</span>
-                    <span class="status-badge ${isCached ? 'stale' : ''}">
-                        ${isCached ? '🟡 Cached (7 Days)' : '🟢 Live Data'}
-                    </span>
+        // I update the stats display
+        if (statsDisplay) {
+            statsDisplay.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                    <div>
+                        <span style="font-size:1.2rem; font-weight:bold;">📊 ${result.count} Records</span>
+                        <span class="status-badge ${result.cached ? 'stale' : ''}">
+                            ${result.cached ? '🟡 Cached' : '🟢 Live'}
+                        </span>
+                    </div>
+                    <div style="font-size:0.85rem; color:var(--text-muted);">Source: ${result.source}</div>
                 </div>
-                <div style="font-size:0.85rem; color:var(--text-muted);">
-                    Source: ${result.source} | Last Updated: ${isCached ? '7 Days Ago' : 'Just Now'}
-                </div>
-            </div>
-        `;
+            `;
+        }
 
+        // I render the table
         renderTable();
-        renderCharts(); // Safe call
+
+        // I try to auto-render the chart if the library is ready
+        if (typeof window.renderChart === 'function') {
+            console.log("Auto-rendering chart...");
+            setTimeout(() => window.renderChart(currentData), 500);
+        } else {
+            console.warn("Chart library not found yet.");
+        }
+
     } catch (error) {
         console.error("Fetch Error:", error);
-        dataContainer.innerHTML = `
-            <div style="text-align:center; padding:20px; color:var(--danger);">
-                ⚠️ <strong>Connection Failed</strong><br>
-                ${error.message}<br>
-                <small>Please check console or try again later.</small>
-            </div>
-        `;
-        statsDisplay.innerHTML = '<span style="color:var(--danger)">Data Unavailable</span>';
+        if (dataContainer) dataContainer.innerHTML = `<div style="color:red; text-align:center;">Error: ${error.message}</div>`;
     } finally {
         isLoading = false;
     }
 }
 
-// --- Tab Switching ---
+// --- 5. TABS ---
+// I switch between Asteroids and Exoplanets
 function switchTab(tab) {
     currentTab = tab;
-    document.querySelectorAll('.controls .theme-btn').forEach(btn => {
-        if (btn.onclick.toString().includes(tab)) btn.classList.add('active');
-        else btn.classList.remove('active');
-    });
+    // I hide the 3D and Chart views when switching tabs
+    const d3 = document.getElementById('3d-view-container');
+    const ch = document.getElementById('chart-container');
+    if (d3) d3.style.display = 'none';
+    if (ch) ch.style.display = 'none';
+
+    // I fetch new data
     fetchData();
 }
 
-// --- Table Rendering (With New Science Metrics) ---
+// --- 6. TABLE RENDER ---
+// I draw the HTML table based on the data
 function renderTable() {
+    if (!dataContainer) return;
     if (currentData.length === 0) {
-        dataContainer.innerHTML = '<p style="text-align:center; padding:20px;">No data found.</p>';
+        dataContainer.innerHTML = '<p>No data.</p>';
         return;
     }
 
-    let headers = [];
-    let rows = [];
-
+    let headers = [], rows = [];
     if (currentTab === 'asteroids') {
         headers = ['Name', 'Date', 'Diameter (km)', 'Velocity (km/h)', 'Hazardous'];
-        rows = currentData.map(item => [
-            item.name,
-            item.date,
-            item.diameter_km.toFixed(2),
-            item.velocity_kmh.toFixed(2),
-            item.hazardous ? '<span style="color:var(--danger)">⚠️ Yes</span>' : 'No'
+        rows = currentData.map(i => [
+            i.name, i.date, i.diameter_km.toFixed(2), i.velocity_kmh.toFixed(2),
+            i.hazardous ? '<span style="color:red">Yes</span>' : 'No'
         ]);
     } else {
-        // Exoplanets: NEW SCIENCE COLUMNS
-        headers = ['Name', 'Host Star', 'Radius (R🜨)', 'Mass (M🜨)', 'ESI', 'Water', 'Oxygen', 'Earth Comp'];
-        rows = currentData.slice(0, 50).map(item => {
-            const esi = item.esi ? item.esi.toFixed(3) : 'N/A';
-            const water = item.water_status || 'Unknown';
-            const oxygen = item.oxygen_likelihood || 'Unknown';
-            const comp = item.earth_comparison || 'N/A';
-            
-            const esiColor = esi > 0.8 ? 'var(--accent)' : (esi > 0.5 ? 'var(--warning)' : 'var(--text-muted)');
-            
-            return [
-                item.pl_name,
-                item.hostname,
-                item.pl_rade,
-                item.pl_bmasse,
-                `<span style="color:${esiColor}; font-weight:bold;">${esi}</span>`,
-                water,
-                oxygen,
-                `<span style="font-size:0.85rem; color:var(--text-muted);">${comp}</span>`
-            ];
-        });
+        headers = ['Name', 'Host', 'Radius', 'Mass', 'ESI', 'Water', 'Oxygen'];
+        rows = currentData.slice(0, 50).map(i => [
+            i.pl_name, i.hostname, i.pl_rade, i.pl_bmasse,
+            i.esi ? i.esi.toFixed(3) : 'N/A',
+            i.water_status || '?', i.oxygen_likelihood || '?'
+        ]);
     }
 
-    let html = `<table><thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>`;
-    
-    rows.forEach(row => {
-        html += `<tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`;
-    });
-    
+    // I build the HTML string for the table
+    let html = `<table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>`;
+    rows.forEach(r => html += `<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`);
     html += '</tbody></table>';
-    if (currentData.length > 50) {
-        html += `<p style="text-align:center; margin-top:10px; color:var(--text-muted);">Showing first 50 of ${currentData.length} records.</p>`;
-    }
-
     dataContainer.innerHTML = html;
 }
 
-// --- Habitability Scanner ---
+// --- 7. HABITABILITY ---
+// I check if a planet is habitable
 async function checkHabitability() {
-    const name = document.getElementById('planet-input').value.trim();
-    if (!name) { alert("Please enter a planet name."); return; }
-
-    habitabilityResult.innerHTML = '<div style="text-align:center; color:var(--primary);">🔭 Analyzing...</div>';
-
+    const name = document.getElementById('planet-input')?.value.trim();
+    if (!name) return alert("Enter name");
+    
+    if (habitabilityResult) habitabilityResult.innerHTML = "Scanning...";
+    
     try {
         const res = await fetch(`/api/habitability?name=${encodeURIComponent(name)}`);
         const data = await res.json();
-
         if (data.error) {
-            habitabilityResult.innerHTML = `<div style="color:var(--danger); text-align:center;">❌ ${data.error}</div>`;
-            return;
+            if (habitabilityResult) habitabilityResult.innerHTML = `<span style="color:red">${data.error}</span>`;
+        } else {
+            const color = data.status.includes("High") ? "#0f0" : "#f00";
+            if (habitabilityResult) habitabilityResult.innerHTML = `<div style="border-left:4px solid ${color}; padding:10px;">
+                <strong>${data.planet}</strong>: ${data.status}<br>Period: ${data.period_days} days
+            </div>`;
         }
-
-        const badgeColor = data.status.includes("High") ? "var(--accent)" : 
-                           data.status.includes("Hot") ? "var(--danger)" : "var(--warning)";
-        
-        habitabilityResult.innerHTML = `
-            <div style="background:rgba(0,0,0,0.3); padding:15px; border-radius:10px; border-left:4px solid ${badgeColor}; animation: slideIn 0.3s;">
-                <h3 style="color:var(--primary);">${data.planet}</h3>
-                <p><strong>Status:</strong> <span style="color:${badgeColor}; font-weight:bold;">${data.status}</span></p>
-                <p><strong>Orbital Period:</strong> ${data.period_days} days</p>
-                <p style="font-size:0.8rem; color:var(--text-muted); margin-top:5px;">${data.disclaimer}</p>
-            </div>
-        `;
-    } catch (err) {
-        habitabilityResult.innerHTML = `<div style="color:var(--danger); text-align:center;">Connection Error</div>`;
+    } catch(e) {
+        if (habitabilityResult) habitabilityResult.innerHTML = "<span style='color:red'>Error</span>";
     }
 }
 
-// --- Chart Rendering (Safe Stub) ---
-function renderCharts() {
-    // This function is now safe. It does nothing to prevent crashes.
-    // To enable charts later, replace this body with the chart drawing code.
-    // console.log("Charts skipped for stability.");
+// --- 8. 3D & CHART CONTROLS ---
+// I handle the 3D View button click
+function toggle3DView() {
+    console.log("Button Clicked: 3D View");
+    const container = document.getElementById('3d-view-container');
+    if (!container) {
+        console.error("Container #3d-view-container not found!");
+        alert("Container missing in HTML!");
+        return;
+    }
+
+    // If hidden, I show it and load data
+    if (container.style.display === 'none' || container.style.display === '') {
+        container.style.display = 'block';
+        // I check if the library function exists
+        if (typeof window.load3DView === 'function') {
+            console.log("Calling load3DView with", currentData.length, "items");
+            window.load3DView(currentData);
+        } else {
+            console.error("ERROR: window.load3DView is undefined!");
+            container.innerHTML = "<p style='color:red'>3D Library not loaded. Check console.</p>";
+        }
+    } else {
+        // If visible, I hide it
+        container.style.display = 'none';
+        if (typeof window.stop3DView === 'function') window.stop3DView();
+    }
 }
 
-// --- Interactive Tooltips ---
-document.addEventListener('click', (e) => {
-    if (e.target.closest('tr')) {
-        const row = e.target.closest('tr');
-        const cells = row.querySelectorAll('td');
-        if (cells.length > 0) {
-            const name = cells[0].innerText;
-            tooltip.innerText = `Selected: ${name}`;
-            tooltip.style.left = e.pageX + 10 + 'px';
-            tooltip.style.top = e.pageY + 10 + 'px';
-            tooltip.style.opacity = 1;
-            setTimeout(() => tooltip.style.opacity = 0, 2000);
-        }
+// I handle the Chart button click
+function showChart() {
+    console.log("Button Clicked: Chart");
+    const container = document.getElementById('chart-container');
+    if (!container) {
+        console.error("Container #chart-container not found!");
+        alert("Container missing in HTML!");
+        return;
     }
-});
 
-// --- Initialization ---
+    // If hidden, I show it and load data
+    if (container.style.display === 'none' || container.style.display === '') {
+        container.style.display = 'block';
+        // I check if the library function exists
+        if (typeof window.renderChart === 'function') {
+            console.log("Calling renderChart with", currentData.length, "items");
+            window.renderChart(currentData);
+        } else {
+            console.error("ERROR: window.renderChart is undefined!");
+            container.innerHTML = "<p style='color:red'>Chart Library not loaded.</p>";
+        }
+    } else {
+        // If visible, I hide it
+        container.style.display = 'none';
+    }
+}
+
+// --- 9. INIT ---
+// I run this when the page finishes loading
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("App Loaded. Checking libraries...");
+    console.log("Three:", typeof THREE, "Chart:", typeof Chart);
+    
+    // I start fetching data
     fetchData();
 });

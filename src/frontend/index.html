@@ -1,56 +1,104 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="neon">
 <head>
+    <!-- I set the character encoding to UTF-8 so emojis and special characters work correctly -->
     <meta charset="UTF-8">
+    <!-- I set the viewport so the site looks good on mobile phones and tablets -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- I set the title that appears in the browser tab -->
     <title>Universe Booklet | Live Data</title>
+    <!-- I link the CSS file to style the page -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- I create a canvas for the background star animation (handled by animations.js) -->
     <canvas id="cosmos-canvas"></canvas>
 
     <div class="container">
         <header>
+            <!-- I set the main title of the app -->
             <h1>🌌 Universe Booklet</h1>
-            <p>Live NASA Data • Anime Aesthetic • Privacy First</p>
+            <!-- I add a subtitle describing the features -->
+            <p>Live NASA Data • Privacy First • Offline Capable</p>
+            
+            <!-- I create a control panel for buttons -->
             <div class="controls">
+                <!-- I add theme switching buttons (they call setTheme function) -->
                 <button class="theme-btn active" onclick="setTheme('neon')">Neon Void</button>
                 <button class="theme-btn" onclick="setTheme('solar')">Solar Flare</button>
-                <button class="theme-btn" onclick="setTheme('nebula')">Deep Nebula</button>
-                <button class="theme-btn" onclick="setTheme('sunset')">Anime Sunset</button>
+                
+                <!-- I add data tab switching buttons (they call switchTab function) -->
+                <button class="theme-btn" onclick="switchTab('asteroids')">Asteroids</button>
+                <button class="theme-btn" onclick="switchTab('exoplanets')">Exoplanets</button>
+                
+                <!-- I add the NEW feature buttons (they call my new functions) -->
+                <button class="theme-btn" onclick="toggle3DView()">🌌 3D View</button>
+                <button class="theme-btn" onclick="showChart()">📊 Chart</button>
             </div>
         </header>
 
         <main>
+            <!-- I create a panel to show live stats (count, cache status) -->
             <div class="glass-panel">
                 <h2>📊 Live Stats</h2>
                 <div id="stats-display">Loading...</div>
             </div>
 
+            <!-- I create a panel to display the data table -->
             <div class="glass-panel">
-                <div class="controls">
-                    <button class="theme-btn active" onclick="switchTab('asteroids')">Asteroids</button>
-                    <button class="theme-btn" onclick="switchTab('exoplanets')">Exoplanets</button>
-                </div>
                 <div id="data-container"><p>Loading data from NASA cache...</p></div>
             </div>
 
-            <div class="glass-panel">
-                <h2>🔬 Habitability Scanner</h2>
-                <input type="text" id="planet-input" placeholder="Enter Planet Name (e.g., Kepler-186f)" style="width:100%; padding:10px; margin:10px 0; background:rgba(0,0,0,0.3); border:1px solid var(--primary); color:white;">
-                <button class="theme-btn" onclick="checkHabitability()">Scan</button>
-                <div id="habitability-result" style="margin-top:15px;"></div>
-                
+            <!-- I create a hidden container for the 3D view (starts hidden) -->
+            <div id="3d-view-container" style="display:none; width:100%; height:350px; margin:20px 0; border-radius:12px; overflow:hidden; background:rgba(0,0,0,0.2);"></div>
+            
+            <!-- I create a hidden container for the chart (starts hidden) -->
+            <div id="chart-container" style="display:none; width:100%; height:350px; margin:20px 0;">
+                <canvas id="chart-canvas"></canvas>
             </div>
 
+            <!-- I create the habitability scanner panel -->
+            <div class="glass-panel">
+                <h2>🔬 Habitability Scanner</h2>
+                <!-- I add an input field for the user to type a planet name -->
+                <input type="text" id="planet-input" placeholder="Enter Planet Name (e.g., Kepler-186f)" style="width:100%; padding:10px; margin:10px 0; background:rgba(0,0,0,0.3); border:1px solid var(--primary); color:white;">
+                <!-- I add a button to trigger the scan -->
+                <button class="theme-btn" onclick="checkHabitability()">Scan</button>
+                <!-- I create a div to show the result -->
+                <div id="habitability-result" style="margin-top:15px;"></div>
+            </div>
+
+            <!-- I add a disclaimer footer -->
             <div class="disclaimer">
                 ⚠️ <strong>Disclaimer:</strong> Data provided by NASA/JPL. All calculations are for educational purposes only. Not for navigation or mission planning.
             </div>
         </main>
     </div>
 
+    <!-- ========================================== -->
+    <!-- SCRIPT LOADING ORDER IS CRITICAL HERE      -->
+    <!-- ========================================== -->
+
+    <!-- 1. I load the LIBRARIES FIRST. If these fail, my code will crash. -->
+    <!-- I load Three.js for 3D graphics -->
+    <script src="lib/three.min.js"></script>
+    <!-- I load Chart.js for data visualization -->
+    <script src="lib/chart.min.js"></script>
+    <!-- I load jsPDF for PDF generation (future use) -->
+    <script src="lib/jspdf.min.js"></script>
+    <!-- I load the AutoTable plugin for jsPDF -->
+    <script src="lib/jspdf-autotable.min.js"></script>
+
+    <!-- 2. I load my HELPER FILES next. They define global functions. -->
+    <!-- I load the 3D view logic (defines window.load3DView) -->
+    <script src="three_view.js"></script>
+    <!-- I load the chart logic (defines window.renderChart) -->
+    <script src="charts_view.js"></script>
+
+    <!-- 3. I load my MAIN APP LAST. It uses the functions defined above. -->
+    <!-- I load the background animation logic -->
     <script src="animations.js"></script>
-    <script src="charts.js"></script>
+    <!-- I load the main application logic (fetching, tables, buttons) -->
     <script src="app.js"></script>
 </body>
 </html>
