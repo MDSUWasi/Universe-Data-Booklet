@@ -1,0 +1,475 @@
+/* ================================================================
+   UNIVERSE BOOKLET - THEME & STYLESHEET
+   Supports 3 themes: neon, solar, lab (via [data-theme])
+   ================================================================ */
+
+:root {
+    /* Theme: Neon Void (Default - Clean & Professional) */
+    --bg-color: #0b0d17;
+    --glass-bg: rgba(20, 25, 40, 0.85);
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --primary: #4facfe;
+    --secondary: #00f2fe;
+    --accent: #00ff9d;
+    --warning: #ffd54f;
+    --danger: #ff6b6b;
+    --success: #00ff9d;
+    --text-main: #ffffff;
+    --text-muted: #a0a0c0;
+    --font-main: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+    --glow: 0 0 10px rgba(79, 172, 254, 0.4);
+    --transition-speed: 0.3s;
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.2);
+    --shadow-md: 0 4px 20px rgba(0,0,0,0.3);
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+}
+
+/* Theme: Lab White (Clean, High Contrast for Students/Education) */
+[data-theme="lab"] {
+    --bg-color: #f4f6f9;
+    --glass-bg: rgba(255, 255, 255, 0.95);
+    --glass-border: rgba(0, 0, 0, 0.1);
+    --primary: #2c3e50;
+    --secondary: #3498db;
+    --accent: #27ae60;
+    --warning: #f39c12;
+    --danger: #e74c3c;
+    --success: #27ae60;
+    --text-main: #2c3e50;
+    --text-muted: #7f8c8d;
+    --glow: none;
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+/* Theme: Solar Gold (Warm, Energetic for Space Enthusiasts) */
+[data-theme="solar"] {
+    --bg-color: #1a1500;
+    --glass-bg: rgba(40, 30, 10, 0.9);
+    --glass-border: rgba(255, 200, 0, 0.25);
+    --primary: #ffaa00;
+    --secondary: #ff5500;
+    --accent: #ffcc00;
+    --warning: #ffbb33;
+    --danger: #ff4444;
+    --success: #00C851;
+    --text-main: #fff8e1;
+    --text-muted: #ffd54f;
+    --glow: 0 0 10px rgba(255, 170, 0, 0.5);
+    --shadow-sm: 0 2px 8px rgba(255,170,0,0.2);
+    --shadow-md: 0 4px 20px rgba(255,170,0,0.3);
+}
+
+/* ==================== GLOBAL RESETS ==================== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    font-family: var(--font-main);
+    overflow-x: hidden;
+    min-height: 100vh;
+    transition: background-color var(--transition-speed), color var(--transition-speed);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Online/Offline States */
+body.offline #offline-banner {
+    display: block !important;
+}
+
+body.online #offline-banner {
+    display: none !important;
+}
+
+/* ==================== CANVAS BACKGROUND ==================== */
+#cosmos-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* ==================== SPINNER ANIMATION ==================== */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.spinner {
+    border: 4px solid var(--glass-border);
+    border-top: 4px solid var(--primary);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+/* ==================== CONTAINER LAYOUT ==================== */
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+/* ==================== HEADER ==================== */
+header {
+    text-align: center;
+    padding: 30px 20px;
+    border-bottom: 1px solid var(--glass-border);
+    margin-bottom: 30px;
+}
+
+h1 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 10px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 800;
+}
+
+header p {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+}
+
+/* ==================== CONTROL BUTTONS ==================== */
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.theme-btn {
+    background: transparent;
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    padding: 10px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+}
+
+.theme-btn:hover, .theme-btn.active {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: var(--glow);
+    transform: translateY(-2px);
+}
+
+.theme-btn:active {
+    transform: translateY(0);
+}
+
+.theme-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ==================== GLASS PANELS ==================== */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: 25px;
+    margin: 20px 0;
+    box-shadow: var(--shadow-md);
+    transition: transform var(--transition-speed), box-shadow var(--transition-speed), opacity 0.5s ease-in;
+    opacity: 0;
+    animation: fadeIn 0.8s forwards;
+}
+
+@keyframes fadeIn {
+    to { opacity: 1; }
+}
+
+.glass-panel:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 25px rgba(0,0,0,0.3);
+}
+
+.glass-panel h2 {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    color: var(--primary);
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 10px;
+}
+
+.glass-panel h3 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    color: var(--text-main);
+}
+
+/* ==================== STATUS BADGES ==================== */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    background: rgba(0, 255, 157, 0.15);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    margin-left: 10px;
+}
+
+.status-badge.stale {
+    background: rgba(255, 204, 0, 0.15);
+    color: var(--warning);
+    border-color: var(--warning);
+}
+
+/* ==================== TABLE STYLES ==================== */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 0.95rem;
+}
+
+th, td {
+    padding: 14px 12px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    transition: background 0.2s, transform 0.2s;
+}
+
+th {
+    color: var(--primary);
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    font-weight: 700;
+    position: sticky;
+    top: 0;
+    background: var(--bg-color);
+    z-index: 10;
+}
+
+td {
+    color: var(--text-main);
+}
+
+tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+tr:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: scale(1.01);
+    cursor: pointer;
+}
+
+tr:first-child:hover td {
+    border-top: none;
+}
+
+/* Responsive Table Scroll */
+@media (max-width: 768px) {
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}
+
+/* ==================== INPUT FIELDS ==================== */
+input[type="text"],
+input[type="search"] {
+    width: 100%;
+    padding: 14px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--primary);
+    border-radius: var(--radius-sm);
+    color: var(--text-main);
+    font-size: 1rem;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--secondary);
+    box-shadow: 0 0 10px rgba(79, 172, 254, 0.3);
+}
+
+input::placeholder {
+    color: var(--text-muted);
+}
+
+/* ==================== HABITABILITY RESULT BOX ==================== */
+#habitability-result {
+    min-height: 80px;
+    padding: 15px;
+    border-radius: var(--radius-sm);
+    background: rgba(0, 0, 0, 0.2);
+    border-left: 4px solid var(--primary);
+    transition: all 0.3s ease;
+}
+
+#habitability-result:empty {
+    border-left-color: var(--glass-border);
+    background: transparent;
+}
+
+.hab-high { border-left-color: var(--success) !important; background: rgba(0, 255, 157, 0.1) !important; }
+.hab-moderate { border-left-color: var(--warning) !important; background: rgba(255, 213, 79, 0.1) !important; }
+.hab-low { border-left-color: var(--danger) !important; background: rgba(255, 107, 107, 0.1) !important; }
+
+/* ==================== FOOTER DISCLAIMER ==================== */
+.disclaimer {
+    border-color: var(--warning);
+    margin-top: 40px;
+}
+
+.disclaimer a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.disclaimer a:hover {
+    color: var(--secondary);
+    text-decoration: underline;
+}
+
+/* ==================== ERROR MESSAGES ==================== */
+#error-message div {
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* ==================== RESPONSIVE DESIGN ==================== */
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+    
+    header {
+        padding: 20px 10px;
+    }
+    
+    h1 {
+        font-size: 1.8rem;
+        letter-spacing: 2px;
+    }
+    
+    .glass-panel {
+        margin: 15px 0;
+        padding: 20px;
+    }
+    
+    .controls {
+        gap: 8px;
+    }
+    
+    .theme-btn {
+        padding: 8px 14px;
+        font-size: 0.85rem;
+    }
+    
+    input[type="text"] {
+        padding: 12px;
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 1.5rem;
+    }
+    
+    .controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .theme-btn {
+        justify-content: center;
+    }
+    
+    .glass-panel h2 {
+        font-size: 1.3rem;
+    }
+}
+
+/* ==================== PRINT STYLES ==================== */
+@media print {
+    #cosmos-canvas,
+    .theme-btn,
+    #offline-banner,
+    footer.disclaimer {
+        display: none;
+    }
+    
+    body {
+        background: white;
+        color: black;
+    }
+    
+    .glass-panel {
+        background: white !important;
+        border: 1px solid #ccc;
+        box-shadow: none;
+    }
+}
+
+/* ==================== ACCESSIBILITY ==================== */
+*:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+[aria-label] {
+    cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

@@ -1,7 +1,5 @@
 /**
  * Cosmic Animation Engine
- * Generates Meteors, Stars, and Nebula effects using pure Canvas.
- * Adapts to CSS variables for theme consistency.
  */
 
 const canvas = document.getElementById('cosmos-canvas');
@@ -10,14 +8,12 @@ const ctx = canvas.getContext('2d');
 let width, height;
 let stars = [];
 let meteors = [];
-let particles = []; // For nebula glow
+let particles = [];
 
-// Configuration
 const STAR_COUNT = 150;
 const METEOR_COUNT = 3;
 const METEOR_SPEED = 8;
 
-// Resize handler
 function resize() {
     width = canvas.width = window.innerWidth;
     height = canvas.height = window.innerHeight;
@@ -26,7 +22,6 @@ function resize() {
 
 window.addEventListener('resize', resize);
 
-// Initialize Stars
 function initStars() {
     stars = [];
     for (let i = 0; i < STAR_COUNT; i++) {
@@ -40,19 +35,17 @@ function initStars() {
     }
 }
 
-// Initialize Meteors
 function spawnMeteor() {
     meteors.push({
         x: Math.random() * width,
         y: -10,
         length: Math.random() * 100 + 50,
         speed: Math.random() * METEOR_SPEED + 5,
-        angle: Math.PI / 4 + (Math.random() * 0.2 - 0.1), // Slight variation
+        angle: Math.PI / 4 + (Math.random() * 0.2 - 0.1),
         opacity: 1
     });
 }
 
-// Initialize Nebula Particles (Soft glow)
 function initParticles() {
     particles = [];
     for(let i=0; i<20; i++) {
@@ -67,7 +60,6 @@ function initParticles() {
     }
 }
 
-// Get current theme colors
 function getThemeColors() {
     const style = getComputedStyle(document.body);
     return {
@@ -77,15 +69,12 @@ function getThemeColors() {
     };
 }
 
-// Animation Loop
 function animate() {
     const colors = getThemeColors();
     
-    // Clear with slight fade for trail effect
     ctx.fillStyle = colors.bg;
     ctx.fillRect(0, 0, width, height);
 
-    // 1. Draw Nebula Glow (Background)
     particles.forEach(p => {
         p.x += p.dx;
         p.y += p.dy;
@@ -95,7 +84,7 @@ function animate() {
         if(p.y > height + p.radius) p.y = -p.radius;
 
         const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius);
-        gradient.addColorStop(0, colors.primary + '33'); // Low opacity hex
+        gradient.addColorStop(0, colors.primary + '33');
         gradient.addColorStop(1, 'transparent');
         ctx.fillStyle = gradient;
         ctx.beginPath();
@@ -103,7 +92,6 @@ function animate() {
         ctx.fill();
     });
 
-    // 2. Draw Stars
     stars.forEach(star => {
         star.y -= star.speed;
         if (star.y < 0) star.y = height;
@@ -116,8 +104,7 @@ function animate() {
         ctx.globalAlpha = 1;
     });
 
-    // 3. Draw Meteors
-    if (Math.random() < 0.02) spawnMeteor(); // Chance to spawn
+    if (Math.random() < 0.02) spawnMeteor();
 
     for (let i = meteors.length - 1; i >= 0; i--) {
         const m = meteors[i];
@@ -130,7 +117,6 @@ function animate() {
             continue;
         }
 
-        // Meteor Trail
         const gradient = ctx.createLinearGradient(m.x, m.y, m.x - Math.cos(m.angle)*m.length, m.y - Math.sin(m.angle)*m.length);
         gradient.addColorStop(0, '#ffffff');
         gradient.addColorStop(1, 'transparent');
@@ -146,7 +132,6 @@ function animate() {
     requestAnimationFrame(animate);
 }
 
-// Start
 resize();
 initParticles();
 animate();

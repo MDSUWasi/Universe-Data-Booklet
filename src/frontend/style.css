@@ -147,3 +147,94 @@ tr:hover {
     h1 { font-size: 1.8rem; }
     .glass-panel { margin: 10px; padding: 15px; }
 }
+/* ... existing styles ... */
+
+/* SCROLLABLE TABLE CONTAINER */
+#data-container {
+    max-height: 60vh; /* Limits height to 60% of viewport */
+    overflow-y: auto; /* Adds vertical scrollbar */
+    overflow-x: hidden; /* Hides horizontal scrollbar */
+    position: relative;
+}
+
+/* Custom Scrollbar Styling (Webkit browsers like Chrome/Safari) */
+#data-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+#data-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+#data-container::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 4px;
+}
+
+#data-container::-webkit-scrollbar-thumb:hover {
+    background: var(--secondary);
+}
+
+/* Ensure table stays within width */
+#data-container table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    white-space: nowrap; /* Prevents text wrapping in cells */
+}
+
+/* Sticky Header for better scrolling experience */
+#data-container thead th {
+    position: sticky;
+    top: 0;
+    background: var(--bg-color); /* Matches theme background */
+    z-index: 10;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* SKELETON LOADER STYLES */
+.skeleton-row {
+    height: 40px;
+    margin-bottom: 8px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+    background-size: 200% 100%;
+    border-radius: 4px;
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    color: var(--primary);
+    font-weight: bold;
+}
+
+.loading-spinner::after {
+    content: "";
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--primary);
+    border-top-color: transparent;
+    border-radius: 50%;
+    margin-left: 10px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Optimized Table Scroll */
+#data-container {
+    max-height: 65vh; /* Slightly taller for better UX */
+    overflow-y: auto;
+    position: relative;
+}
