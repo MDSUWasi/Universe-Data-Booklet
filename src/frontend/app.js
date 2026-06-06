@@ -1,9 +1,13 @@
 // src/frontend/app.js
 let currentTab = 'asteroids';
-let currentData = [];
+let currentData = []; // Holds ONLY the current page
+let allData = [];     // Holds the FULL dataset fetched in chunks? 
+// Actually, better approach: Fetch page by page, append to local view array
+let loadedAllPages = false;
+let currentPage = 1;
+const PAGE_SIZE = 50;
 let isLoading = false;
-let loadedCount = 0;
-const PAGE_SIZE = 50; // Load 50 items at a time for speed
+let totalPages = 1;
 
 const elements = {
     dataContainer: document.getElementById('data-container'),
@@ -11,7 +15,8 @@ const elements = {
     habitabilityResult: document.getElementById('habitability-result'),
     planetInput: document.getElementById('planet-input'),
     d3Container: document.getElementById('3d-view-container'),
-    chartContainer: document.getElementById('chart-container')
+    chartContainer: document.getElementById('chart-container'),
+    loadMoreBtn: null
 };
 
 function setTheme(themeName) {
@@ -24,54 +29,56 @@ function setTheme(themeName) {
     });
 }
 
-async function fetchData() {
+async function fetchData(reset = false) {
     if (isLoading) return;
     isLoading = true;
-    loadedCount = 0; 
-
-    // Skeleton Loader
-    if (elements.dataContainer) {
-        elements.dataContainer.innerHTML = `
-            <div class="loading-spinner">Syncing Data...</div>
-            <div style="margin-top:20px;">${Array(5).fill('<div class="skeleton-row"></div>').join('')}</div>`;
+    
+    if (reset) {
+        currentPage = 1;
+        loadedAllPages = false;
+        currentData = [];
+        if (elements.dataContainer) elements.dataContainer.innerHTML = '<div class="loading-spinner">Syncing Data...</div>';
     }
 
     try {
-        const endpoint = currentTab === 'asteroids' ? '/api/asteroids' : '/api/exoplanets';
-        const response = await fetch(endpoint);
+        const endpoint = `${currentTab === 'asteroids' ? '/api/asteroids' : '/api/exoplanets'}?page=${currentPage}&limit=${PAGE_SIZE}`;
         
+        const response = await fetch(endpoint);
         if (!response.ok) throw new Error(`Server Error (${response.status})`);
         
         const result = await response.json();
-        
         if (result.error) throw new Error(result.error);
 
-        let rawData = result.data || [];
-        if (!Array.isArray(rawData)) rawData = [];
-
-        currentData = rawData;
-
-        // Update Stats
+        // Total records from server
+        const totalCount = result.count || 0;
+        totalPages = result.total_pages || 1;
+        
+        // Append new chunk
+        const newChunk = result.data || [];
+        currentData = [...currentData, ...newChunk];
+        
+        // Update UI Stats
         if (elements.statsDisplay) {
-            const count = result.count || currentData.length;
             const source = result.source || 'Unknown';
-            const isCached = result.cached || false;
+            // Determine cached status based on timestamp if available, otherwise assume live/cached mix
+            // For simplicity, we just show total count
             elements.statsDisplay.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
                     <div>
-                        <span style="font-size:1.2rem; font-weight:bold;">📊 ${count.toLocaleString()} Records</span>
-                        <span class="status-badge ${isCached ? 'stale' : ''}">${isCached ? '🟡 Cached' : '🟢 Live'}</span>
+                        <span style="font-size:1.2rem; font-weight:bold;">📊 ${totalCount.toLocaleString()} Records</span>
+                        <span class="status-badge">Showing Page ${currentPage}/${totalPages}</span>
                     </div>
                     <div style="font-size:0.85rem; color:var(--text-muted);">Source: ${source}</div>
                 </div>
             `;
         }
 
-        renderPage(); // Render first chunk
+        renderTable(newChunk, reset);
 
         // Auto-render chart if visible
         if (typeof window.renderChart === 'function' && elements.chartContainer.style.display !== 'none') {
-            setTimeout(() => window.renderChart(currentData), 500);
+            // Optional: Re-render chart only when first page loads or manually triggered
+            if (reset) setTimeout(() => window.renderChart(currentData), 500);
         }
 
     } catch (error) {
@@ -81,7 +88,7 @@ async function fetchData() {
                 <div style="color:var(--secondary); text-align:center; padding:20px;">
                     ⚠️ <strong>Error</strong><br>
                     <small>${error.message}</small><br>
-                    <button onclick="fetchData()" style="margin-top:10px; cursor:pointer;">🔄 Retry</button>
+                    <button onclick="fetchData(true)" style="margin-top:10px; cursor:pointer;">🔄 Retry</button>
                 </div>`;
         }
         currentData = [];
@@ -93,7 +100,6 @@ async function fetchData() {
 function switchTab(tab) {
     if (currentTab === tab) return;
     currentTab = tab;
-    loadedCount = 0;
     
     if (elements.d3Container) elements.d3Container.style.display = 'none';
     if (elements.chartContainer) elements.chartContainer.style.display = 'none';
@@ -103,23 +109,13 @@ function switchTab(tab) {
         btn.classList.toggle('active', btn.textContent.toLowerCase().includes(tab));
     });
 
-    fetchData();
+    fetchData(true); // Reset and fetch
 }
 
-// LAZY LOADING: Renders only PAGE_SIZE items
-function renderPage() {
+function renderTable(chunk, reset) {
     if (!elements.dataContainer) return;
-    if (!Array.isArray(currentData) || currentData.length === 0) {
-        elements.dataContainer.innerHTML = '<p style="text-align:center; color:var(--text-muted);">No data available.</p>';
-        return;
-    }
+    if (!chunk || chunk.length === 0) return;
 
-    const totalRecords = currentData.length;
-    const remaining = totalRecords - loadedCount;
-    const limit = Math.min(PAGE_SIZE, remaining);
-    
-    const chunk = currentData.slice(loadedCount, loadedCount + limit);
-    
     let headers = [], rowsHtml = '';
 
     if (currentTab === 'asteroids') {
@@ -146,36 +142,46 @@ function renderPage() {
             </tr>`).join('');
     }
 
-    const tableHtml = `
-        <table>
-            <thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead>
-            <tbody>${rowsHtml}</tbody>
-        </table>
-    `;
-
-    if (loadedCount === 0) {
+    const rowHtml = `<tbody>${rowsHtml}</tbody>`;
+    
+    if (reset) {
+        const tableHtml = `
+            <table>
+                <thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead>
+                ${rowHtml}
+            </table>
+        `;
         elements.dataContainer.innerHTML = tableHtml;
     } else {
         const tbody = elements.dataContainer.querySelector('tbody');
         if (tbody) tbody.insertAdjacentHTML('beforeend', rowsHtml);
     }
 
-    loadedCount += limit;
+    // Manage Load More Button
+    const remaining = parseInt(elements.statsDisplay?.querySelector('.status-badge')?.textContent?.split('/ ')[1] || 1);
+    const hasMore = currentPage < totalPages;
 
-    // Show Load More Button
-    if (loadedCount < totalRecords) {
-        let footer = document.querySelector('.load-more-container');
-        if (!footer) {
-            footer = document.createElement('div');
-            footer.className = 'load-more-container';
-            footer.innerHTML = `<button class="theme-btn" id="loadMoreBtn" style="margin: 20px auto; display:block;">Load More (${totalRecords - loadedCount} remaining)</button>`;
-            elements.dataContainer.appendChild(footer);
+    let btn = document.querySelector('.load-more-container button');
+    if (hasMore) {
+        if (!btn) {
+            const container = document.createElement('div');
+            container.className = 'load-more-container';
+            container.innerHTML = `<button class="theme-btn" id="loadMoreBtn" style="margin: 20px auto; display:block;">Load More</button>`;
+            elements.dataContainer.appendChild(container);
+            btn = document.getElementById('loadMoreBtn');
+            btn.onclick = () => {
+                btn.disabled = true;
+                btn.innerText = 'Loading...';
+                currentPage++;
+                fetchData(false);
+            };
+        } else {
+            btn.disabled = false;
+            btn.innerText = 'Load More';
         }
-        
-        document.getElementById('loadMoreBtn').onclick = () => {
-            document.getElementById('loadMoreBtn').remove();
-            renderPage();
-        };
+    } else {
+        if (btn) btn.parentElement.remove();
+        // Optional: Show "End of list" message
     }
 }
 
@@ -226,6 +232,6 @@ function showChart() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("App Loaded. Initializing fast mode...");
-    fetchData();
+    console.log("App Loaded. Initializing secure mode...");
+    fetchData(true);
 });

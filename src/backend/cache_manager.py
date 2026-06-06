@@ -11,8 +11,11 @@ CACHE_DURATION_SECONDS = 7 * 24 * 60 * 60 # 7 Days
 CLEANUP_THRESHOLD = 14 * 24 * 60 * 60     # 14 Days
 
 def ensure_cache_dir():
-    if not os.path.exists(CACHE_DIR):
-        os.makedirs(CACHE_DIR, exist_ok=True)
+    try:
+        if not os.path.exists(CACHE_DIR):
+            os.makedirs(CACHE_DIR, exist_ok=True)
+    except PermissionError:
+        print(f"⚠️ Permission denied creating cache dir: {CACHE_DIR}")
 
 def cleanup_old_cache():
     """Deletes files older than CLEANUP_THRESHOLD."""
@@ -75,6 +78,7 @@ def save_to_cache(filename, payload):
     except Exception as e:
         if os.path.exists(temp_path):
             os.remove(temp_path)
+        print(f"⚠️ Failed to save cache: {e}")
         raise e
 
 def get_cached_data(filename):

@@ -13,17 +13,17 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from cache_manager import get_cached_data, save_to_cache
 
 # --- CONFIGURATION ---
-NASA_API_KEY = "DEMO_KEY" 
+# SECURITY FIX: Use Environment Variable. Fallback to DEMO_KEY with warning.
+NASA_API_KEY = os.getenv("NASA_API_KEY", "DEMO_KEY")
+if NASA_API_KEY == "DEMO_KEY":
+    print("⚠️ Using NASA DEMO_KEY. For production, set NASA_API_KEY environment variable.")
+
 BASE_URL = "https://api.nasa.gov"
 CACHE_DAYS = 7  
 
-# --- CORRECT PATH CALCULATION FOR YOUR STRUCTURE ---
-# Script is at: /project/src/backend/client.py
+# --- PATH CALCULATION ---
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))       
-# Go UP ONE level: /project/src (This is where 'data' and 'frontend' are)
-SRC_DIR = os.path.dirname(SCRIPT_DIR)                         
-
-# Now 'data' is directly inside SRC_DIR
+SRC_DIR = os.path.dirname(SCRIPT_DIR)                          
 DATA_DIR = os.path.join(SRC_DIR, 'data')
 CSV_PATH = os.path.join(DATA_DIR, 'exoplanets.csv')
 JSON_PATH = os.path.join(DATA_DIR, 'exoplanets.json')
@@ -35,6 +35,7 @@ print(f"📂 DATA DIR: {DATA_DIR}")
 print(f"📄 CSV PATH: {CSV_PATH}")
 print(f"✅ CSV EXISTS: {os.path.exists(CSV_PATH)}")
 if os.path.exists(DATA_DIR):
+    # Only print filenames, not full content
     print(f"📝 FILES IN DATA: {os.listdir(DATA_DIR)}")
 else:
     print("❌ ERROR: Data directory NOT FOUND!")
@@ -146,6 +147,7 @@ def load_exoplanets_from_csv():
 
     except Exception as e:
         print(f"❌ Error reading CSV: {e}")
+        # Log full traceback to console only, not to user
         import traceback
         traceback.print_exc()
         return None, False
@@ -161,7 +163,7 @@ def fetch_asteroids():
     
     try:
         context = ssl._create_unverified_context()
-        req = urllib.request.Request(url, headers={'User-Agent': 'UniverseBooklet/3.0'})
+        req = urllib.request.Request(url, headers={'User-Agent': 'UniverseBooklet-Secure/1.0'})
         with urllib.request.urlopen(req, context=context, timeout=30) as response:
             raw_data = json.loads(response.read().decode())
             neo_data = raw_data.get('near_earth_objects', {})
@@ -174,15 +176,19 @@ def fetch_asteroids():
                     except KeyError:
                         diam_min, vel = 0, 0
                     flat_list.append({
-                        "id": str(obj['id']), "name": sanitize_input(obj['name']), "date": day,
-                        "diameter_km": round(float(diam_min)/1000, 2), "velocity_kmh": round(float(vel), 2),
+                        "id": str(obj['id']), 
+                        "name": sanitize_input(obj['name']), 
+                        "date": day,
+                        "diameter_km": round(float(diam_min)/1000, 2), 
+                        "velocity_kmh": round(float(vel), 2),
                         "hazardous": obj.get('is_potentially_hazardous_asteroid', False)
                     })
             if len(flat_list) == 0: raise Exception("Empty")
             save_to_cache('cached_asteroids.json', flat_list)
             return flat_list, False
     except Exception as e:
-        print(f"❌ Asteroid Error: {e}")
+        print(f"❌ Asteroid Fetch Error: {e}")
+        # Return fallback data safely
         return [{"id": "1", "name": "Ceres", "date": datetime.now().strftime("%Y-%m-%d"), "diameter_km": 940.0, "velocity_kmh": 18000, "hazardous": False}], False
 
 def fetch_exoplanets():
