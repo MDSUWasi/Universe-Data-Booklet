@@ -281,6 +281,6 @@ if __name__ == '__main__':
         print("\n🛑 Stopped by user.")
     except OSError as e:
         if e.errno == 98: 
-            print(f"\n❌ Port {PORT} is in use. Please kill the process or change PORT env var.")
+            print(f"\n❌ Port {PORT} is in use. Please stop the process or change PORT env var.")
         else: 
             raise
