@@ -200,7 +200,8 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
             try:
                 data, _ = fetch_exoplanets()
                 if not isinstance(data, list): data = []
-                planet = next((p for p in data if p.get('pl_name', '').lower() == safe_name.lower()), None)
+                # Normalize stored planet names to match the sanitized query
+                planet = next((p for p in data if re.sub(r'[^\w\-]', '', p.get('pl_name', '')).lower() == safe_name.lower()), None)
                 
                 if not planet:
                     self.send_json_response(200, {"error": "Planet not found"})

@@ -14,7 +14,6 @@ const elements = {
     statsDisplay: document.getElementById('stats-display'),
     habitabilityResult: document.getElementById('habitability-result'),
     planetInput: document.getElementById('planet-input'),
-    d3Container: document.getElementById('3d-view-container'),
     chartContainer: document.getElementById('chart-container'),
     loadMoreBtn: null
 };
@@ -101,9 +100,7 @@ function switchTab(tab) {
     if (currentTab === tab) return;
     currentTab = tab;
     
-    if (elements.d3Container) elements.d3Container.style.display = 'none';
     if (elements.chartContainer) elements.chartContainer.style.display = 'none';
-    if (typeof window.stop3DView === 'function') window.stop3DView();
     
     document.querySelectorAll('.theme-btn').forEach(btn => {
         btn.classList.toggle('active', btn.textContent.toLowerCase().includes(tab));
@@ -208,18 +205,6 @@ async function checkHabitability() {
     }
 }
 
-function toggle3DView() {
-    if (!elements.d3Container) return;
-    if (elements.d3Container.style.display === 'none' || elements.d3Container.style.display === '') {
-        elements.d3Container.style.display = 'block';
-        if (typeof window.load3DView === 'function') window.load3DView(currentData);
-        else elements.d3Container.innerHTML = "<p style='color:red'>3D Library missing</p>";
-    } else {
-        elements.d3Container.style.display = 'none';
-        if (typeof window.stop3DView === 'function') window.stop3DView();
-    }
-}
-
 function showChart() {
     if (!elements.chartContainer) return;
     if (elements.chartContainer.style.display === 'none' || elements.chartContainer.style.display === '') {
@@ -233,5 +218,6 @@ function showChart() {
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log("App Loaded. Initializing secure mode...");
+
     fetchData(true);
 });

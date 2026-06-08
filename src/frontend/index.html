@@ -22,7 +22,6 @@
                 <button class="theme-btn" onclick="switchTab('asteroids')">Asteroids</button>
                 <button class="theme-btn" onclick="switchTab('exoplanets')">Exoplanets</button>
                 
-                <button class="theme-btn" onclick="toggle3DView()">🌌 3D View</button>
                 <button class="theme-btn" onclick="showChart()">📊 Chart</button>
             </div>
         </header>
@@ -37,8 +36,6 @@
                 <div id="data-container"><p>Loading data from NASA cache...</p></div>
             </div>
 
-            <div id="3d-view-container" style="display:none; width:100%; height:350px; margin:20px 0; border-radius:12px; overflow:hidden; background:rgba(0,0,0,0.2);"></div>
-            
             <div id="chart-container" style="display:none; width:100%; height:350px; margin:20px 0;">
                 <canvas id="chart-canvas"></canvas>
             </div>
@@ -58,13 +55,11 @@
 
         <!-- Libraries -->
     <!-- Note: Since index.html is inside src/frontend/, lib/ is a sibling folder -->
-    <script src="lib/three.min.js"></script>
     <script src="lib/chart.min.js"></script>
     <script src="lib/jspdf.min.js"></script>
     <script src="lib/jspdf.autotable.min.js"></script>
 
     <!-- Helpers -->
-    <script src="three_view.js"></script>
     <script src="charts_view.js"></script>
 
     <!-- App Logic -->

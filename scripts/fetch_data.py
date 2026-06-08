@@ -32,7 +32,8 @@ def fetch_asteroids():
     url = f"https://api.nasa.gov/neo/rest/v1/feed?start_date={start}&end_date={end}&api_key={NASA_API_KEY}"
     
     try:
-        ctx = ssl._create_unverified_context()
+        # Use secure default SSL context (do not bypass verification)
+        ctx = ssl.create_default_context()
         with urllib.request.urlopen(url, context=ctx, timeout=30) as res:
             raw = json.loads(res.read().decode())
             data = []
@@ -55,7 +56,8 @@ def fetch_exoplanets():
     url = "https://exoplanetarchive.ipac.caltech.edu/cgi-bin/TblView/nph-tblView?access=CSV&table=pscompPSC&confirms=confirmed"
     
     try:
-        ctx = ssl._create_unverified_context()
+        # Use secure default SSL context (do not bypass verification)
+        ctx = ssl.create_default_context()
         req = urllib.request.Request(url, headers={'User-Agent': 'UniverseBooklet/2.0'})
         with urllib.request.urlopen(req, context=ctx, timeout=180) as res:
             reader = csv.DictReader(io.StringIO(res.read().decode()))

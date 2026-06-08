@@ -162,7 +162,8 @@ def fetch_asteroids():
     url = f"{BASE_URL}/neo/rest/v1/feed?start_date={start_date}&end_date={end_date}&api_key={NASA_API_KEY}"
     
     try:
-        context = ssl._create_unverified_context()
+        # Use a secure default SSL context (enforce certificate verification)
+        context = ssl.create_default_context()
         req = urllib.request.Request(url, headers={'User-Agent': 'UniverseBooklet-Secure/1.0'})
         with urllib.request.urlopen(req, context=context, timeout=30) as response:
             raw_data = json.loads(response.read().decode())
