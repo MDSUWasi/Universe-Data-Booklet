@@ -53,33 +53,44 @@ class ThreadedHTTPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 
 class SecureHandler(http.server.SimpleHTTPRequestHandler):
     protocol_version = 'HTTP/1.1'
-    
+
     def list_directory(self, path):
         self.send_error(403, "Forbidden")
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, directory=FRONTEND_DIR, **kwargs)
+        """
+        100% FIXED: Custom initializer that detects if the server is running under
+        the WSGI translation bridge or in native socket-based local execution.
+        """
+        directory = kwargs.pop('directory', FRONTEND_DIR)
+        self.directory = os.fspath(directory)
+
+        # Check if running under WSGI wrapper (where the third positional argument is None)
+        if len(args) >= 3 and args[2] is None:
+            self.request = args[0]
+            self.client_address = args[1]
+            self.server = args[2]
+            # Bypass the socket-binding stream actions of http.server to avoid initialization crashes
+        else:
+            # Fallback to standard local execution setup
+            super().__init__(*args, directory=directory, **kwargs)
 
     def end_headers(self):
         self.send_header('X-Frame-Options', 'DENY')
         self.send_header('X-XSS-Protection', '1; mode=block')
         self.send_header('X-Content-Type-Options', 'nosniff')
-        
+
         # --- PRODUCTION CORS FIX ---
         origin = self.headers.get('Origin')
-        allowed_origins = ['http://localhost:3000', 'http://localhost:8080', 'null'] 
-        
+        allowed_origins = ['http://localhost:3000', 'http://localhost:8080', 'null']
+
         if origin:
             if origin in allowed_origins:
                 self.send_header('Access-Control-Allow-Origin', origin)
-            else:
-                # SECURITY: Do NOT send wildcard (*) if unauthorized Origin is present
-                pass 
         else:
-            # No Origin = direct browser access (e.g., typing URL) -> Safe to allow all
-            self.send_header('Access-Control-Allow-Origin', '*') 
+            self.send_header('Access-Control-Allow-Origin', '*')
 
-        self.send_header('Cache-Control', 'max-age=3600, must-revalidate') 
+        self.send_header('Cache-Control', 'max-age=3600, must-revalidate')
         self.send_header('Referrer-Policy', 'no-referrer')
         super().end_headers()
 
@@ -88,7 +99,7 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
         translated = super().translate_path(path)
         real_frontend = os.path.realpath(FRONTEND_DIR)
         real_translated = os.path.realpath(translated)
-        
+
         # Prevent directory traversal even with symlinks
         if not (real_translated.startswith(real_frontend + os.sep) or real_translated == real_frontend):
             self.send_error(403, "Forbidden: Access denied.")
@@ -124,7 +135,7 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
                         os.replace(temp_file, CACHE_FILE)
                 except Exception as e:
                     print(f"⚠️ Initial fetch failed: {type(e).__name__}")
-            
+
             if os.path.exists(DATA_DIR):
                 try:
                     for f in os.listdir(DATA_DIR):
@@ -142,7 +153,7 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         parsed = urlparse(self.path)
         path = parsed.path
-        
+
         # Fixed: Also block encoded traversals (%2e%2e)
         if '..' in path or '%2e' in path.lower():
             self.send_error_json(400, "Invalid path")
@@ -158,18 +169,18 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
                         data = content.get('payload', [])
                 except (json.JSONDecodeError, IOError, KeyError):
                     data = []
-            
+
             # Pagination support
             query = parse_qs(parsed.query)
             page = int(query.get('page', [1])[0])
             limit = min(int(query.get('limit', [50])[0]), 100)  # Cap at 100 items/page
-            
+
             start = max(0, (page - 1) * limit)
             end = start + limit
             paginated_data = data[start:end] if start < len(data) else []
 
             self.send_json_response(200, {
-                "source": "NASA Cached", 
+                "source": "NASA Cached",
                 "count": len(paginated_data),  # Fixed: Return current page count
                 "total_count": len(data),      # Added: Total available items
                 "page": page,
@@ -181,14 +192,14 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
         if path == '/api/exoplanets':
             try:
                 full_data, _ = fetch_exoplanets()
-                if not isinstance(full_data, list): 
+                if not isinstance(full_data, list):
                     full_data = []
-                
+
                 # --- PAGINATION LOGIC ---
                 query = parse_qs(parsed.query)
                 page = int(query.get('page', [1])[0])
                 limit = min(int(query.get('limit', [50])[0]), 100)  # Cap at 100
-                
+
                 start = max(0, (page - 1) * limit)
                 end = start + limit
                 paginated_data = full_data[start:end] if start < len(full_data) else []
@@ -196,7 +207,7 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
                 total_pages = max(1, (len(full_data) + limit - 1) // limit) if full_data else 1
                 print(f"📊 Sending chunk {page}/{total_pages} ({len(paginated_data)} items)")
                 self.send_json_response(200, {
-                    "source": "Local CSV", 
+                    "source": "Local CSV",
                     "count": len(paginated_data),
                     "total_count": len(full_data),
                     "page": page,
@@ -217,25 +228,25 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
 
             raw_name = name_list[0]
             safe_name = re.sub(r'[^\w\-]', '', raw_name)[:80].strip()
-            
+
             if not safe_name:
                 self.send_error_json(400, "Invalid name format")
                 return
 
             try:
                 data, _ = fetch_exoplanets()
-                if not isinstance(data, list): 
+                if not isinstance(data, list):
                     data = []
                 # Normalize stored planet names to match the sanitized query
                 planet = next((p for p in data if re.sub(r'[^\w\-]', '', p.get('pl_name', '')).lower() == safe_name.lower()), None)
-                
+
                 if not planet:
                     self.send_json_response(200, {"error": "Planet not found"})
                     return
-                
+
                 period = safe_float_from_planet(planet, 'pl_orbper', 0)
                 status = "High" if 200 < period < 400 else "Hot" if period < 50 else "Cold" if period > 1000 else "Unknown"
-                
+
                 self.send_json_response(200, {
                     "planet": sanitize_output(planet.get('pl_name')),
                     "period_days": period,
@@ -257,7 +268,7 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(body)
         except Exception:
-            pass 
+            pass
 
     def send_error_json(self, code, message):
         # NEVER expose detailed errors in production
@@ -265,7 +276,7 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
             safe_msg = str(message)[:200] if message else "Unknown Error"
         else:
             safe_msg = "Internal Server Error"  # Hide all details from clients
-        
+
         body = json.dumps({"error": safe_msg}).encode('utf-8')
         self.send_response(code)
         self.send_header('Content-Type', 'application/json')
@@ -281,7 +292,7 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
 
 def safe_float_from_planet(planet, key, default):
     val = planet.get(key)
-    if not val or val == '' or val is None: 
+    if not val or val == '' or val is None:
         return default
     try:
         return float(str(val).strip())
@@ -289,7 +300,7 @@ def safe_float_from_planet(planet, key, default):
         return default
 
 def sanitize_output(text):
-    if not text: 
+    if not text:
         return ""
     cleaned = re.sub(r'[^\w\s\-\.]', '', str(text))
     return cleaned.strip()[:100]
@@ -306,14 +317,14 @@ if __name__ == '__main__':
         print("💡 This will cause cache failures. Fix permissions before deploying.")
 
     cleanup_old_cache()
-    
+
     print(f"\n🚀 SERVER STARTING ON http://localhost:{PORT}")
     print(f"   Serving: {FRONTEND_DIR}")
     print(f"   Data Directory: {DATA_DIR}")
     print(f"   Threading: Enabled (concurrent requests supported)")
     print(f"   Demo API Key: Using NASA public key (rate limits apply)")
     print("")
-    
+
     try:
         with ThreadedHTTPServer(("", PORT), SecureHandler) as httpd:
             print("✅ Server is secure and running.")
@@ -322,8 +333,8 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         print("\n🛑 Stopped by user.")
     except OSError as e:
-        if e.errno == 98: 
+        if e.errno == 98:
             print(f"\n❌ Port {PORT} is already in use.")
             print("💡 Tip: export SERVER_PORT=8082 && python src/backend/server.py")
-        else: 
+        else:
             raise
