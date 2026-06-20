@@ -1,174 +1,261 @@
+/* =========================================
+   BLOCK INTERFACE - REFACTORED
+   Theme: Space Hybrid (Solid & Blocky)
+   ========================================= */
+
 :root {
-    /* Theme: Deep Space (Default - Clean & Professional) */
+    /* --- DEFAULT THEME: DEEP SPACE BLOCKS --- */
     --bg-color: #0b0d17;
-    --glass-bg: rgba(20, 25, 40, 0.85); /* More opaque for readability */
-    --glass-border: rgba(255, 255, 255, 0.15);
-    --primary: #4facfe; /* Soft Blue */
+    
+    /* Solid Colors (No Transparency/Glass) */
+    --panel-bg: #1a1d2e; 
+    --panel-border: #4facfe;
+    
+    /* Accents */
+    --primary: #4facfe;   /* Soft Blue */
     --secondary: #00f2fe; /* Cyan */
-    --accent: #00ff9d; /* Green */
+    --accent: #00ff9d;    /* Green */
+    --warning: #ffcc00;   /* Added: Yellow for warnings */
+    
+    /* Text */
     --text-main: #ffffff;
     --text-muted: #a0a0c0;
-    --font-main: 'Segoe UI', 'Roboto', sans-serif;
-    --glow: 0 0 10px rgba(79, 172, 254, 0.4);
-    --transition-speed: 0.3s;
+    
+    /* Typography & Geometry */
+    --font-main: 'Courier New', Courier, monospace; /* Monospaced for block feel */
+    --border-width: 2px;
+    --transition-speed: 0.2s;
+    --shadow-depth: 4px; /* Simulated depth without blur */
 }
 
-/* Theme: Lab White (Clean, High Contrast for Students) */
+/* THEME: LAB WHITE (Clean, Academic Blocks) */
 [data-theme="lab"] {
-    --bg-color: #f4f6f9;
-    --glass-bg: rgba(255, 255, 255, 0.9);
-    --glass-border: rgba(0, 0, 0, 0.1);
+    --bg-color: #e8eaed;
+    --panel-bg: #ffffff;
+    --panel-border: #2c3e50;
+    
     --primary: #2c3e50;
     --secondary: #3498db;
     --accent: #27ae60;
+    --warning: #e67e22;
+    
     --text-main: #2c3e50;
     --text-muted: #7f8c8d;
-    --glow: none;
 }
 
-/* Theme: Solar Gold (Warm, Energetic) */
+/* THEME: SOLAR GOLD (Warm, Energetic Blocks) */
 [data-theme="solar"] {
     --bg-color: #1a1500;
-    --glass-bg: rgba(40, 30, 10, 0.85);
-    --glass-border: rgba(255, 200, 0, 0.2);
+    --panel-bg: #2b1f00;
+    --panel-border: #ffaa00;
+    
     --primary: #ffaa00;
     --secondary: #ff5500;
     --accent: #ffcc00;
+    --warning: #ff3300;
+    
     --text-main: #fff8e1;
     --text-muted: #ffd54f;
-    --glow: 0 0 10px rgba(255, 170, 0, 0.4);
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+/* --- GLOBAL RESETS --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
 body {
     background-color: var(--bg-color);
     color: var(--text-main);
-    font-family: 'Courier New', Courier, monospace;
-    letter-spacing: 0.08em;
+    font-family: var(--font-main);
+    letter-spacing: 0.05em;
     text-transform: uppercase;
     overflow-x: hidden;
     min-height: 100vh;
-    transition: background-color var(--transition-speed);
+    transition: background-color var(--transition-speed), color var(--transition-speed);
 }
 
-#cosmos-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+/* Background Star Animation Container */
+#cosmos-canvas { 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    z-index: -1; 
+    pointer-events: none; 
+}
 
-/* Static square panels */
+/* --- BLOCK STYLES (Replaces Glass) --- */
 .glass-panel {
-    background: rgba(10, 14, 24, 0.95);
-    border: 1px solid var(--glass-border);
-    border-radius: 0;
-    padding: 18px;
+    /* Solid opaque background */
+    background: var(--panel-bg);
+    /* Hard borders instead of glass edges */
+    border: var(--border-width) solid var(--panel-border);
+    border-radius: 0; /* No rounding, strictly blocky */
+    padding: 20px;
     margin: 20px;
-    box-shadow: none;
-    transition: none;
+    
+    /* Simulate 3D depth with shadow (no blur) */
+    box-shadow: var(--shadow-depth) var(--shadow-depth) 0px rgba(0, 0, 0, 0.5);
+    
     opacity: 1;
+    transition: transform var(--transition-speed);
 }
 
-@keyframes fadeIn { to { opacity: 1; } }
-
+/* Hover effect: Slight lift, no glass glow */
 .glass-panel:hover {
-    transform: none;
-    box-shadow: none;
+    transform: translate(-2px, -2px);
+    box-shadow: calc(var(--shadow-depth) + 2px) calc(var(--shadow-depth) + 2px) 0px rgba(0, 0, 0, 0.6);
 }
 
-/* Header */
-header { text-align: center; padding: 28px 20px; border-bottom: 1px solid var(--glass-border); }
+/* --- HEADER --- */
+header {
+    text-align: center;
+    padding: 30px 20px;
+    border-bottom: var(--border-width) solid var(--panel-border);
+    background: var(--panel-bg);
+}
+
 h1 {
     font-size: 2.4rem;
     text-transform: uppercase;
-    letter-spacing: 0.24em;
+    letter-spacing: 0.2em;
     color: var(--primary);
-    background: none;
-    -webkit-background-clip: unset;
-    -webkit-text-fill-color: unset;
-    background-clip: unset;
     text-shadow: none;
     margin-bottom: 10px;
+    /* Optional: Add a slight inset border effect via text if desired, keeping it simple here */
 }
 
-/* Controls */
-.controls { display: flex; justify-content: center; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
+/* --- CONTROLS (Buttons) --- */
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+}
+
 .theme-btn {
-    background: transparent;
-    border: 2px solid var(--primary);
+    background: var(--panel-bg);
+    border: var(--border-width) solid var(--primary);
     color: var(--primary);
-    padding: 10px 16px;
-    border-radius: 0;
+    padding: 12px 20px;
+    border-radius: 0; /* Blocky corners */
     cursor: pointer;
     font-weight: 700;
-    transition: background 0.15s ease;
-    font-size: 0.88rem;
+    font-family: var(--font-main);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    transition: all var(--transition-speed) ease;
+    
+    /* 3D Button Depth */
+    box-shadow: 4px 4px 0px var(--panel-border);
 }
+
 .theme-btn:hover, .theme-btn.active {
     background: var(--primary);
     color: #000;
-    box-shadow: none;
+    /* Pressed effect */
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px var(--panel-border);
 }
 
-/* Dashboard Status */
+/* --- STATUS BADGES --- */
 .status-badge {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 4px 10px; border-radius: 2px;
-    font-size: 0.8rem; font-weight: bold;
-    background: rgba(0, 255, 157, 0.08); color: var(--accent);
-    border: 1px solid var(--accent);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 0;
+    font-size: 0.8rem;
+    font-weight: bold;
+    border: var(--border-width) solid var(--accent);
+    background: rgba(0, 0, 0, 0.2); /* Subtle dark tint */
+    color: var(--accent);
+    box-shadow: 2px 2px 0px rgba(0,0,0,0.3);
 }
-.status-badge.stale { background: rgba(255, 204, 0, 0.1); color: var(--warning); border-color: var(--warning); }
 
-/* Table Interactions */
-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-th, td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.08); transition: background 0.15s; }
-th { color: var(--primary); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.12em; }
-tr { transition: background 0.15s; }
+.status-badge.stale {
+    border-color: var(--warning);
+    color: var(--warning);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+/* --- DATA TABLE --- */
+table {
+    width: 100%;
+    border-collapse: separate; /* Allows spacing if needed, but keep collapse for clean lines */
+    border-collapse: collapse;
+    margin-top: 10px;
+    border: var(--border-width) solid var(--panel-border);
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--panel-border);
+    border-right: 1px solid var(--panel-border); /* Add vertical dividers for block grid feel */
+}
+
+th {
+    color: var(--primary);
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    background: rgba(0,0,0,0.2);
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
 tr:hover {
-    background: rgba(255,255,255,0.08);
-    transform: none;
+    background: rgba(255,255,255,0.1);
     cursor: pointer;
 }
 
-/* Tooltip for particles */
+/* --- TOOLTIP --- */
 .tooltip {
     position: absolute;
-    background: rgba(0,0,0,0.92);
+    background: #000;
     color: var(--text-main);
     padding: 8px 12px;
+    border: var(--border-width) solid var(--primary);
     border-radius: 0;
     font-size: 0.85rem;
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.2s;
     z-index: 100;
-    border: 1px solid var(--primary);
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.5);
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    h1 { font-size: 1.8rem; }
-    .glass-panel { margin: 10px; padding: 15px; }
-}
-/* ... existing styles ... */
-
-/* SCROLLABLE TABLE CONTAINER */
+/* --- SCROLLABLE TABLE CONTAINER --- */
 #data-container {
-    max-height: 60vh; /* Limits height to 60% of viewport */
-    overflow-y: auto; /* Adds vertical scrollbar */
-    overflow-x: hidden; /* Hides horizontal scrollbar */
+    max-height: 65vh;
+    overflow-y: auto;
+    overflow-x: hidden;
     position: relative;
+    border: var(--border-width) solid var(--panel-border);
+    background: var(--panel-bg);
 }
 
-/* Custom Scrollbar Styling (Webkit browsers like Chrome/Safari) */
+/* Custom Scrollbar: Blocky Style */
 #data-container::-webkit-scrollbar {
-    width: 8px;
+    width: 12px; /* Thicker scrollbar */
 }
 
 #data-container::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.2);
+    background: #000;
+    border-left: var(--border-width) solid var(--panel-border);
     border-radius: 0;
 }
 
 #data-container::-webkit-scrollbar-thumb {
     background: var(--primary);
+    border: 2px solid #000; /* Inner border for depth */
     border-radius: 0;
 }
 
@@ -176,30 +263,25 @@ tr:hover {
     background: var(--secondary);
 }
 
-/* Ensure table stays within width */
-#data-container table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.9rem;
-    white-space: nowrap; /* Prevents text wrapping in cells */
-}
-
-/* Sticky Header for better scrolling experience */
+/* Sticky Header */
 #data-container thead th {
     position: sticky;
     top: 0;
-    background: var(--bg-color); /* Matches theme background */
+    background: var(--panel-bg);
     z-index: 10;
-    box-shadow: none;
+    box-shadow: 0 2px 0 var(--panel-border); /* Hard shadow separator */
+    border-bottom: var(--border-width) solid var(--panel-border);
 }
 
-/* SKELETON LOADER STYLES */
+/* --- LOADING STATES --- */
 .skeleton-row {
     height: 40px;
     margin-bottom: 8px;
-    background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+    /* Blocky shimmer */
+    background: linear-gradient(90deg, #333 25%, #444 50%, #333 75%);
     background-size: 200% 100%;
     border-radius: 0;
+    border: 1px solid var(--panel-border);
     animation: shimmer 1.5s infinite;
 }
 
@@ -215,26 +297,28 @@ tr:hover {
     padding: 40px;
     color: var(--primary);
     font-weight: bold;
+    text-transform: uppercase;
 }
 
 .loading-spinner::after {
     content: "";
-    width: 24px;
-    height: 24px;
-    border: 3px solid var(--primary);
-    border-top-color: transparent;
-    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    border: 4px solid var(--panel-border);
+    border-top-color: var(--primary);
+    border-radius: 0; /* Square spinner for block theme */
     margin-left: 10px;
-    animation: spin 1s linear infinite;
+    animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
 
-/* Optimized Table Scroll */
-#data-container {
-    max-height: 65vh; /* Slightly taller for better UX */
-    overflow-y: auto;
-    position: relative;
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    h1 { font-size: 1.8rem; }
+    .glass-panel { margin: 10px; padding: 15px; }
+    .controls { gap: 5px; }
+    .theme-btn { padding: 8px 12px; font-size: 0.8rem; }
 }
