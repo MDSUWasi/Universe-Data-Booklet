@@ -8,15 +8,19 @@ import re
 from datetime import datetime, timedelta
 import csv
 import sys
+import logging
+import threading
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from cache_manager import get_cached_data, save_to_cache
 
 # --- CONFIGURATION ---
-# SECURITY FIX: Use Environment Variable. Fallback to DEMO_KEY with warning.
+# SECURITY FIX: Use Environment Variable. Fallback to DEMO_KEY with explicit warning.
 NASA_API_KEY = os.getenv("NASA_API_KEY", "DEMO_KEY")
 if NASA_API_KEY == "DEMO_KEY":
     print("⚠️ Using NASA DEMO_KEY. For production, set NASA_API_KEY environment variable.")
+else:
+    print("✅ Production API key configured.")
 
 BASE_URL = "https://api.nasa.gov"
 CACHE_DAYS = 7  
@@ -36,14 +40,24 @@ print(f"📄 CSV PATH: {CSV_PATH}")
 print(f"✅ CSV EXISTS: {os.path.exists(CSV_PATH)}")
 if os.path.exists(DATA_DIR):
     # Only print filenames, not full content
-    print(f"📝 FILES IN DATA: {os.listdir(DATA_DIR)}")
+    files_list = os.listdir(DATA_DIR)
+    print(f"📝 FILES IN DATA: {files_list}")
 else:
     print("❌ ERROR: Data directory NOT FOUND!")
 print("="*60 + "\n")
 
+# ========================================
+# 🚀 MEMORY CACHE - FIX FOR DISK I/O BOTTLENECK
+# ========================================
+_EXOPLANET_CACHE = None          # Global variable to hold planet data in RAM
+_EXOPLANET_LOCK = threading.Lock()  # Prevent race conditions during initial load
+# ========================================
+
 def sanitize_input(text):
-    if not text: return ""
-    cleaned = re.sub(r'[^\w\s\-\.]', '', str(text))
+    """Fixed: Match server.py sanitization pattern [^\w\-] (removes dots too)."""
+    if not text: 
+        return ""
+    cleaned = re.sub(r'[^\w\-]', '', str(text))
     return cleaned.strip()[:100]
 
 def safe_float(value, default=1.0):
@@ -68,20 +82,28 @@ def calculate_earth_similarity(planet):
 def calculate_water_probability(planet):
     try:
         period = safe_float(planet.get('pl_orbper'), 0)
-        if 200 < period < 400: return "High (Likely Liquid)"
-        elif period < 50: return "Low (Too Hot - Steam)"
-        elif period > 1000: return "Low (Too Cold - Ice)"
-        else: return "Moderate (Uncertain)"
-    except: return "Unknown"
+        if 200 < period < 400: 
+            return "High (Likely Liquid)"
+        elif period < 50: 
+            return "Low (Too Hot - Steam)"
+        elif period > 1000: 
+            return "Low (Too Cold - Ice)"
+        else: 
+            return "Moderate (Uncertain)"
+    except: 
+        return "Unknown"
 
 def calculate_oxygen_likelihood(planet):
     try:
         mass = safe_float(planet.get('pl_bmasse'), 0)
         radius = safe_float(planet.get('pl_rade'), 0)
-        if 0.5 < mass < 5.0 and 0.8 < radius < 1.5: return "Possible (Terrestrial)"
-        elif mass > 10: return "Unlikely (Gas/Ice Giant)"
+        if 0.5 < mass < 5.0 and 0.8 < radius < 1.5: 
+            return "Possible (Terrestrial)"
+        elif mass > 10: 
+            return "Unlikely (Gas/Ice Giant)"
         return "Unknown"
-    except: return "Unknown"
+    except: 
+        return "Unknown"
 
 def enrich_planet_data(planet):
     planet['esi'] = calculate_earth_similarity(planet)
@@ -92,8 +114,10 @@ def enrich_planet_data(planet):
     m = safe_float(planet.get('pl_bmasse'), 1)
     
     size_comp = "Earth-sized"
-    if r > 1.5: size_comp = "Larger than Earth"
-    elif r < 0.8: size_comp = "Smaller than Earth"
+    if r > 1.5: 
+        size_comp = "Larger than Earth"
+    elif r < 0.8: 
+        size_comp = "Smaller than Earth"
     
     planet['earth_comparison'] = f"{size_comp} ({m}x Mass, {r}x Radius)"
     planet['pl_name'] = sanitize_input(planet.get('pl_name', ''))
@@ -120,7 +144,8 @@ def load_exoplanets_from_csv():
             
             for row in reader:
                 p_name = row.get('pl_name') or row.get('name')
-                if not p_name: continue
+                if not p_name: 
+                    continue
                 
                 p = {
                     'pl_name': p_name,
@@ -133,7 +158,10 @@ def load_exoplanets_from_csv():
                 
                 enriched = enrich_planet_data(p)
                 planets.append(enriched)
-                if len(planets) >= 6000: break
+                
+                # Note: Keep 6000 limit for compatibility; remove if you want full dataset
+                if len(planets) >= 6000: 
+                    break
             
             if len(planets) == 0:
                 print("❌ No planets extracted.")
@@ -184,17 +212,51 @@ def fetch_asteroids():
                         "velocity_kmh": round(float(vel), 2),
                         "hazardous": obj.get('is_potentially_hazardous_asteroid', False)
                     })
-            if len(flat_list) == 0: raise Exception("Empty")
+            if len(flat_list) == 0: 
+                raise Exception("Empty response from NASA API")
             save_to_cache('cached_asteroids.json', flat_list)
             return flat_list, False
     except Exception as e:
-        print(f"❌ Asteroid Fetch Error: {e}")
-        # Return fallback data safely
-        return [{"id": "1", "name": "Ceres", "date": datetime.now().strftime("%Y-%m-%d"), "diameter_km": 940.0, "velocity_kmh": 18000, "hazardous": False}], False
+        print(f"⚠️ Asteroid Fetch Error: {type(e).__name__}. Using fallback data.")
+        # Return fallback data safely with metadata flag so frontend knows it's not live data
+        fallback_data = [
+            {
+                "id": "1", 
+                "name": "Ceres", 
+                "date": datetime.now().strftime("%Y-%m-%d"), 
+                "diameter_km": 940.0, 
+                "velocity_kmh": 18000, 
+                "hazardous": False,
+                "is_fallback": True  # Added: Flag for frontend to indicate fallback data
+            }
+        ]
+        return fallback_data, False
 
 def fetch_exoplanets():
-    data, _ = load_exoplanets_from_csv()
-    if data and len(data) > 10:
-        return data, False
-    print("⚠️ No exoplanet data loaded.")
-    return [], False
+    """
+    Fixed: Uses in-memory cache to avoid reading CSV on every request.
+    First call loads from disk, subsequent calls serve from RAM instantly.
+    Thread-safe with locking mechanism.
+    """
+    global _EXOPLANET_CACHE, _EXOPLANET_LOCK
+    
+    # Fast path: Check if data already loaded in RAM
+    with _EXOPLANET_LOCK:
+        if _EXOPLANET_CACHE is not None:
+            # Return copy to prevent accidental modification of cached data
+            return list(_EXOPLANET_CACHE), True
+    
+    # Slow path: Load from CSV once at startup
+    with _EXOPLANET_LOCK:
+        # Double-check another thread didn't load it while we were waiting
+        if _EXOPLANET_CACHE is not None:
+            return list(_EXOPLANET_CACHE), True
+        
+        data, loaded = load_exoplanets_from_csv()
+        if data and len(data) > 10:
+            _EXOPLANET_CACHE = data
+            print(f"✅ Exoplanet data cached in RAM ({len(data)} planets)")
+            return list(data), True
+        else:
+            print("⚠️ No exoplanet data loaded.")
+            return [], False
