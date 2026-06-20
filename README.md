@@ -85,9 +85,13 @@ cd UniverseDataBooklet
 
 
 Configure Environment:
-Create a .env file in the root directory (if missing) and add your NASA API key (optional, defaults to DEMO_KEY):
-SERVER_PORT=8080
+
+Create a .env file in the root directory (if missing) and add your API key:
+
+SERVER_PORT=8081
+
 NASA_API_KEY=YOUR_NASA_API_KEY_HERE
+
 DEBUG_MODE=false
 
 
@@ -96,7 +100,7 @@ python src/backend/server.py
 
 
 Access the App:
-Open your browser and navigate to http://localhost:8080.
+Open your browser and navigate to http://localhost:8081.
 
 
 
