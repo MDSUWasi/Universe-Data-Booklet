@@ -1,9 +1,8 @@
 # 🌌 Universe Data Booklet
 
 > **An interactive, privacy-first explorer for Near-Earth Asteroids and Exoplanets.**  
-> *Built for students, educators, and amateur astronomers. Powered by NASA, secured by design.*
+> *Built for students, educators. Powered by NASA, secured by design.*
 
-![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)
 ![Security](https://img.shields.io/badge/Security-Audited-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
@@ -18,18 +17,13 @@ Calculates the "Water Probability" for exoplanets based on orbital period, stell
 
 ### 📊 **Dual-Dataset Analysis**
 Seamlessly switch between two massive datasets:
-- **Near-Earth Asteroids (NEO):** Live tracking of objects within Earth's orbit.
+- **Near-Earth Asteroids (NEO):** Tracking of objects within Earth's orbit.
 - **Confirmed Exoplanets:** A catalog of thousands of discovered worlds with calculated Earth Similarity Index (ESI).
 
 ### 🎨 **Immersive Visualization**
 - **3D Galaxy View:** Interactive WebGL rendering of celestial bodies using Three.js.
 - **Dynamic Charts:** Real-time bar charts powered by Chart.js to visualize size and velocity distributions.
 - **Theme Switcher:** Toggle between "Neon Void," "Solar Flare," and "Lab White" themes for any environment.
-
-### 🔒 **Privacy-First Architecture**
-- **Local-First Logic:** No user data is ever sent to external servers beyond the necessary API calls for public data.
-- **Client-Side Sanitization:** All user inputs (planet names, search terms) are sanitized before processing.
-- **No Tracking:** No cookies, no analytics, no third-party trackers.
 
 ---
 
@@ -47,21 +41,6 @@ One of the biggest challenges in public API projects is hitting rate limits when
 
 ---
 
-## 🛡️ Security & Privacy Audit
-
-This application has been audited against OWASP Top 10 vulnerabilities.
-
-| Feature | Implementation Details |
-| :--- | :--- |
-| **XSS Protection** | **Defense-in-Depth:** Input sanitization on backend + `escapeHtml()` escaping on frontend prevents script injection. |
-| **CSRF/CORS** | Strict Origin whitelist configured; no wildcard CORS policies allowed for authenticated origins. |
-| **Path Traversal** | Backend validates all file paths using `os.path.realpath` to ensure access is restricted to the `frontend/` directory. |
-| **Input Validation** | Planet names are regex-sanitized and length-limited (max 50 chars) to prevent buffer overflows and injection. |
-| **Error Handling** | Production mode (`DEBUG=false`) hides stack traces, returning generic safe error messages to users. |
-| **API Key Safety** | Keys are loaded exclusively from `.env`. The file is excluded from Git version control. |
-| **Resource Limits** | Client-side cooldowns prevent spam; server-side pagination limits data payload sizes. |
-
----
 
 ## 🛠 Technology Stack
 
@@ -75,7 +54,7 @@ This application has been audited against OWASP Top 10 vulnerabilities.
 
 ## 📁 Project Structure
 
-```text
+```
 UniverseDataBooklet/
 ├── data/                  # Cached JSON data & static CSVs
 ├── src/
@@ -88,14 +67,16 @@ UniverseDataBooklet/
 ├── .env                   # Environment variables (DO NOT COMMIT)
 ├── .gitignore             # Secure exclusion rules
 └── README.md              # This file
+```
 
-🚀 Quick Start Guide
-Prerequisites
+## 🚀 Quick Start Guide
+
+# Prerequisites
 
 Python 3.x installed
 Internet connection (for initial data fetch)
 
-Installation
+# Installation
 
 
 Clone the repository:
@@ -119,7 +100,7 @@ Open your browser and navigate to http://localhost:8080.
 
 
 
-🧪 Usage Examples
+# 🧪 Usage Examples
 Checking Habitability
 
 Navigate to the Exoplanets tab.
@@ -132,7 +113,7 @@ Filter your data table by category.
 Click the PDF Report button (top right) to generate a downloadable summary of the current view.
 
 
-🤝 Contributing
+# 🤝 Contributing
 This is an educational project designed to demonstrate secure, scalable web development. Feel free to fork, modify, and improve!
 
 Fork the Project
@@ -142,13 +123,13 @@ Push to the Branch (git push origin feature/AmazingFeature)
 Open a Pull Request
 
 
-📜 License
+# 📜 License
 Distributed under the MIT License. See LICENSE for more information.
-🙏 Acknowledgments
+# 🙏 Acknowledgments
 
 NASA: For providing free, open-access space data APIs.
 Three.js, Chart.js, jsPDF: For powerful, open-source visualization libraries.
 Proton: Inspired by their commitment to privacy and security.
 
 
-Built with ❤️ for the stars.
+# Built with ❤️ for the stars.
