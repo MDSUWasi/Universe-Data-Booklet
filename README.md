@@ -133,7 +133,7 @@ Distributed under the MIT License. See LICENSE for more information.
 
 NASA: For providing free, open-access space data APIs.
 Three.js, Chart.js, jsPDF: For powerful, open-source visualization libraries.
-Proton: Inspired by their commitment to privacy and security.
+
 
 
 # Built with ❤️ for the stars.
