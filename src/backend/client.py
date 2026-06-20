@@ -15,7 +15,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from cache_manager import get_cached_data, save_to_cache
 
 # --- CONFIGURATION ---
-# SECURITY FIX: Use Environment Variable. Fallback to DEMO_KEY with explicit warning.
 NASA_API_KEY = os.getenv("NASA_API_KEY", "DEMO_KEY")
 if NASA_API_KEY == "DEMO_KEY":
     print("⚠️ Using NASA DEMO_KEY. For production, set NASA_API_KEY environment variable.")
@@ -47,7 +46,7 @@ else:
 print("="*60 + "\n")
 
 # ========================================
-# 🚀 MEMORY CACHE - FIX FOR DISK I/O BOTTLENECK
+# 🚀 MEMORY CACHE
 # ========================================
 _EXOPLANET_CACHE = None          # Global variable to hold planet data in RAM
 _EXOPLANET_LOCK = threading.Lock()  # Prevent race conditions during initial load

@@ -1,3 +1,79 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+ENV/
+
+# Environment Variables (CRITICAL - NEVER commit secrets!)
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+credentials.json
+
+# Logs
+*.log
+logs/
+*.txt
+!README.md
+!requirements.txt
+!LICENSE
+
+# IDE & Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Data & Cache (IMPORTANT - Don't upload cached data)
 data/*.json
-src/backend/*.pyc
-src/backend/__pycache__
+data/*.csv
+src/backend/data/*.json
+src/backend/data/*.csv
+cached_asteroids.json
+exoplanets.json
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Miscellaneous
+*.bak
+*.tmp
+.pastebin-content-*

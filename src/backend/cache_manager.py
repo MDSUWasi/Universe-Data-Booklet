@@ -9,7 +9,7 @@ import threading
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CACHE_DIR = os.path.join(BASE_DIR, '..', '..', 'data')
 
-# Fixed: Align with server.py MAX_CACHE_AGE_DAYS = 90 days
+# Align with server.py MAX_CACHE_AGE_DAYS = 90 days
 CACHE_DURATION_SECONDS = 7 * 24 * 60 * 60      # 7 Days (for checking freshness on read)
 CLEANUP_THRESHOLD = 90 * 24 * 60 * 60          # 90 Days (matches server.py retention)
 

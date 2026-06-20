@@ -1,0 +1,15 @@
+# ========================================
+# Project Dependencies
+# ========================================
+# This project uses ONLY Python standard library modules.
+# No external pip packages are required for core functionality.
+#
+# Used modules:
+#   http.server, socketserver, json, os, sys, urllib.parse
+#   re, time, datetime, threading, csv, ssl, urllib.request
+#
+# If you plan to deploy with Gunicorn (recommended for production):
+# gunicorn>=20.0.0
+
+# Uncomment if using Gunicorn:
+# gunicorn==21.2.0
