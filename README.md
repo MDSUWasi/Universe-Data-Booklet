@@ -73,28 +73,21 @@ Internet connection (for initial data fetch)
 ### Installation
 
 
-Clone the repository:
-git clone https://github.com/MDSUWasi/Universe-Data-Booklet.git
-cd Universe-Data-Booklet
+1) Clone the repository: git clone https://github.com/MDSUWasi/Universe-Data-Booklet.git
+
+2) cd Universe-Data-Booklet
 
 
-Configure Environment:
-
-Create a .env file in the root directory (if missing) and add your API key:
-
-SERVER_PORT=8081
-
-NASA_API_KEY=YOUR_NASA_API_KEY_HERE
-
-DEBUG_MODE=false
+3) Create a .env file in the root directory (if missing) and add your API key:
+4) SERVER_PORT=8081
+5) NASA_API_KEY=YOUR_NASA_API_KEY_HERE
+6) DEBUG_MODE=false
 
 
-Start the Server:
-python src/backend/server.py
+5) Start the Server: python src/backend/server.py
 
 
-Access the App:
-Open your browser and navigate to http://localhost:8081.
+5) Access the App: Open your browser and navigate to http://localhost:8081.
 
 **Note: The source code uses public api by default. If anyone want to use this source code, they they have to update it with their own API.**
 
