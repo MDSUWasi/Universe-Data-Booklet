@@ -26,10 +26,11 @@ window.renderChart = function(data, canvasId = 'chart-canvas') {
         return 1;
     });
 
-    const style = getComputedStyle(document.body);
-    const primaryColor = style.getPropertyValue('--primary').trim() || '#4facfe';
-    const textColor = style.getPropertyValue('--text-main').trim() || '#ffffff';
-    const gridColor = 'rgba(255, 255, 255, 0.1)';
+    const style = getComputedStyle(document.documentElement);
+    const primaryColor = style.getPropertyValue('--primary').trim() || '#8b6f47';
+    const accentColor = style.getPropertyValue('--accent').trim() || '#c97b3c';
+    const textColor = style.getPropertyValue('--text-chart').trim() || '#efe8de';
+    const gridColor = style.getPropertyValue('--chart-grid').trim() || 'rgb(248, 232, 207)';
 
     chartInstance = new Chart(canvas, {
         type: 'bar',
@@ -39,7 +40,7 @@ window.renderChart = function(data, canvasId = 'chart-canvas') {
                 label: 'Size Metric',
                 data: values,
                 backgroundColor: primaryColor,
-                borderColor: '#ffffff',
+                borderColor: accentColor,
                 borderWidth: 1,
                 borderRadius: 4
             }]
@@ -56,10 +57,10 @@ window.renderChart = function(data, canvasId = 'chart-canvas') {
                     font: { size: 16, weight: 'bold' }
                 },
                 tooltip: {
-                    backgroundColor: 'rgba(0,0,0,0.8)',
-                    titleColor: '#fff',
-                    bodyColor: '#fff',
-                    borderColor: primaryColor,
+                    backgroundColor: primaryColor,
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff',
+                    borderColor: accentColor,
                     borderWidth: 1
                 }
             },
