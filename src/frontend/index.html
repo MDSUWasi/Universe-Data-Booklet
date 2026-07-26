@@ -1,68 +1,81 @@
-<!DOCTYPE html>
-<html lang="en" data-theme="neon">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universe Data Booklet</title>
+// src/frontend/charts_view.js
+let chartInstance = null;
+
+window.renderChart = function(data, canvasId = 'chart-canvas') {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) { console.error(`Canvas #${canvasId} not found.`); return; }
+
+    if (chartInstance) {
+        chartInstance.destroy();
+        chartInstance = null;
+    }
+
+    if (!data || data.length === 0) return;
+
+    const MAX_CHART_ITEMS = 50;
+    const displayData = data.slice(0, Math.min(MAX_CHART_ITEMS, data.length));
     
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <canvas id="cosmos-canvas"></canvas>
+    const labels = displayData.map(item => {
+        const name = item.name || item.pl_name || "Unknown";
+        return name.length > 12 ? name.substring(0, 10) + '..' : name;
+    });
+    
+    const values = displayData.map(item => {
+        if (item.diameter_km) return parseFloat(item.diameter_km);
+        if (item.pl_rade) return parseFloat(item.pl_rade) * 1000;
+        return 1;
+    });
 
-    <div class="container">
-        <header>
-            <h1>🌌 Universe Data Booklet</h1>
-            <p>Data on exoplanets and asteroids</p>
-            
-            <div class="controls">
-                <button class="theme-btn active" onclick="setTheme('neon')">Neon</button>
-                <button class="theme-btn" onclick="setTheme('solar')">Solar</button>
-                
-                <button class="theme-btn" onclick="switchTab('asteroids')">Asteroids</button>
-                <button class="theme-btn" onclick="switchTab('exoplanets')">Exoplanets</button>
-                
-                <button class="theme-btn" onclick="showChart()">📊 Chart</button>
-            </div>
-        </header>
+    const style = getComputedStyle(document.documentElement);
+    const primaryColor = style.getPropertyValue('--primary').trim() || '#8b6f47';
+    const accentColor = style.getPropertyValue('--accent').trim() || '#c97b3c';
+    const textColor = style.getPropertyValue('--text-chart').trim() || '#efe8de';
+    const gridColor = style.getPropertyValue('--chart-grid').trim() || 'rgb(248, 232, 207)';
 
-        <main>
-            <div class="glass-panel">
-                <h2>📊 Live Stats</h2>
-                <div id="stats-display">Loading...</div>
-            </div>
-
-            <div class="glass-panel">
-                <div id="data-container"><p>Loading data from...</p></div>
-            </div>
-
-            <div id="chart-container" style="display:none; width:100%; height:350px; margin:20px 0;">
-                <canvas id="chart-canvas"></canvas>
-            </div>
-
-            <div class="glass-panel">
-                <h2>🔬 Habitability Scanner</h2>
-                <input type="text" id="planet-input" placeholder="Enter Planet Name (e.g., Kepler-186f)" style="width:100%; padding:10px; margin:10px 0; background:rgba(0,0,0,0.3); border:1px solid var(--primary); color:white;">
-                <button class="theme-btn" onclick="checkHabitability()">Scan</button>
-                <div id="habitability-result" style="margin-top:15px;"></div>
-            </div>
-
-            <div class="disclaimer">
-                ⚠️ <strong>Disclaimer:</strong> All calculations are for educational purposes only. Not for navigation or mission planning. (Only for study purpose and may have mistakes)
-            </div>
-        </main>
-    </div>
-
-        <!-- Libraries -->
-    <script src="lib/chart.min.js"></script>
-    <script src="lib/jspdf.min.js"></script>
-    <script src="lib/jspdf.autotable.min.js"></script>
-
-    <!-- Helpers -->
-    <script src="charts_view.js"></script>
-
-    <!-- App Logic -->
-    <script src="animations.js"></script>
-    <script src="app.js"></script>
-</body>
-</html>
+    chartInstance = new Chart(canvas, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Size Metric',
+                data: values,
+                backgroundColor: primaryColor,
+                borderColor: accentColor,
+                borderWidth: 1,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                title: {
+                    display: true,
+                    text: `Top ${displayData.length} Objects by Size`,
+                    color: textColor,
+                    font: { size: 16, weight: 'bold' }
+                },
+                tooltip: {
+                    backgroundColor: primaryColor,
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff',
+                    borderColor: accentColor,
+                    borderWidth: 1
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: gridColor },
+                    ticks: { color: textColor }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: textColor, maxRotation: 45, minRotation: 45 }
+                }
+            },
+            animation: { duration: 1000, easing: 'easeOutQuart' }
+        }
+    });
+};
