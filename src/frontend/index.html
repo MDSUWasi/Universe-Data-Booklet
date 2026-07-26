@@ -1,81 +1,116 @@
-// src/frontend/charts_view.js
-let chartInstance = null;
+<!DOCTYPE html>
+<html lang="en" data-theme="cream">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universe Data Booklet</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <canvas id="cosmos-canvas"></canvas>
 
-window.renderChart = function(data, canvasId = 'chart-canvas') {
-    const canvas = document.getElementById(canvasId);
-    if (!canvas) { console.error(`Canvas #${canvasId} not found.`); return; }
+    <nav class="topbar">
+        <div class="topbar-left">
+            <h1>🌌 Universe Data Booklet</h1>
+            <p>Data on exoplanets and asteroids</p>
+        </div>
+        <button id="hamburger" class="hamburger" onclick="toggleSidebar()" aria-label="Toggle Settings">
+            <span></span><span></span><span></span>
+        </button>
+    </nav>
 
-    if (chartInstance) {
-        chartInstance.destroy();
-        chartInstance = null;
-    }
+    <div class="layout">
+        <main class="main-content">
+            <section class="controls-section">
+                <div class="tab-group">
+                    <button class="tab-btn active" onclick="switchTab('asteroids')">🪨 Asteroids</button>
+                    <button class="tab-btn" onclick="switchTab('exoplanets')">🪐 Exoplanets</button>
+                </div>
+                <button class="action-btn" onclick="showChart()">📊 View Chart</button>
+            </section>
 
-    if (!data || data.length === 0) return;
+            <section class="glass-panel stats-panel">
+                <h2>📊 Live Stats</h2>
+                <div id="stats-display">Loading...</div>
+            </section>
 
-    const MAX_CHART_ITEMS = 50;
-    const displayData = data.slice(0, Math.min(MAX_CHART_ITEMS, data.length));
-    
-    const labels = displayData.map(item => {
-        const name = item.name || item.pl_name || "Unknown";
-        return name.length > 12 ? name.substring(0, 10) + '..' : name;
-    });
-    
-    const values = displayData.map(item => {
-        if (item.diameter_km) return parseFloat(item.diameter_km);
-        if (item.pl_rade) return parseFloat(item.pl_rade) * 1000;
-        return 1;
-    });
+            <section class="glass-panel data-panel">
+                <div id="data-container"><p>Loading data...</p></div>
+            </section>
 
-    const style = getComputedStyle(document.documentElement);
-    const primaryColor = style.getPropertyValue('--primary').trim() || '#8b6f47';
-    const accentColor = style.getPropertyValue('--accent').trim() || '#c97b3c';
-    const textColor = style.getPropertyValue('--text-chart').trim() || '#efe8de';
-    const gridColor = style.getPropertyValue('--chart-grid').trim() || 'rgb(248, 232, 207)';
+            <section class="glass-panel chart-panel" id="chart-container" style="display:none;">
+                <canvas id="chart-canvas"></canvas>
+            </section>
 
-    chartInstance = new Chart(canvas, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Size Metric',
-                data: values,
-                backgroundColor: primaryColor,
-                borderColor: accentColor,
-                borderWidth: 1,
-                borderRadius: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                title: {
-                    display: true,
-                    text: `Top ${displayData.length} Objects by Size`,
-                    color: textColor,
-                    font: { size: 16, weight: 'bold' }
-                },
-                tooltip: {
-                    backgroundColor: primaryColor,
-                    titleColor: '#ffffff',
-                    bodyColor: '#ffffff',
-                    borderColor: accentColor,
-                    borderWidth: 1
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { color: gridColor },
-                    ticks: { color: textColor }
-                },
-                x: {
-                    grid: { display: false },
-                    ticks: { color: textColor, maxRotation: 45, minRotation: 45 }
-                }
-            },
-            animation: { duration: 1000, easing: 'easeOutQuart' }
+            <section class="glass-panel habitability-panel">
+                <h2>🔬 Habitability Scanner</h2>
+                <div class="scanner-input">
+                    <input type="text" id="planet-input" placeholder="Enter Planet Name (e.g., Kepler-186f)">
+                    <button class="action-btn scan-btn" onclick="checkHabitability()">Scan</button>
+                </div>
+                <div id="habitability-result"></div>
+            </section>
+
+            <footer class="disclaimer">
+                ⚠️ <strong>Disclaimer:</strong> All calculations are for educational purposes only. Not for navigation or mission planning.
+            </footer>
+        </main>
+
+        <aside class="settings-sidebar" id="settings-sidebar">
+            <div class="sidebar-header">
+                <h2>⚙️ Settings</h2>
+                <button class="close-btn" onclick="toggleSidebar()" aria-label="Close">✕</button>
+            </div>
+            <div class="settings-group">
+                <h3>📐 Density</h3>
+                <div class="density-options">
+                    <button class="density-btn" onclick="setDensity('comfortable')">Comfortable</button>
+                    <button class="density-btn active" onclick="setDensity('compact')">Compact</button>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <h3>🔔 Notifications</h3>
+                <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="toggle-slider"></span>
+                    <span class="toggle-label">Live Updates</span>
+                </label>
+                <label class="toggle-switch">
+                    <input type="checkbox">
+                    <span class="toggle-slider"></span>
+                    <span class="toggle-label">Sound Alerts</span>
+                </label>
+            </div>
+
+            <div class="settings-group">
+                <h3>ℹ️ About</h3>
+                <p class="about-text">Universe Data Booklet v5.0<br>Educational tool for astronomy enthusiasts.</p>
+            </div>
+
+            <div class="sidebar-footer">
+                <small>Made with 💜 for Curiosity</small>
+            </div>
+        </aside>
+
+        <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+    </div>
+
+    <script src="lib/chart.min.js"></script>
+    <script src="lib/jspdf.min.js"></script>
+    <script src="lib/jspdf.autotable.min.js"></script>
+
+    <script src="charts_view.js"></script>
+
+    <script src="animations.js"></script>
+    <script src="app.js"></script>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('settings-sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('active');
+            document.getElementById('hamburger').classList.toggle('active');
         }
-    });
-};
+    </script>
+</body>
+</html>
