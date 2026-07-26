@@ -1,14 +1,10 @@
-// src/frontend/app.js
-
-// --- State Management ---
-let currentTab = 'asteroids'; // Default tab
-let currentData = [];         // Holds the currently loaded dataset (paginated)
+let currentTab = 'asteroids'; 
+let currentData = [];         
 let currentPage = 1;
 const PAGE_SIZE = 50;
 let isLoading = false;
 let totalPages = 1;
 
-// Cache for UI elements (Performance optimization)
 const elements = {
     dataContainer: document.getElementById('data-container'),
     statsDisplay: document.getElementById('stats-display'),
@@ -30,7 +26,6 @@ function setTheme(themeName) {
     
     document.documentElement.setAttribute('data-theme', cssTheme);
     
-    // Update button active states based on exact name matching
     document.querySelectorAll('.theme-btn').forEach(btn => {
         const btnLabel = btn.dataset.theme || btn.textContent.toLowerCase();
         // Check if the button corresponds to the theme (case-insensitive)
@@ -56,7 +51,6 @@ async function fetchData(reset = false) {
     }
 
     try {
-        // Construct API endpoint
         const resource = currentTab === 'asteroids' ? 'asteroids' : 'exoplanets';
         const endpoint = `/api/${resource}?page=${currentPage}&limit=${PAGE_SIZE}`;
 
@@ -66,15 +60,12 @@ async function fetchData(reset = false) {
         const result = await response.json();
         if (result.error) throw new Error(result.error);
 
-        // Update Pagination State
         totalPages = result.total_pages || 1;
         const totalCount = result.count || 0;
         const newChunk = result.data || [];
 
-        // Merge new data
         currentData = [...currentData, ...newChunk];
 
-        // Update Stats UI
         if (elements.statsDisplay) {
             const source = result.source || 'Unknown';
             elements.statsDisplay.innerHTML = `
@@ -90,10 +81,8 @@ async function fetchData(reset = false) {
             `;
         }
 
-        // Render the new chunk
         renderTable(newChunk, reset);
 
-        // Auto-render chart if visible and first page loaded
         if (typeof window.renderChart === 'function' && elements.chartContainer.style.display !== 'none') {
             if (reset) {
                 setTimeout(() => window.renderChart(currentData), 500);
@@ -123,16 +112,11 @@ function switchTab(tab) {
     if (currentTab === tab) return;
     currentTab = tab;
 
-    // Hide chart when switching tabs to prevent stale data visualization
     if (elements.chartContainer) elements.chartContainer.style.display = 'none';
 
-    // Update button states manually since setTheme handles generic theme switching
     document.querySelectorAll('.theme-btn').forEach(btn => {
-        // Optional: Add logic here if buttons are tab-specific vs theme-specific
-        // For now, assuming theme buttons are distinct from tab buttons
     });
 
-    // Reset data and fetch new tab data
     fetchData(true);
 }
 
@@ -144,7 +128,6 @@ function renderTable(chunk, reset) {
 
     let headers = [], rowsHtml = '';
 
-    // Define columns based on tab
     if (currentTab === 'asteroids') {
         headers = ['Name', 'Date', 'Diameter (km)', 'Velocity (km/h)', 'Hazardous'];
         rowsHtml = chunk.map(item => `
@@ -184,14 +167,12 @@ function renderTable(chunk, reset) {
         `;
         elements.dataContainer.innerHTML = tableHtml;
         
-        // Re-attach Load More button after full replacement
         manageLoadMoreButton(true);
     } else {
         const tbody = elements.dataContainer.querySelector('tbody');
         if (tbody) {
             tbody.insertAdjacentHTML('beforeend', rowsHtml);
         }
-        // Re-check load more button visibility
         manageLoadMoreButton(false);
     }
 }
@@ -201,7 +182,6 @@ function renderTable(chunk, reset) {
  * Uses the known 'totalPages' variable instead of parsing text.
  */
 function manageLoadMoreButton(forceUpdate = false) {
-    // Initialize button element reference if missing
     if (!elements.loadMoreBtn) {
         const container = document.querySelector('.load-more-container');
         if (container) {
@@ -214,7 +194,6 @@ function manageLoadMoreButton(forceUpdate = false) {
 
     if (hasMore) {
         if (!elements.loadMoreBtn) {
-            // Create button if it doesn't exist
             const container = document.createElement('div');
             container.className = 'load-more-container';
             container.style.cssText = 'text-align:center; margin: 20px 0;';
@@ -228,13 +207,11 @@ function manageLoadMoreButton(forceUpdate = false) {
             container.appendChild(elements.loadMoreBtn);
             elements.dataContainer.appendChild(container);
         } else {
-            // Update existing
             elements.loadMoreBtn.disabled = false;
             elements.loadMoreBtn.innerText = 'Load More';
             elements.loadMoreBtn.style.display = 'block';
         }
     } else {
-        // Remove button if no more data
         if (elements.loadMoreBtn) {
             elements.loadMoreBtn.parentElement.remove();
             elements.loadMoreBtn = null;
@@ -291,7 +268,6 @@ async function checkHabitability() {
             return;
         }
 
-        // Determine status color dynamically
         let statusColor = '#aaa';
         if (data.status.includes("High")) statusColor = 'var(--accent)'; // Green
         else if (data.status.includes("Hot")) statusColor = 'var(--warning)'; // Orange
@@ -321,21 +297,16 @@ function showChart() {
     elements.chartContainer.style.display = isVisible ? 'none' : 'block';
 
     if (!isVisible && typeof window.renderChart === 'function') {
-        // Small delay to ensure container is visible before calculating dimensions
         setTimeout(() => window.renderChart(currentData), 100);
     }
 }
 
-// --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Lumo App Initialized - Secure Mode Active");
     
-    // Initialize Theme (Default to Neon if not set elsewhere)
-    // Ensure this matches your initial CSS default or localStorage preference
     if (window.location.hash === '#lab') setTheme('lab');
     else if (window.location.hash === '#solar') setTheme('solar');
     else setTheme('neon');
 
-    // Initial Data Fetch
     fetchData(true);
 });
