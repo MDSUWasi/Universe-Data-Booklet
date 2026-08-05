@@ -22,7 +22,8 @@ else:
     print("✅ Production API key configured.")
 
 BASE_URL = "https://api.nasa.gov"
-CACHE_DAYS = 7  
+# Unified cache TTL: matches server.py REFRESH_THRESHOLD_DAYS + cache_manager.py
+CACHE_DAYS = 30  
 
 # --- PATH CALCULATION ---
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))       
@@ -53,10 +54,11 @@ _EXOPLANET_LOCK = threading.Lock()  # Prevent race conditions during initial loa
 # ========================================
 
 def sanitize_input(text):
-    """Fixed: Match server.py sanitization pattern [^\w\-] (removes dots too)."""
+    """Fixed: Preserve dots, spaces, and hyphens so planet names like
+    'HD 10180' or 'Kepler-186 f' survive lookup correctly."""
     if not text: 
         return ""
-    cleaned = re.sub(r'[^\w\-]', '', str(text))
+    cleaned = re.sub(r'[^\w\s\-\.]', '', str(text))
     return cleaned.strip()[:100]
 
 def safe_float(value, default=1.0):
@@ -157,10 +159,6 @@ def load_exoplanets_from_csv():
                 
                 enriched = enrich_planet_data(p)
                 planets.append(enriched)
-                
-                # Note: Keep 6000 limit for compatibility; remove if you want full dataset
-                if len(planets) >= 6000: 
-                    break
             
             if len(planets) == 0:
                 print("❌ No planets extracted.")

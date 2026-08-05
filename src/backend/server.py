@@ -102,13 +102,14 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
 
         # Prevent directory traversal even with symlinks
         if not (real_translated.startswith(real_frontend + os.sep) or real_translated == real_frontend):
-            self.send_error(403, "Forbidden: Access denied.")
             return None
         return translated
 
     def check_and_refresh_asteroids(self):
-        """Fixed: Added thread lock to prevent concurrent cache writes."""
+        """Fixed: Added thread lock to prevent concurrent cache writes.
+        Returns True if data was refreshed/fetched, False otherwise."""
         now = time.time()
+        refreshed = False
         with _refresh_lock:
             if os.path.exists(CACHE_FILE):
                 age_days = (now - os.stat(CACHE_FILE).st_mtime) / 86400
@@ -121,6 +122,7 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
                                 json.dump({'timestamp': time.time(), 'payload': new_data}, f)
                             os.replace(temp_file, CACHE_FILE)
                             print(f"✅ Refreshed asteroids ({len(new_data)})")
+                            refreshed = True
                     except Exception as e:
                         # Log locally, don't expose details to clients
                         print(f"⚠️ Cache refresh failed: {type(e).__name__}")
@@ -133,6 +135,7 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
                         with open(temp_file, 'w', encoding='utf-8') as f:
                             json.dump({'timestamp': time.time(), 'payload': new_data}, f)
                         os.replace(temp_file, CACHE_FILE)
+                        refreshed = True
                 except Exception as e:
                     print(f"⚠️ Initial fetch failed: {type(e).__name__}")
 
@@ -148,7 +151,7 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
                     pass
                 except Exception as e:
                     print(f"⚠️ Cleanup error: {type(e).__name__}")
-        return False
+        return refreshed
 
     def do_GET(self):
         parsed = urlparse(self.path)
@@ -170,10 +173,16 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
                 except (json.JSONDecodeError, IOError, KeyError):
                     data = []
 
-            # Pagination support
+            # Pagination support (with input validation)
             query = parse_qs(parsed.query)
-            page = int(query.get('page', [1])[0])
-            limit = min(int(query.get('limit', [50])[0]), 100)  # Cap at 100 items/page
+            try:
+                page = max(1, int(query.get('page', [1])[0]))
+            except (ValueError, TypeError):
+                page = 1
+            try:
+                limit = min(max(1, int(query.get('limit', [50])[0])), 100)
+            except (ValueError, TypeError):
+                limit = 50
 
             start = max(0, (page - 1) * limit)
             end = start + limit
@@ -195,10 +204,16 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
                 if not isinstance(full_data, list):
                     full_data = []
 
-                # --- PAGINATION LOGIC ---
+                # --- PAGINATION LOGIC (with input validation) ---
                 query = parse_qs(parsed.query)
-                page = int(query.get('page', [1])[0])
-                limit = min(int(query.get('limit', [50])[0]), 100)  # Cap at 100
+                try:
+                    page = max(1, int(query.get('page', [1])[0]))
+                except (ValueError, TypeError):
+                    page = 1
+                try:
+                    limit = min(max(1, int(query.get('limit', [50])[0])), 100)
+                except (ValueError, TypeError):
+                    limit = 50
 
                 start = max(0, (page - 1) * limit)
                 end = start + limit
@@ -245,7 +260,15 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
                     return
 
                 period = safe_float_from_planet(planet, 'pl_orbper', 0)
-                status = "High" if 200 < period < 400 else "Hot" if period < 50 else "Cold" if period > 1000 else "Unknown"
+                # Unified status vocabulary with client.py calculate_water_probability
+                if 200 < period < 400:
+                    status = "High (Likely Liquid)"
+                elif period < 50:
+                    status = "Low (Too Hot - Steam)"
+                elif period > 1000:
+                    status = "Low (Too Cold - Ice)"
+                else:
+                    status = "Moderate (Uncertain)"
 
                 self.send_json_response(200, {
                     "planet": sanitize_output(planet.get('pl_name')),
@@ -255,6 +278,11 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
             except Exception as e:
                 print(f"⚠️ Habitability calculation error: {type(e).__name__}")
                 self.send_error_json(500, "Internal Server Error: Calculation failed")
+            return
+
+        # 404 for unknown API routes
+        if path.startswith('/api/'):
+            self.send_error_json(404, "Endpoint not found")
             return
 
         return super().do_GET()
