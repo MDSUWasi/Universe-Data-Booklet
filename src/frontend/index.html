@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="cream">
+<html lang="en" data-theme="neon">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Universe Data Booklet</title>
+    <meta name="description" content="Interactive explorer for Near-Earth Asteroids and Exoplanets">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -14,9 +15,16 @@
             <h1>🌌 Universe Data Booklet</h1>
             <p>Data on exoplanets and asteroids</p>
         </div>
-        <button id="hamburger" class="hamburger" onclick="toggleSidebar()" aria-label="Toggle Settings">
-            <span></span><span></span><span></span>
-        </button>
+        <div class="topbar-right">
+            <div class="theme-switcher">
+                <button class="theme-dot active" data-theme="neon" onclick="setTheme('neon')" title="Neon" style="background:#4facfe"></button>
+                <button class="theme-dot" data-theme="solar" onclick="setTheme('solar')" title="Solar" style="background:#f39c12"></button>
+                <button class="theme-dot" data-theme="lab" onclick="setTheme('lab')" title="Lab" style="background:#2ecc71"></button>
+            </div>
+            <button id="hamburger" class="hamburger" onclick="toggleSidebar()" aria-label="Toggle Settings">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
     </nav>
 
     <div class="layout">
@@ -26,7 +34,12 @@
                     <button class="tab-btn active" onclick="switchTab('asteroids')">🪨 Asteroids</button>
                     <button class="tab-btn" onclick="switchTab('exoplanets')">🪐 Exoplanets</button>
                 </div>
-                <button class="action-btn" onclick="showChart()">📊 View Chart</button>
+                <div class="action-group">
+                    <input type="text" id="search-input" class="search-input" placeholder="🔍 Search..." oninput="handleSearch(this.value)">
+                    <button class="action-btn" onclick="showChart()">📊 Chart</button>
+                    <button class="action-btn" onclick="toggle3DView()">🌍 3D</button>
+                    <button class="action-btn" onclick="exportPDF()">📄 PDF</button>
+                </div>
             </section>
 
             <section class="glass-panel stats-panel">
@@ -35,11 +48,15 @@
             </section>
 
             <section class="glass-panel data-panel">
-                <div id="data-container"><p>Loading data...</p></div>
+                <div id="data-container"><div class="skeleton"></div></div>
             </section>
 
             <section class="glass-panel chart-panel" id="chart-container" style="display:none;">
                 <canvas id="chart-canvas"></canvas>
+            </section>
+
+            <section class="glass-panel three-panel" id="three-container" style="display:none;">
+                <div id="three-view-container"></div>
             </section>
 
             <section class="glass-panel habitability-panel">
@@ -61,6 +78,16 @@
                 <h2>⚙️ Settings</h2>
                 <button class="close-btn" onclick="toggleSidebar()" aria-label="Close">✕</button>
             </div>
+
+            <div class="settings-group">
+                <h3>🎨 Theme</h3>
+                <div class="density-options">
+                    <button class="density-btn theme-btn active" data-theme="neon" onclick="setTheme('neon')">🌃 Neon</button>
+                    <button class="density-btn theme-btn" data-theme="solar" onclick="setTheme('solar')">☀️ Solar</button>
+                    <button class="density-btn theme-btn" data-theme="lab" onclick="setTheme('lab')">🧪 Lab</button>
+                </div>
+            </div>
+
             <div class="settings-group">
                 <h3>📐 Density</h3>
                 <div class="density-options">
@@ -72,12 +99,12 @@
             <div class="settings-group">
                 <h3>🔔 Notifications</h3>
                 <label class="toggle-switch">
-                    <input type="checkbox" checked>
+                    <input type="checkbox" id="live-updates" checked>
                     <span class="toggle-slider"></span>
                     <span class="toggle-label">Live Updates</span>
                 </label>
                 <label class="toggle-switch">
-                    <input type="checkbox">
+                    <input type="checkbox" id="sound-alerts">
                     <span class="toggle-slider"></span>
                     <span class="toggle-label">Sound Alerts</span>
                 </label>
@@ -85,7 +112,11 @@
 
             <div class="settings-group">
                 <h3>ℹ️ About</h3>
-                <p class="about-text">Universe Data Booklet v5.0<br>Educational tool for astronomy enthusiasts.</p>
+                <p class="about-text">Universe Data Booklet v5.1<br>Educational tool for astronomy enthusiasts.<br><br>
+                Data sources:<br>
+                • NASA NEO API (free & public)<br>
+                • NASA Exoplanet Archive<br>
+                (free & public)</p>
             </div>
 
             <div class="sidebar-footer">
@@ -96,13 +127,24 @@
         <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
     </div>
 
+    <!-- Detail Modal -->
+    <div class="modal-overlay" id="detail-modal" onclick="closeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="close-btn modal-close" onclick="closeModal()">✕</button>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
     <script src="lib/chart.min.js"></script>
     <script src="lib/jspdf.min.js"></script>
     <script src="lib/jspdf.autotable.min.js"></script>
+    <script src="lib/three.min.js"></script>
 
     <script src="charts_view.js"></script>
+    <script src="three_view.js"></script>
 
     <script src="animations.js"></script>
+    <script src="js/pdf.js"></script>
     <script src="app.js"></script>
 
     <script>
@@ -114,3 +156,4 @@
     </script>
 </body>
 </html>
+

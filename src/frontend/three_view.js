@@ -37,7 +37,7 @@ function init3D(containerId) {
 
 function onWindowResize() {
     if (!camera || !renderer) return;
-    const container = document.getElementById('3d-view-container');
+    const container = renderer.domElement.parentElement;
     if (!container) return;
 
     camera.aspect = container.clientWidth / container.clientHeight;
@@ -77,7 +77,7 @@ function populate3D(data) {
             specular: 0x111111
         });
 
-        const mesh = new THREE.Mesh(geometry, material);
+const mesh = new THREE.Mesh(geometry, material);
 
         const angle = index * 0.4;
         const radius = 6 + (index * 1.2);
@@ -86,11 +86,50 @@ function populate3D(data) {
         mesh.position.y = Math.sin(angle) * radius;
         mesh.position.z = (Math.random() - 0.5) * 15;
 
-        mesh.userData = { name: item.name || item.pl_name, info: item };
+        mesh.userData = { name: item.name || item.pl_name, info: item, index: index };
         
+        // Add orbit ring for this object
+        const ringGeo = new THREE.RingGeometry(radius - 0.15, radius + 0.15, 64);
+        const ringMat = new THREE.MeshBasicMaterial({
+            color: item.hazardous ? 0xff4444 : 0x4488ff,
+            transparent: true,
+            opacity: 0.25,
+            side: THREE.DoubleSide
+        });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.rotation.x = Math.PI / 2;
+        scene.add(ring);
+
         scene.add(mesh);
         planetMeshes.push(mesh);
     });
+
+    // Enable simple auto-rotation for a more dynamic view
+    window.addEventListener('mousedown', startDrag, false);
+    window.addEventListener('mousemove', onDrag, false);
+    window.addEventListener('mouseup', endDrag, false);
+}
+
+let isDragging = false;
+let prevMouseX = 0;
+let prevMouseY = 0;
+let rotX = 0;
+let rotY = 0;
+
+function startDrag(e) { isDragging = true; prevMouseX = e.clientX; prevMouseY = e.clientY; }
+function endDrag() { isDragging = false; }
+function onDrag(e) {
+    if (!isDragging || !camera) return;
+    const dx = (e.clientX - prevMouseX) * 0.01;
+    const dy = (e.clientY - prevMouseY) * 0.01;
+    rotY += dx;
+    rotX = Math.max(-1.5, Math.min(1.5, rotX + dy));
+    prevMouseX = e.clientX;
+    prevMouseY = e.clientY;
+    camera.position.x = 30 * Math.sin(rotY) * Math.cos(rotX);
+    camera.position.y = 30 * Math.sin(rotX);
+    camera.position.z = 30 * Math.cos(rotY) * Math.cos(rotX);
+    camera.lookAt(0, 0, 0);
 }
 
 function animate3D() {
@@ -107,17 +146,24 @@ function animate3D() {
 // CRITICAL FIX: Proper Memory Disposal
 window.stop3DView = function() {
     if (animationFrameId) cancelAnimationFrame(animationFrameId);
-    
+
+    // Remove drag listeners
+    window.removeEventListener('mousedown', startDrag, false);
+    window.removeEventListener('mousemove', onDrag, false);
+    window.removeEventListener('mouseup', endDrag, false);
+
     planetMeshes.forEach(mesh => {
         if(mesh.geometry) mesh.geometry.dispose();
         if(mesh.material) {
             mesh.material.dispose();
         }
     });
-    
+
     planetMeshes = [];
-    
+
     if (renderer) {
+        const parent = renderer.domElement.parentElement;
+        if (parent) parent.innerHTML = '';
         renderer.dispose();
         renderer.forceContextLoss();
         renderer = null;

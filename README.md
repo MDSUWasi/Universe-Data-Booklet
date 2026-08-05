@@ -18,7 +18,15 @@ Seamlessly switch between two massive datasets:
 
 ### 🎨 **Immersive Visualization**
 - **Dynamic Charts:** Real-time bar charts powered by Chart.js to visualize size and velocity distributions.
-- **Theme Switcher:** Toggle between "Neon" and "Solar" themes for any environment.
+- **3D Interactive View:** Explore objects as 3D spheres (Three.js) with orbit rings and drag-to-rotate camera.
+- **Theme Switcher:** Toggle between **Neon**, **Solar**, and **Lab** themes (persisted in localStorage).
+- **Detail Modal:** Click any row for a deep-dive into the object's data.
+- **Search & Stats:** Client-side search across both datasets plus live stat cards.
+
+### 🛡️ **Security & Privacy**
+- Secure HTTP headers (X-Frame-Options, XSS protection, nosniff, CORS allow-list, Referrer-Policy).
+- Path-traversal & encoded-traversal protection on static files.
+- Sanitized user inputs (no raw HTML injection) & hidden internal errors in production.
 
 ---
 
@@ -28,7 +36,7 @@ One of the biggest challenges in public API projects is hitting rate limits when
 
 ### How It Works
 1.  **Single Fetch, Infinite Users:** When the first user requests data, the Python backend fetches it from the **NASA Public API**.
-2.  **Intelligent Caching:** The data is stored locally on the server (`data/`) with a timestamp.
+2.  **Intelligent Caching:** The data is stored locally on the server (`src/data/`) with a timestamp.
 3.  **Automatic Refresh:** The cache remains valid for **30 days** (configurable). All subsequent users receive this cached data instantly.
 4.  **Zero API Burden:** Even if 10,000+ users visits the site, the site hit the NASA API **once every 30 days**, completely solving the standard rate limits.
 
@@ -50,14 +58,15 @@ One of the biggest challenges in public API projects is hitting rate limits when
 
 ```
 UniverseDataBooklet/
-├── data/                  # Cached JSON data & static CSVs
 ├── src/
 │   ├── backend/           # Python logic (Server, Cache, API Client)
+│   ├── data/              # Cached JSON data & static CSVs
 │   └── frontend/          # UI, Animations, JS Logic
 │       ├── lib/           # Local copies of Three.js, Chart.js, jsPDF
 │       └── ...            # Source files
 ├── docs/                  # Scientific methodology
 ├── tests/                 # Unit tests
+├── scripts/               # Data fetching utilities
 ├── .env                   # Environment variables (DO NOT COMMIT)
 ├── .gitignore             # Secure exclusion rules
 └── README.md              # This file
