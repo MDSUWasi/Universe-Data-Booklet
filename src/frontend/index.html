@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="neon">
+<html lang="en" data-theme="cream">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,8 +16,9 @@
             <p>Data on exoplanets and asteroids</p>
         </div>
         <div class="topbar-right">
-            <div class="theme-switcher">
-                <button class="theme-dot active" data-theme="neon" onclick="setTheme('neon')" title="Neon" style="background:#4facfe"></button>
+<div class="theme-switcher">
+                <button class="theme-dot active" data-theme="cream" onclick="setTheme('cream')" title="Cream" style="background:#c97b3c"></button>
+                <button class="theme-dot" data-theme="neon" onclick="setTheme('neon')" title="Neon" style="background:#4facfe"></button>
                 <button class="theme-dot" data-theme="solar" onclick="setTheme('solar')" title="Solar" style="background:#f39c12"></button>
                 <button class="theme-dot" data-theme="lab" onclick="setTheme('lab')" title="Lab" style="background:#2ecc71"></button>
             </div>
@@ -34,10 +35,11 @@
                     <button class="tab-btn active" onclick="switchTab('asteroids')">🪨 Asteroids</button>
                     <button class="tab-btn" onclick="switchTab('exoplanets')">🪐 Exoplanets</button>
                 </div>
-                <div class="action-group">
+<div class="action-group">
                     <input type="text" id="search-input" class="search-input" placeholder="🔍 Search..." oninput="handleSearch(this.value)">
                     <button class="action-btn" onclick="showChart()">📊 Chart</button>
                     <button class="action-btn" onclick="toggle3DView()">🌍 3D</button>
+                    <button class="action-btn" onclick="showMap()">🗺️ Map</button>
                     <button class="action-btn" onclick="exportPDF()">📄 PDF</button>
                 </div>
             </section>
@@ -49,14 +51,6 @@
 
             <section class="glass-panel data-panel">
                 <div id="data-container"><div class="skeleton"></div></div>
-            </section>
-
-            <section class="glass-panel chart-panel" id="chart-container" style="display:none;">
-                <canvas id="chart-canvas"></canvas>
-            </section>
-
-            <section class="glass-panel three-panel" id="three-container" style="display:none;">
-                <div id="three-view-container"></div>
             </section>
 
             <section class="glass-panel habitability-panel">
@@ -82,7 +76,8 @@
             <div class="settings-group">
                 <h3>🎨 Theme</h3>
                 <div class="density-options">
-                    <button class="density-btn theme-btn active" data-theme="neon" onclick="setTheme('neon')">🌃 Neon</button>
+                    <button class="density-btn theme-btn active" data-theme="cream" onclick="setTheme('cream')">🍦 Cream</button>
+                    <button class="density-btn theme-btn" data-theme="neon" onclick="setTheme('neon')">🌃 Neon</button>
                     <button class="density-btn theme-btn" data-theme="solar" onclick="setTheme('solar')">☀️ Solar</button>
                     <button class="density-btn theme-btn" data-theme="lab" onclick="setTheme('lab')">🧪 Lab</button>
                 </div>
@@ -127,11 +122,38 @@
         <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
     </div>
 
-    <!-- Detail Modal -->
     <div class="modal-overlay" id="detail-modal" onclick="closeModal()">
         <div class="modal-content" onclick="event.stopPropagation()">
             <button class="close-btn modal-close" onclick="closeModal()">✕</button>
             <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="chart-modal" onclick="closeChartModal()">
+        <div class="modal-content modal-lg" onclick="event.stopPropagation()">
+            <button class="close-btn modal-close" onclick="closeChartModal()">✕</button>
+            <h2 class="modal-title">📊 Data Chart</h2>
+            <div class="chart-modal-body">
+                <canvas id="chart-canvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="three-modal" onclick="closeThreeModal()">
+        <div class="modal-content modal-lg" onclick="event.stopPropagation()">
+            <button class="close-btn modal-close" onclick="closeThreeModal()">✕</button>
+            <h2 class="modal-title">🌍 3D Solar System</h2>
+            <div class="three-modal-body">
+                <div id="three-view-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="map-modal" onclick="closeMapModal()">
+        <div class="modal-content modal-lg" onclick="event.stopPropagation()">
+            <button class="close-btn modal-close" onclick="closeMapModal()">✕</button>
+            <h2 class="modal-title">🗺️ Data Map</h2>
+            <div class="map-modal-body" id="map-container"></div>
         </div>
     </div>
 

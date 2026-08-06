@@ -1,7 +1,7 @@
 <h1 align="center"> 🌌 Universe Data Booklet</h1>
 
 > **An interactive explorer for Near-Earth Asteroids and Exoplanets.**  
-> *Built for students, educators.*
+> *Built for students, educators. (Not for serious astronomy project) and for study purpose*
 
 ![License](https://img.shields.io/badge/License-MIT-green)
 
@@ -13,13 +13,13 @@ Universe Data Booklet transforms raw astronomical data into an intuitive and gra
 
 ### 📊 **Dual-Dataset Analysis**
 Seamlessly switch between two massive datasets:
-- **Near-Earth Asteroids (NEO):** Tracking of objects within Earth's orbit.
-- **Confirmed Exoplanets:** A catalog of thousands of discovered worlds with calculated Earth Similarity Index (ESI).
+- **Near-Earth Asteroids (NEO):** Tracking of objects within Earth's orbit. (It fetches data only once in 30 Days)
+- **Confirmed Exoplanets:** A catalog of thousands of discovered worlds with calculated Earth Similarity Index (ESI). (Currently, this data is not updated in realtime, The site uses csv dataset for this)
 
 ### 🎨 **Immersive Visualization**
-- **Dynamic Charts:** Real-time bar charts powered by Chart.js to visualize size and velocity distributions.
-- **3D Interactive View:** Explore objects as 3D spheres (Three.js) with orbit rings and drag-to-rotate camera.
-- **Theme Switcher:** Toggle between **Neon**, **Solar**, and **Lab** themes (persisted in localStorage).
+- **Dynamic Charts:** Real-time bar charts pop up powered by Chart.js to visualize size and velocity distributions.
+- **3D Interactive View:** Explore objects as 3D spheres (Three.js) (pop up) with orbit rings and drag-to-rotate camera.
+- **Theme Switcher:** Toggle between **Cream**,**Neon**, **Solar**, and **Lab** themes (persisted in localStorage).
 - **Detail Modal:** Click any row for a deep-dive into the object's data.
 - **Search & Stats:** Client-side search across both datasets plus live stat cards.
 
@@ -28,6 +28,7 @@ Seamlessly switch between two massive datasets:
 - Path-traversal & encoded-traversal protection on static files.
 - Sanitized user inputs (no raw HTML injection) & hidden internal errors in production.
 
+[I have tried my best to ensure security. But this is a solo project if there is still any issue, please let me know]
 ---
 
 <h2 align="center"> 🚀 Handling Thousands of Users</h2>
@@ -54,25 +55,7 @@ One of the biggest challenges in public API projects is hitting rate limits when
 
 ---
 
-<h2 align="center"> 📁 Project Structure</h2>
-
-```
-UniverseDataBooklet/
-├── src/
-│   ├── backend/           # Python logic (Server, Cache, API Client)
-│   ├── data/              # Cached JSON data & static CSVs
-│   └── frontend/          # UI, Animations, JS Logic
-│       ├── lib/           # Local copies of Three.js, Chart.js, jsPDF
-│       └── ...            # Source files
-├── docs/                  # Scientific methodology
-├── tests/                 # Unit tests
-├── scripts/               # Data fetching utilities
-├── .env                   # Environment variables (DO NOT COMMIT)
-├── .gitignore             # Secure exclusion rules
-└── README.md              # This file
-```
-
-<h2 align="center"> 🚀 Quick Start Guide</h2>
+<h2 align="center"> 🚀 Quick Start Guide (For those who are using the source code directly)</h2>
 
 ### Prerequisites
 

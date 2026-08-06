@@ -5,7 +5,6 @@ const PAGE_SIZE = 50;
 let isLoading = false;
 let totalPages = 1;
 
-// Expose globals for pdf.js / table.js compatibility
 window.currentTab = currentTab;
 window.globalData = currentData;
 window.totalPages = totalPages;
@@ -15,17 +14,20 @@ const elements = {
     statsDisplay: document.getElementById('stats-display'),
     habitabilityResult: document.getElementById('habitability-result'),
     planetInput: document.getElementById('planet-input'),
-    chartContainer: document.getElementById('chart-container'),
-    threeContainer: document.getElementById('three-container'),
+    chartContainer: document.getElementById('chart-canvas'),
+    threeContainer: document.getElementById('three-view-container'),
+    chartModal: document.getElementById('chart-modal'),
+    threeModal: document.getElementById('three-modal'),
+    mapModal: document.getElementById('map-modal'),
+    mapContainer: document.getElementById('map-container'),
     loadMoreBtn: null,
     searchInput: document.getElementById('search-input')
 };
 
-// --- THEME SYSTEM ---
-const THEMES = ['neon', 'solar', 'lab'];
+const THEMES = ['cream', 'neon', 'solar', 'lab'];
 function setTheme(themeName) {
     if (!document.documentElement) return;
-    const cssTheme = THEMES.includes(themeName) ? themeName : 'neon';
+    const cssTheme = THEMES.includes(themeName) ? themeName : 'cream';
     document.documentElement.setAttribute('data-theme', cssTheme);
     localStorage.setItem('udb-theme', cssTheme);
 
@@ -43,7 +45,6 @@ function setDensity(mode) {
     localStorage.setItem('udb-density', mode);
 }
 
-// --- DATA FETCHING ---
 async function fetchData(reset = false) {
     if (isLoading) return;
     isLoading = true;
@@ -75,10 +76,10 @@ async function fetchData(reset = false) {
         window.globalData = currentData;
         window.totalPages = totalPages;
 
-        renderStats(result, totalCount);
+renderStats(result, totalCount);
         renderTable(newChunk, reset);
 
-        if (typeof window.renderChart === 'function' && elements.chartContainer && elements.chartContainer.style.display !== 'none') {
+        if (typeof window.renderChart === 'function' && elements.chartModal && elements.chartModal.classList.contains('open')) {
             window.renderChart(currentData);
         }
     } catch (error) {
@@ -129,9 +130,9 @@ function switchTab(tab) {
     currentTab = tab;
     window.currentTab = tab;
 
-    if (elements.chartContainer) elements.chartContainer.style.display = 'none';
-    if (elements.threeContainer) elements.threeContainer.style.display = 'none';
-    if (typeof window.stop3DView === 'function') window.stop3DView();
+    closeChartModal();
+    closeThreeModal();
+    closeMapModal();
 
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.toggle('active', btn.textContent.includes(tab === 'asteroids' ? 'Asteroid' : 'Exoplanet'));
@@ -223,7 +224,6 @@ function handleLoadMore() {
     fetchData(false);
 }
 
-// --- SEARCH ---
 let searchDebounce = null;
 function handleSearch(val) {
     clearTimeout(searchDebounce);
@@ -247,7 +247,6 @@ function handleSearch(val) {
     }, 300);
 }
 
-// --- DETAIL MODAL ---
 function showDetail(index) {
     const item = currentData[index];
     if (!item) return;
@@ -287,33 +286,152 @@ function closeModal() {
     if (modal) modal.classList.remove('open');
 }
 
-// --- CHART & 3D VIEW ---
-function showChart() {
-    if (!elements.chartContainer) return;
-    const isVisible = elements.chartContainer.style.display !== 'none';
-    elements.chartContainer.style.display = isVisible ? 'none' : 'block';
-    if (elements.threeContainer) elements.threeContainer.style.display = 'none';
-    if (typeof window.stop3DView === 'function') window.stop3DView();
+function openModal(modal) {
+    if (!modal) return;
+    modal.classList.add('open');
+}
 
-    if (!isVisible && typeof window.renderChart === 'function') {
-        setTimeout(() => window.renderChart(currentData), 100);
+function closeModalById(id) {
+    const modal = document.getElementById(id);
+    if (modal) modal.classList.remove('open');
+}
+
+function showChart() {
+    if (!elements.chartModal) return;
+    closeThreeModal();
+    closeMapModal();
+    openModal(elements.chartModal);
+    if (typeof window.renderChart === 'function') {
+        setTimeout(() => window.renderChart(currentData), 120);
     }
+}
+
+function closeChartModal() {
+    closeModalById('chart-modal');
 }
 
 function toggle3DView() {
-    if (!elements.threeContainer) return;
-    const isVisible = elements.threeContainer.style.display !== 'none';
-    elements.threeContainer.style.display = isVisible ? 'none' : 'block';
-    if (elements.chartContainer) elements.chartContainer.style.display = 'none';
-
-    if (!isVisible && typeof window.load3DView === 'function') {
-        setTimeout(() => window.load3DView(currentData, 'three-view-container'), 100);
-    } else if (isVisible && typeof window.stop3DView === 'function') {
-        window.stop3DView();
+    if (!elements.threeModal) return;
+    closeChartModal();
+    closeMapModal();
+    openModal(elements.threeModal);
+    if (typeof window.load3DView === 'function') {
+        setTimeout(() => window.load3DView(currentData, 'three-view-container'), 120);
     }
 }
 
-// --- HABITABILITY ---
+function closeThreeModal() {
+    closeModalById('three-modal');
+    if (typeof window.stop3DView === 'function') window.stop3DView();
+}
+
+function showMap() {
+    if (!elements.mapModal) return;
+    closeChartModal();
+    closeThreeModal();
+    openModal(elements.mapModal);
+    setTimeout(() => renderMap(), 120);
+}
+
+function closeMapModal() {
+    closeModalById('map-modal');
+}
+
+function renderMap() {
+    const container = elements.mapContainer;
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    const canvas = document.createElement('canvas');
+    canvas.width = container.clientWidth || 720;
+    canvas.height = container.clientHeight || 400;
+    container.appendChild(canvas);
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const w = canvas.width;
+    const h = canvas.height;
+    const theme = getComputedStyle(document.documentElement);
+
+    ctx.fillStyle = theme.getPropertyValue('--bg-panel-solid').trim() || '#fff';
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.strokeStyle = theme.getPropertyValue('--border-color').trim() || '#ddd';
+    ctx.lineWidth = 0.5;
+    for (let i = 1; i < 5; i++) {
+        ctx.beginPath();
+        ctx.moveTo(0, (h / 5) * i);
+        ctx.lineTo(w, (h / 5) * i);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo((w / 7) * i, 0);
+        ctx.lineTo((w / 7) * i, h);
+        ctx.stroke();
+    }
+
+    const maxX = currentData.length || 1;
+    const textColor = theme.getPropertyValue('--text-primary').trim() || '#333';
+    const accent = theme.getPropertyValue('--accent').trim() || '#c97b3c';
+
+    ctx.fillStyle = textColor;
+    ctx.font = 'bold 15px system-ui, sans-serif';
+    ctx.fillText(`🗺️ ${currentTab === 'asteroids' ? 'Asteroid' : 'Exoplanet'} Distribution`, 14, 24);
+    ctx.font = '12px system-ui, sans-serif';
+    ctx.fillStyle = theme.getPropertyValue('--text-muted').trim() || '#999';
+    ctx.fillText(`Showing top ${currentData.length} of ${window.totalPages * currentData.length}`, 14, 44);
+
+    const step = Math.max(1, Math.floor(currentData.length / 120));
+    for (let i = 0; i < currentData.length; i += step) {
+        const item = currentData[i];
+        const x = 30 + Math.random() * (w - 60);
+        const y = 60 + Math.random() * (h - 100);
+
+        let radius = 3;
+        let color = accent;
+
+        if (currentTab === 'asteroids') {
+            if (item.diameter_km) {
+                radius = Math.max(3, Math.min(10, parseFloat(item.diameter_km) / 200));
+            }
+            if (item.hazardous) color = theme.getPropertyValue('--danger').trim() || '#c6605a';
+            else color = theme.getPropertyValue('--success').trim() || '#5a9e6f';
+        } else {
+            if (item.esi) {
+                const esi = parseFloat(item.esi);
+                radius = Math.max(3, Math.min(10, esi * 10));
+                if (esi > 0.7) color = theme.getPropertyValue('--success').trim() || '#5a9e6f';
+                else if (esi > 0.4) color = theme.getPropertyValue('--warning').trim() || '#d4a04a';
+                else color = theme.getPropertyValue('--danger').trim() || '#c6605a';
+            }
+        }
+
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.globalAlpha = 0.7;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+    }
+
+    const legendY = h - 20;
+    ctx.font = '11px system-ui, sans-serif';
+    if (currentTab === 'asteroids') {
+        ctx.fillStyle = theme.getPropertyValue('--success').trim() || '#5a9e6f';
+        ctx.fillText('● Safe', 14, legendY);
+        ctx.fillStyle = theme.getPropertyValue('--danger').trim() || '#c6605a';
+        ctx.fillText('● Hazardous', 60, legendY);
+    } else {
+        ctx.fillStyle = theme.getPropertyValue('--success').trim() || '#5a9e6f';
+        ctx.fillText('● High ESI', 14, legendY);
+        ctx.fillStyle = theme.getPropertyValue('--warning').trim() || '#d4a04a';
+        ctx.fillText('● Medium ESI', 90, legendY);
+        ctx.fillStyle = theme.getPropertyValue('--danger').trim() || '#c6605a';
+        ctx.fillText('● Low ESI', 180, legendY);
+    }
+}
+
 async function checkHabitability() {
     const inputVal = elements.planetInput?.value.trim();
     if (!inputVal) { alert("Please enter a planet name."); return; }
@@ -353,7 +471,6 @@ async function checkHabitability() {
     }
 }
 
-// --- HELPERS (XSS-safe escaping) ---
 function escapeHtml(text) {
     if (text === null || text === undefined) return '';
     const AMP = '&' + 'amp;';
@@ -371,14 +488,12 @@ function escapeHtml(text) {
     return String(text).replace(/[&<>"']/g, function(ch) { return map[ch]; });
 }
 
-// --- INIT ---
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Universe Data Booklet Initialized");
 
-    // Load saved theme
     const savedTheme = localStorage.getItem('udb-theme');
     if (savedTheme && THEMES.includes(savedTheme)) setTheme(savedTheme);
-    else setTheme('neon');
+    else setTheme('cream');
 
     const savedDensity = localStorage.getItem('udb-density');
     if (savedDensity) setDensity(savedDensity);
@@ -386,7 +501,6 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchData(true);
 });
 
-// Expose functions globally
 window.switchTab = switchTab;
 window.showChart = showChart;
 window.toggle3DView = toggle3DView;
@@ -396,4 +510,8 @@ window.showDetail = showDetail;
 window.closeModal = closeModal;
 window.setTheme = setTheme;
 window.setDensity = setDensity;
+window.showMap = showMap;
+window.closeChartModal = closeChartModal;
+window.closeThreeModal = closeThreeModal;
+window.closeMapModal = closeMapModal;
 
