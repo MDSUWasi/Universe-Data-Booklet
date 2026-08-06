@@ -16,8 +16,8 @@ from client import fetch_asteroids, fetch_exoplanets
 from cache_manager import cleanup_old_cache
 
 PORT = int(os.getenv("SERVER_PORT", 8081))
-# Production Check: Set DEBUG=false in env to hide stack traces completely
-DEBUG_MODE = os.getenv("DEBUG_MODE", "true").lower() == "true"
+# Production Check: Default to DEBUG off unless explicitly enabled
+DEBUG_MODE = os.getenv("DEBUG_MODE", "false").lower() == "true"
 
 SERVER_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SRC_DIR = os.path.dirname(SERVER_SCRIPT_DIR)
@@ -28,6 +28,11 @@ DATA_DIR = os.path.join(SRC_DIR, 'data')
 REFRESH_THRESHOLD_DAYS = 30
 MAX_CACHE_AGE_DAYS = 90
 CACHE_FILE = os.path.join(DATA_DIR, 'cached_asteroids.json')
+
+RATE_LIMIT_WINDOW_SECONDS = int(os.getenv("RATE_LIMIT_WINDOW_SECONDS", "60"))
+RATE_LIMIT_MAX_REQUESTS = int(os.getenv("RATE_LIMIT_MAX_REQUESTS", "120"))
+_rate_limit_lock = threading.Lock()
+_rate_limit_counters = {}
 
 # Cache refresh lock to prevent race conditions
 _refresh_lock = threading.Lock()
@@ -82,14 +87,22 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
 
         # --- PRODUCTION CORS FIX ---
         origin = self.headers.get('Origin')
-        allowed_origins = ['http://localhost:3000', 'http://localhost:8080', 'null']
+        allowed_origins = os.getenv('ALLOWED_ORIGINS', 'http://localhost:3000,http://localhost:8080,http://localhost:8081').split(',')
+        allowed_origins = [o.strip() for o in allowed_origins if o.strip()]
 
-        if origin:
-            if origin in allowed_origins:
-                self.send_header('Access-Control-Allow-Origin', origin)
-        else:
-            self.send_header('Access-Control-Allow-Origin', '*')
+        if origin and origin.strip() in allowed_origins:
+            self.send_header('Access-Control-Allow-Origin', origin.strip())
+            self.send_header('Vary', 'Origin')
 
+        self.send_header('Content-Security-Policy',
+                         "default-src 'self'; "
+                         "script-src 'self' 'unsafe-inline'; "
+                         "style-src 'self' 'unsafe-inline'; "
+                         "img-src 'self' data:; "
+                         "connect-src 'self'; "
+                         "frame-ancestors 'none'; "
+                         "base-uri 'self';")
+        self.send_header('Permissions-Policy', 'geolocation=(), microphone=(), camera=()')
         self.send_header('Cache-Control', 'max-age=3600, must-revalidate')
         self.send_header('Referrer-Policy', 'no-referrer')
         super().end_headers()
@@ -104,6 +117,22 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
         if not (real_translated.startswith(real_frontend + os.sep) or real_translated == real_frontend):
             return None
         return translated
+
+    def is_rate_limited(self):
+        client_ip = self.client_address[0] if self.client_address else 'unknown'
+        now = time.time()
+        window_start = now - RATE_LIMIT_WINDOW_SECONDS
+
+        with _rate_limit_lock:
+            requests = _rate_limit_counters.get(client_ip, [])
+            requests = [ts for ts in requests if ts > window_start]
+            if len(requests) >= RATE_LIMIT_MAX_REQUESTS:
+                _rate_limit_counters[client_ip] = requests
+                return True, len(requests)
+
+            requests.append(now)
+            _rate_limit_counters[client_ip] = requests
+            return False, len(requests)
 
     def check_and_refresh_asteroids(self):
         """Fixed: Added thread lock to prevent concurrent cache writes.
@@ -156,6 +185,15 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         parsed = urlparse(self.path)
         path = parsed.path
+
+        rate_limited, request_count = self.is_rate_limited()
+        if rate_limited:
+            self.send_response(429)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Retry-After', str(RATE_LIMIT_WINDOW_SECONDS))
+            self.end_headers()
+            self.wfile.write(json.dumps({"error": "Too many requests. Please try again later."}).encode('utf-8'))
+            return
 
         # Fixed: Also block encoded traversals (%2e%2e)
         if '..' in path or '%2e' in path.lower():
