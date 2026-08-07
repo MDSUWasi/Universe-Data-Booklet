@@ -1,27 +1,3 @@
-/* ============================================================
- * Universe Data Booklet — 3D Simulation Engine
- * ------------------------------------------------------------
- * Two physics-based modes driven by REAL dataset values:
- *
- *  SOLAR SYSTEM (asteroids tab):
- *    - Glowing Sun at centre + starfield + orbit rings
- *    - Asteroids orbit the Sun using circular-orbit Kepler
- *      mechanics derived from their real relative velocity:
- *        r = GM / v²   and   ω = v / r
- *    - Earth + Moon satellite demo system
- *    - Each body self-rotates; speed scales with size
- *
- *  GALAXY (exoplanets tab):
- *    - Spiral galaxy of host stars (real Kepler 3rd law
- *      placement: r ∝ period^(2/3))
- *    - Each planet orbits its host star with its REAL
- *      orbital period (pl_orbper days) -> "solar year"
- *
- *  Interaction: drag = orbit camera, wheel = zoom,
- *  hover = tooltip, click = open detail modal,
- *  auto-rotate toggle + time-scale controls + legend.
- * ============================================================ */
-
 let scene, camera, renderer;
 let animationFrameId = null;
 let simTime = 0;
@@ -30,8 +6,8 @@ let autoRotate = true;
 let currentMode = 'solar';
 
 // Scene object registries (for cleanup + animation)
-const bodies = [];          // { mesh, orbit, label, userData }
-const helperMeshes = [];    // stars, rings, glows, lines
+const bodies = [];
+const helperMeshes = [];
 const materialsToDispose = [];
 const geometriesToDispose = [];
 const texturesToDispose = [];
@@ -51,7 +27,7 @@ let orbitYaw = 0, orbitPitch = 0;
 let camDistance = 34;
 const TARGET = new THREE.Vector3(0, 0, 0);
 
-// ---------- helpers ----------
+// Helpers
 function $(id) { return document.getElementById(id); }
 function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 function num(v, fb) { const n = parseFloat(v); return isNaN(n) ? fb : n; }
@@ -62,7 +38,7 @@ function safeColor(hex, fallback) {
     return c.r + c.g + c.b > 0.01 ? hex : fallback;
 }
 
-// ---------- canvas texture helpers ----------
+// Canvas Texture
 function makeGlowTexture(inner = 'rgba(255,200,80,1)', outer = 'rgba(255,120,20,0)') {
     const c = document.createElement('canvas');
     c.width = c.height = 128;
@@ -99,7 +75,7 @@ function makeLabelSprite(text, color = '#ffffff') {
     return sprite;
 }
 
-// ---------- scene builders ----------
+// Scene
 function buildStarfield() {
     const count = 800;
     const pos = new Float32Array(count * 3);
@@ -148,11 +124,11 @@ function makeSphere(radius, color, emissive = 0x000000) {
     return mesh;
 }
 
-// ---------- solar system (asteroids) ----------
+// Solar System (Asteroids)
 function buildSolarSystem(data) {
     currentMode = 'solar';
 
-    // Sun
+    // The Sun
     const sun = makeSphere(1.8, 0xffaa33, 0xff7700);
     const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: makeGlowTexture(), transparent: true, blending: THREE.AdditiveBlending }));
     glow.scale.set(14, 14, 1);
@@ -165,20 +141,18 @@ function buildSolarSystem(data) {
     scene.add(sunLight);
     helperMeshes.push(sunLight);
 
-    // Real Kepler physics from velocity (km/h):
     // circular orbit: v = sqrt(GM/r)  =>  r = GM / v^2
     // pick GM so displayed radii fit nicely in the scene.
     const withVel = data.filter(d => num(d.velocity_kmh) > 0);
     const pool = withVel.length ? withVel : data;
 
-    // Real velocity range -> normalized, then mapped to orbit radius
-    // (Kepler circular orbit: faster object = smaller orbit)
+    // Kepler circular orbit: faster object = smaller orbit
     const vArr = pool.map(d => num(d.velocity_kmh, 0));
     const vMin = Math.min.apply(null, vArr.concat([1]));
     const vMax = Math.max.apply(null, vArr.concat([1]));
     const rMin = 4.5, rMax = 24;
 
-    // Kepler-like angular speed: ω ∝ r^(-3/2) — fastest orbit ~12s, slowest ~150s
+    // Kepler-like angular speed: ω ∝ r^(-3/2)
     const omega0 = (2 * Math.PI) / 12;
 
     const useN = Math.min(pool.length, 90);
@@ -226,7 +200,7 @@ function buildSolarSystem(data) {
         makeOrbitRing(radius, hazardous ? 0xff6655 : 0x88aadd, hazardous ? 0.4 : 0.22);
     });
 
-    // --- Earth + Moon satellite demo ---
+    // Earth + Moon Satellite Demonstration
     const earthRadius = 15;
     const earth = makeSphere(0.85, 0x3a7bd5, 0x0a2a55);
     earth.position.set(earthRadius, 0, 0);
@@ -250,11 +224,11 @@ function buildSolarSystem(data) {
     });
 }
 
-// ---------- galaxy (exoplanets) ----------
+// Galaxy (Exoplanets)
 function buildGalaxy(data) {
     currentMode = 'galaxy';
 
-    // Galactic core glow
+    // Galactic Core (glow)
     const core = makeSphere(1.2, 0xffdd88, 0xcc8800);
     const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: makeGlowTexture('rgba(255,230,150,0.9)', 'rgba(200,120,20,0)'), transparent: true, blending: THREE.AdditiveBlending }));
     glow.scale.set(16, 16, 1);
@@ -273,7 +247,7 @@ function buildGalaxy(data) {
 
     for (let i = 0; i < useN; i++) {
         const item = planets[i];
-        const period = num(item.pl_orbper, 365);       // REAL orbital period (days)
+        const period = num(item.pl_orbper, 365);
 
         // Kepler's 3rd law: r ∝ T^(2/3)  -> place stars in spiral
         const rNorm = Math.pow(period, 2 / 3);
@@ -284,18 +258,18 @@ function buildGalaxy(data) {
         const scatter = (Math.random() - 0.5) * 0.35;
         const angle = baseAngle + scatter;
 
-        // host star
+        // Host Star
         const starColor = 0xffdd99;
         const starSize = 0.5 + Math.random() * 0.4;
         const star = makeSphere(starSize, starColor, 0x886622);
         star.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
 
-        // planet orbiting star with REAL period -> angular speed ω = 2π / T
+        // Planets orbiting star with original period -> angular speed ω = 2π / T
         const planetOrbitR = 1.6 + Math.min(period, 400) * 0.01;
-        const planetAng = (Math.PI * 2) / Math.max(period, 1);   // rad per sim-day
+        const planetAng = (Math.PI * 2) / Math.max(period, 1);
 
         const esi = num(item.esi, 0);
-        let color = 0x7fa8ff;                                     // default blue
+        let color = 0x7fa8ff;
         if (esi > 0.7) color = 0x44dd88;
         else if (esi > 0.4) color = 0xd4a04a;
         else if (esi > 0) color = 0xdd6655;
@@ -315,9 +289,9 @@ function buildGalaxy(data) {
             type: 'planet',
             data: item,
             index: data.indexOf(item),
-            star,                                   // host star mesh
+            star,
             orbitRadius: planetOrbitR,
-            angSpeed: planetAng,                    // rad / sim-day
+            angSpeed: planetAng,
             phase: (i * 1.7) % (Math.PI * 2),
             spinSpeed: 0.3 + (plSize / 1.6) * 0.6,
             galaxyRadius: radius,
@@ -325,7 +299,7 @@ function buildGalaxy(data) {
             galaxySpeed: 0.03 + Math.random() * 0.02
         });
 
-        // orbit line around host star (track star so it follows galaxy rotation)
+        // Orbit line around host star
         const orbit = makeOrbitRing(planetOrbitR, color, 0.35);
         orbit.position.x = star.position.x;
         orbit.position.z = star.position.z;
@@ -334,7 +308,7 @@ function buildGalaxy(data) {
         helperMeshes.push(star);
     }
 
-    // faint spiral dust lines (decorative)
+    // Faint spiral dust lines.
     for (let a = 0; a < spiralArms; a++) {
         const pts = [];
         for (let t = 0; t <= 1; t += 0.01) {
@@ -352,7 +326,7 @@ function buildGalaxy(data) {
     }
 }
 
-// ---------- overlays (tooltip / legend / controls) ----------
+// Legend / Controls
 function ensureOverlays(container) {
     if (!legendEl) {
         legendEl = document.createElement('div');
@@ -412,7 +386,7 @@ function updateLegend() {
     }
 }
 
-// ---------- interaction ----------
+// Mouse/ Touch interaction
 function onMouseMove(e) {
     const rect = renderer.domElement.getBoundingClientRect();
     mouseNDC.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
@@ -488,7 +462,7 @@ function onClick(e) {
     if (typeof window.showDetail === 'function' && body.index !== undefined) {
         window.showDetail(body.index);
     } else if (body.data) {
-        // fallback inline info
+        // Fallback info
         const name = body.data.name || body.data.pl_name || 'Object';
         const detail = body.type === 'planet'
             ? `${name} — radius ${num(body.data.pl_rade).toFixed(2)} R⊕, period ${num(body.data.pl_orbper).toFixed(1)} days`
@@ -497,7 +471,7 @@ function onClick(e) {
     }
 }
 
-// ---------- camera orbit / zoom ----------
+// Camera Fixing
 function startDrag(e) { isDragging = true; prevMouseX = e.clientX; prevMouseY = e.clientY; }
 function endDrag() { isDragging = false; }
 function onDrag(e) {
@@ -523,7 +497,7 @@ function resetView() {
     orbitYaw = 0; orbitPitch = 0.35; camDistance = 34;
 }
 
-// ---------- animation ----------
+// Animations
 function animate3D() {
     animationFrameId = requestAnimationFrame(animate3D);
     const dt = 0.016; // ~60fps frame
@@ -551,45 +525,43 @@ function animate3D() {
                     b.moon.label.position.copy(b.moon.mesh.position).add(new THREE.Vector3(0, 0.8, 0));
                 }
             }
-            // self-rotation
+            // Rotation
             if (b.mesh && b.mesh.isMesh) {
                 b.mesh.rotation.y += (b.spinSpeed || 0.2) * dt;
             }
         });
     } else {
-        // galaxy mode
+        // Galaxy mode
         bodies.forEach(b => {
             if (b.type !== 'planet') return;
-            // galaxy rotation (stars/planets around core)
+            // Stars/Planets around the core
             b.galaxyAngle += b.galaxySpeed * timeScale * dt;
             const sx = Math.cos(b.galaxyAngle) * b.galaxyRadius;
             const sz = Math.sin(b.galaxyAngle) * b.galaxyRadius;
             b.star.position.set(sx, 0, sz);
-            // planet orbits host star with REAL period
-            b.phase += b.angSpeed * timeScale * dt * (1 / 240); // convert sim-days to frames
+            // Planet orbits host star with original period
+            b.phase += b.angSpeed * timeScale * dt * (1 / 240);
             const px = sx + Math.cos(b.phase) * b.orbitRadius;
             const pz = sz + Math.sin(b.phase) * b.orbitRadius;
             b.mesh.position.set(px, 0, pz);
             b.label.position.set(px, (b.mesh.geometry.parameters.radius || 0.4) + 1.3, pz);
-            // rotate orbit ring with star
-            // (rings are static helper meshes keyed by position - we track via index)
             if (b.mesh.isMesh) b.mesh.rotation.y += (b.spinSpeed || 0.2) * dt;
         });
-        // move orbit rings to follow their stars
+        // Only follow stars (Star have gravitational pull, Planets have both gravitational pull and also want to go away which causes to revolve around sun.)
         helperMeshes.forEach(h => { if (h.isLine && h.userData.starRef) {
             h.position.x = h.userData.starRef.position.x;
             h.position.z = h.userData.starRef.position.z;
         }});
     }
 
-    // camera
+    // Camera Angle
     if (autoRotate && !isDragging) orbitYaw += 0.0015;
     updateCameraPosition();
 
     if (renderer && scene && camera) renderer.render(scene, camera);
 }
 
-// ---------- init / load / stop ----------
+// Top
 function init3D(containerId) {
     const container = document.getElementById(containerId);
     if (!container) { console.error(`Container #${containerId} not found.`); return; }
@@ -615,7 +587,7 @@ function init3D(containerId) {
     buildStarfield();
     resetView();
 
-    // interaction
+    // Mouse/ Touch or any input devices
     renderer.domElement.addEventListener('mousemove', onMouseMove);
     renderer.domElement.addEventListener('mousedown', startDrag);
     window.addEventListener('mousemove', onDrag);
@@ -649,7 +621,7 @@ window.load3DView = function (data, containerId = 'three-view-container') {
 window.stop3DView = function () {
     if (animationFrameId) { cancelAnimationFrame(animationFrameId); animationFrameId = null; }
 
-    // remove listeners
+    // Remove input receivers
     if (renderer && renderer.domElement) {
         renderer.domElement.removeEventListener('mousemove', onMouseMove);
         renderer.domElement.removeEventListener('mousedown', startDrag);
@@ -660,7 +632,7 @@ window.stop3DView = function () {
     window.removeEventListener('mouseup', endDrag);
     window.removeEventListener('resize', onWindowResize);
 
-    // dispose resources
+    // Dispose resources
     bodies.forEach(b => { if (b.label && b.label.material) b.label.material.dispose(); });
     bodies.length = 0;
     geometriesToDispose.forEach(g => g.dispose());
@@ -685,4 +657,3 @@ window.stop3DView = function () {
     }
     scene = null; camera = null;
 };
-
