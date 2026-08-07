@@ -99,7 +99,7 @@ Open a Pull Request
 
 
 ### 📜 License
-Distributed under License. See LICENSE for more information.
+Distributed under the MIT License (Because I want to give the others the many possible permissions. It is am educational project. So, please those who use the site and source please use it for good purpose. And also if anyone use my source please let me know how this helped you.). See LICENSE for more information.
 
 ### 🙏 Acknowledgments & Thank You
 
