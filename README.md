@@ -3,8 +3,9 @@
 > **An interactive explorer for Near-Earth Asteroids and Exoplanets.**  
 > *Built for students, educators and for study purpose* ``` I cannot gurrantee that all the data and calculations are accurate and correct. So, Please recheck before any serious use```
 
+![License](https://img.shields.io/badge/License-MIT-green)
 
-Universe Data Booklet transforms raw astronomical data into an intuitive and graphical experience. Whether you are tracking potentially hazardous asteroids or analyzing the habitability of distant exoplanets, this tool provides insights with **zero latency** thanks to its intelligent local caching architecture.
+Universe Data Booklet, as it's name suggest, it is a website (It's name is bookelt but it is a website) which contains data on exoplanets and near Earth asteroids. Universe Data Booklet transforms raw astronomical data into an intuitive and graphical experience. Whether you are tracking potentially hazardous asteroids or analyzing the habitability of distant exoplanets, this tool provides insights with **zero latency** thanks to its intelligent local caching architecture.
 
 ---
 
@@ -12,18 +13,20 @@ Universe Data Booklet transforms raw astronomical data into an intuitive and gra
 
 ### 📊 **Dual-Dataset Analysis**
 Seamlessly switch between two massive datasets:
-- **Near-Earth Asteroids (NEO):** Tracking of objects within Earth's orbit. (It fetches data only once in 30 Days)
-- **Confirmed Exoplanets:** A catalog of thousands of discovered worlds with calculated Earth Similarity Index (ESI). (Currently, this data is not updated in realtime, The site uses csv dataset for this)
+- **Near-Earth Asteroids (NEO):** Tracking of objects within Earth's orbit. (It fetches bew data only once in 30 Days and keep old cache data for 90 days)
+- **Confirmed Exoplanets:** A catalog of thousands (around 6,000 exoplanets) of discovered worlds with calculated Earth Similarity Index (ESI). (Currently, this data is not updated in realtime, The site uses csv dataset for this)
 
-### 🎨 **Immersive Visualization**
+### 🎨 **Immersive Visualization & Features**
 - **Dynamic Charts:** Real-time bar charts pop up powered by Chart.js to visualize size and velocity distributions.
 - **3D Interactive View:** Explore objects as 3D spheres (Three.js) (pop up) with orbit rings and drag-to-rotate camera. Exoplanets and Asteroids have 2 different 3D view. Asteroids have a solar system simulation type 3D view.
 - **Theme Switcher:** Toggle between **Cream**,**Neon**, **Solar**, and **Lab** themes (persisted in localStorage).
 - **Detail Modal:** Click any row for a deep-dive into the object's data.
 - **Search & Stats:** Client-side search across both datasets plus live stat cards.
 - **Map View:** A visual map for locating both data. (Make sure to press the "more" button before viewing the map for exoplanets. because there are approximately 6,000 exoplanets and all of those data are not shown at once untill the more button is clicked and the Map view works on how many data is present on the interface.)
-- **Study Mode:** A tab for study section. There user can practice flashcards, quiz, challenge, Compare etc.
-- **Research Mode:** This mode gives user the ability to work on data which are present in the data but not specially sayed or identified.
+- **Study Mode:** A tab for study section. There user can practice flashcards, quiz, challenge etc.
+- **Research Mode:** This mode gives user the ability to work on data which are present in the data but not specially sayed or identified. This mode is present inside ```Study Mode```
+- **Compare:** There is a comapre section inside ```Study Mode```, where users can compare at leat 2 expolanets/ asteroids in a diagram.
+- **PDF Download:** Users can download the data loaded in the interphase as PDF inside their device. System will automatically create, edit and formate the PDF. To use this feature user must load all data in the site first (For example 50 exoplanets list are shown by default but the user want to download the PDF data of 100 exoplanets, then user have to click on load more once and then 100 exoplanets data will be shown) then click on PDF download button. Soon after this the PDF will get downloaded. 
 
 ### 🛡️ **Security & Privacy**
 - Secure HTTP headers (X-Frame-Options, XSS protection, nosniff, CORS allow-list, Referrer-Policy).
@@ -68,7 +71,7 @@ Internet connection (for initial data fetch)
 ### Installation
 
 
-1) Clone the repository: git clone https://github.com/MDSUWasi/Universe-Data-Booklet.git
+1) Clone the repository: git clone https://github.com/MDSUWasi/Universe-Data-Booklet.git  ```Or just download the source as .zip if you don't want it to be downloaded with all git history and git data```
 
 2) cd Universe-Data-Booklet
 
