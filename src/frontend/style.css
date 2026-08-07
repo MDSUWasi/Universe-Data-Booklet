@@ -890,10 +890,127 @@ html[data-theme="lab"] {
   width: 100%;
   height: 100%;
   cursor: grab;
+  position: relative;
 }
 
 #three-view-container:active { 
   cursor: grabbing; 
+}
+
+/* --- 3D Overlays: tooltip / legend / controls --- */
+.three-tooltip {
+  position: absolute;
+  pointer-events: none;
+  z-index: 10;
+  background: rgba(15, 20, 35, 0.92);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.78rem;
+  max-width: 240px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.4);
+  backdrop-filter: blur(4px);
+}
+
+.three-tt-name {
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+  color: #ffd27f;
+}
+
+.three-tt-row {
+  color: #cfd8ea;
+  line-height: 1.5;
+}
+
+.three-tt-hint {
+  margin-top: 6px;
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.45);
+  font-style: italic;
+}
+
+.three-legend {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  z-index: 9;
+  background: rgba(15, 20, 35, 0.75);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.72rem;
+  color: #cfd8ea;
+  pointer-events: none;
+  backdrop-filter: blur(4px);
+  line-height: 1.6;
+}
+
+.three-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.three-legend-item .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.three-legend-note {
+  margin-top: 6px;
+  font-size: 0.66rem;
+  color: rgba(255,255,255,0.5);
+  border-top: 1px solid rgba(255,255,255,0.12);
+  padding-top: 6px;
+}
+
+.three-controls {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 9;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(15, 20, 35, 0.75);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 10px;
+  padding: 6px 8px;
+  backdrop-filter: blur(4px);
+}
+
+.three-ctl-btn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #cfd8ea;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.three-ctl-btn:hover {
+  background: rgba(255,255,255,0.15);
+  border-color: #ffd27f;
+  color: #ffd27f;
+}
+
+.three-ctl-btn.off {
+  opacity: 0.5;
+}
+
+.three-ctl-speed {
+  color: #ffd27f;
+  font-size: 0.72rem;
+  font-weight: 700;
+  min-width: 34px;
+  text-align: center;
 }
 
 .modal-overlay {
@@ -1025,5 +1142,395 @@ html[data-theme="lab"] {
   .search-input { 
     flex: 1; 
     min-width: 120px; 
+  }
+}
+
+/* ============================================================
+   Study & Research Hub
+   ============================================================ */
+
+.study-tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  margin-bottom: 18px;
+}
+
+.study-tab-btn {
+  padding: 8px 14px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.study-tab-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.study-tab-btn.active {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: var(--shadow-sm);
+}
+
+.study-body {
+  min-height: 360px;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/* --- Flashcards --- */
+#flashcard-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 0;
+}
+
+.flashcard {
+  width: 100%;
+  max-width: 420px;
+  height: 240px;
+  perspective: 1000px;
+  cursor: pointer;
+  margin-bottom: 18px;
+}
+
+.flashcard-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+.flashcard.flipped .flashcard-inner {
+  transform: rotateY(180deg);
+}
+
+.flashcard-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+  padding: 20px;
+}
+
+.flashcard-front {
+  background: linear-gradient(135deg, var(--bg-panel-solid), var(--bg-sidebar));
+}
+
+.flashcard-back {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: #fff;
+  transform: rotateY(180deg);
+}
+
+.flashcard-hint {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.flashcard-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--primary-dark);
+}
+
+.flashcard-back .flashcard-title {
+  color: #fff;
+}
+
+.flashcard-body {
+  font-size: 0.98rem;
+  line-height: 2;
+  font-weight: 600;
+}
+
+.flashcard-nav {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.flashcard-counter {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+/* --- Quiz --- */
+.quiz-progress {
+  height: 6px;
+  background: var(--bg-sidebar);
+  border-radius: 3px;
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+
+.quiz-progress-bar {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.quiz-meta {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.quiz-question {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.quiz-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.quiz-option {
+  padding: 12px 16px;
+  background: var(--bg-panel-solid);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.quiz-option:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.quiz-option.correct {
+  background: var(--success);
+  color: #fff;
+  border-color: var(--success);
+}
+
+.quiz-option.wrong {
+  background: var(--danger);
+  color: #fff;
+  border-color: var(--danger);
+}
+
+.quiz-feedback {
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+
+.quiz-feedback.ok {
+  background: rgba(90, 158, 111, 0.12);
+  color: var(--success);
+  border: 1px solid var(--success);
+}
+
+.quiz-feedback.bad {
+  background: rgba(198, 96, 90, 0.12);
+  color: var(--danger);
+  border: 1px solid var(--danger);
+}
+
+.result-ring {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: conic-gradient(var(--accent) var(--pct), var(--bg-sidebar) 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 16px auto;
+}
+
+.result-ring span {
+  width: 82px;
+  height: 82px;
+  background: var(--bg-panel-solid);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.3rem;
+  color: var(--primary-dark);
+}
+
+/* --- Compare --- */
+.compare-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.compare-chip {
+  padding: 7px 14px;
+  background: var(--bg-panel-solid);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.compare-chip:hover {
+  border-color: var(--accent);
+}
+
+.compare-chip.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+#compare-chart-wrap {
+  position: relative;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 10px;
+}
+
+/* --- Progress --- */
+.progress-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.progress-card {
+  background: var(--bg-panel-solid);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+}
+
+.progress-name {
+  font-weight: 700;
+  color: var(--primary-dark);
+  font-size: 0.92rem;
+  margin-bottom: 4px;
+}
+
+.progress-score {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.progress-bar {
+  height: 6px;
+  background: var(--bg-sidebar);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.progress-bar div {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+}
+
+/* --- Discover / Research Lab --- */
+.discover-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.discover-card {
+  display: flex;
+  gap: 14px;
+  background: var(--bg-panel-solid);
+  border: 1px solid var(--border-color);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  transition: all 0.2s ease;
+}
+
+.discover-card:hover {
+  transform: translateX(3px);
+  box-shadow: var(--shadow-sm);
+  border-left-color: var(--primary);
+}
+
+.discover-icon {
+  font-size: 1.6rem;
+  flex-shrink: 0;
+}
+
+.discover-title {
+  font-weight: 700;
+  color: var(--primary-dark);
+  margin-bottom: 4px;
+  font-size: 0.95rem;
+}
+
+.discover-body {
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.discover-detail {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+@media (max-width: 600px) {
+  .quiz-options { 
+    grid-template-columns: 1fr; 
+  }
+  .flashcard { 
+    height: 200px; 
+  }
+  .study-tab-btn { 
+    padding: 7px 10px; 
+    font-size: 0.72rem; 
   }
 }

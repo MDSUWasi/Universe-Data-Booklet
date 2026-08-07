@@ -13,7 +13,7 @@
     <nav class="topbar">
         <div class="topbar-left">
             <h1>🌌 Universe Data Booklet</h1>
-            <p>Data on exoplanets and asteroids</p>
+            <p>Data on Exoplanets and Near-Earth Asteroids</p>
         </div>
         <div class="topbar-right">
 <div class="theme-switcher">
@@ -35,18 +35,19 @@
                     <button class="tab-btn active" onclick="switchTab('asteroids')">🪨 Asteroids</button>
                     <button class="tab-btn" onclick="switchTab('exoplanets')">🪐 Exoplanets</button>
                 </div>
-<div class="action-group">
+                <div class="action-group">
                     <input type="text" id="search-input" class="search-input" placeholder="🔍 Search..." oninput="handleSearch(this.value)">
-                    <button class="action-btn" onclick="showChart()">📊 Chart</button>
-                    <button class="action-btn" onclick="toggle3DView()">🌍 3D</button>
-                    <button class="action-btn" onclick="showMap()">🗺️ Map</button>
+                    <button class="action-btn" onclick="showChart()">📊 Charts View</button>
+                    <button class="action-btn" onclick="toggle3DView()">🌍 3D View</button>
+                    <button class="action-btn" onclick="showMap()">🗺️ Map View</button>
+                    <button class="action-btn" onclick="openStudyModal()">🎓 Study</button>
                     <button class="action-btn" onclick="exportPDF()">📄 PDF</button>
                 </div>
             </section>
 
             <section class="glass-panel stats-panel">
                 <h2>📊 Live Stats</h2>
-                <div id="stats-display">Loading...</div>
+                <div id="stats-display">Loading....</div>
             </section>
 
             <section class="glass-panel data-panel">
@@ -74,7 +75,7 @@
             </div>
 
             <div class="settings-group">
-                <h3>🎨 Theme</h3>
+                <h3>🎨 Themes</h3>
                 <div class="density-options">
                     <button class="density-btn theme-btn active" data-theme="cream" onclick="setTheme('cream')">🍦 Cream</button>
                     <button class="density-btn theme-btn" data-theme="neon" onclick="setTheme('neon')">🌃 Neon</button>
@@ -157,6 +158,29 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="study-modal" onclick="closeStudyModal()">
+        <div class="modal-content modal-lg" onclick="event.stopPropagation()">
+            <button class="close-btn modal-close" onclick="closeStudyModal()">✕</button>
+            <h2 class="modal-title">🎓 Study & Research Hub</h2>
+            <div class="study-tabs">
+                <button class="study-tab-btn active" data-tab="flashcards" onclick="switchStudyTab('flashcards')">📚 Flashcards</button>
+                <button class="study-tab-btn" data-tab="quiz" onclick="switchStudyTab('quiz')">🧠 Quiz</button>
+                <button class="study-tab-btn" data-tab="challenges" onclick="switchStudyTab('challenges')">🎮 Challenges</button>
+                <button class="study-tab-btn" data-tab="compare" onclick="switchStudyTab('compare')">⚖️ Compare</button>
+                <button class="study-tab-btn" data-tab="progress" onclick="switchStudyTab('progress')">🏆 Progress</button>
+                <button class="study-tab-btn" data-tab="discover" onclick="switchStudyTab('discover')">🔬 Discover</button>
+            </div>
+            <div class="study-body">
+                <div class="study-pane" id="study-flashcards"><div id="flashcard-area"><p style="text-align:center;color:var(--text-muted);padding:20px;">Loading...</p></div></div>
+                <div class="study-pane" id="study-quiz" style="display:none;"><div id="quiz-area"></div></div>
+                <div class="study-pane" id="study-challenges" style="display:none;"><div id="challenges-area"></div></div>
+                <div class="study-pane" id="study-compare" style="display:none;"><div id="compare-area"></div></div>
+                <div class="study-pane" id="study-progress" style="display:none;"><div id="progress-area"></div></div>
+                <div class="study-pane" id="study-discover" style="display:none;"><div id="discover-area"></div></div>
+            </div>
+        </div>
+    </div>
+
     <script src="lib/chart.min.js"></script>
     <script src="lib/jspdf.min.js"></script>
     <script src="lib/jspdf.autotable.min.js"></script>
@@ -168,6 +192,7 @@
     <script src="animations.js"></script>
     <script src="js/pdf.js"></script>
     <script src="app.js"></script>
+    <script src="study.js"></script>
 
     <script>
         function toggleSidebar() {
@@ -178,4 +203,3 @@
     </script>
 </body>
 </html>
-
