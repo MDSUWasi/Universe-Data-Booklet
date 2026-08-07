@@ -1,2 +1,2 @@
-// Currently, all charts are rendered in app.js using pure Canvas for performance.
+// Currently, all charts are rendered in app.js using pure Canvas for performance. If you want to check that then check the codes inside app.js
 console.log("Chart module loaded (ready for expansion).");

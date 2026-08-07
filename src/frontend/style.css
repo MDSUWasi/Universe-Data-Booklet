@@ -897,7 +897,8 @@ html[data-theme="lab"] {
   cursor: grabbing; 
 }
 
-/* --- 3D Overlays: tooltip / legend / controls --- */
+/* Controls/ theme and UI for three.js.*/ 
+
 .three-tooltip {
   position: absolute;
   pointer-events: none;
@@ -1145,9 +1146,7 @@ html[data-theme="lab"] {
   }
 }
 
-/* ============================================================
-   Study & Research Hub
-   ============================================================ */
+/* This part is only for study */
 
 .study-tabs {
   display: flex;
@@ -1190,7 +1189,6 @@ html[data-theme="lab"] {
   padding-right: 4px;
 }
 
-/* --- Flashcards --- */
 #flashcard-area {
   display: flex;
   flex-direction: column;
@@ -1282,7 +1280,6 @@ html[data-theme="lab"] {
   font-weight: 600;
 }
 
-/* --- Quiz --- */
 .quiz-progress {
   height: 6px;
   background: var(--bg-sidebar);
@@ -1393,7 +1390,6 @@ html[data-theme="lab"] {
   color: var(--primary-dark);
 }
 
-/* --- Compare --- */
 .compare-picker {
   display: flex;
   flex-wrap: wrap;
@@ -1431,7 +1427,6 @@ html[data-theme="lab"] {
   padding: 10px;
 }
 
-/* --- Progress --- */
 .progress-list {
   display: flex;
   flex-direction: column;
@@ -1473,7 +1468,6 @@ html[data-theme="lab"] {
   border-radius: 3px;
 }
 
-/* --- Discover / Research Lab --- */
 .discover-list {
   display: flex;
   flex-direction: column;

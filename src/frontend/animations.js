@@ -1,7 +1,3 @@
-/**
- * Cosmic Animation Engine
- */
-
 const canvas = document.getElementById('cosmos-canvas');
 const ctx = canvas.getContext('2d');
 

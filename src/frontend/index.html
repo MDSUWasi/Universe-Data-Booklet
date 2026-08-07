@@ -40,8 +40,8 @@
                     <button class="action-btn" onclick="showChart()">📊 Charts View</button>
                     <button class="action-btn" onclick="toggle3DView()">🌍 3D View</button>
                     <button class="action-btn" onclick="showMap()">🗺️ Map View</button>
-                    <button class="action-btn" onclick="openStudyModal()">🎓 Study</button>
-                    <button class="action-btn" onclick="exportPDF()">📄 PDF</button>
+                    <button class="action-btn" onclick="openStudyModal()">🎓 Study Mode</button>
+                    <button class="action-btn" onclick="exportPDF()">📄 PDF Download</button>
                 </div>
             </section>
 
@@ -64,7 +64,7 @@
             </section>
 
             <footer class="disclaimer">
-                ⚠️ <strong>Disclaimer:</strong> All calculations are for educational purposes only. Not for navigation or mission planning.
+                ⚠️ <strong>Disclaimer:</strong> All calculations are for educational purposes only. Not for navigation or mission planning. [And I can not give gurrantee that the data and all the calculations are Accurate and Correct. So, please do not use this data for any critical purpose.]<br>
             </footer>
         </main>
 
@@ -161,7 +161,7 @@
     <div class="modal-overlay" id="study-modal" onclick="closeStudyModal()">
         <div class="modal-content modal-lg" onclick="event.stopPropagation()">
             <button class="close-btn modal-close" onclick="closeStudyModal()">✕</button>
-            <h2 class="modal-title">🎓 Study & Research Hub</h2>
+            <h2 class="modal-title">🎓 Study & Research Tab</h2>
             <div class="study-tabs">
                 <button class="study-tab-btn active" data-tab="flashcards" onclick="switchStudyTab('flashcards')">📚 Flashcards</button>
                 <button class="study-tab-btn" data-tab="quiz" onclick="switchStudyTab('quiz')">🧠 Quiz</button>

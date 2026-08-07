@@ -1,13 +1,7 @@
-/* ============================================================
- * Universe Data Booklet — Study & Research Hub
- * (Flashcards | Quiz | Challenges | Compare | Progress | Discover)
- * Pure frontend. Uses window.globalData populated by app.js.
- * ============================================================ */
-
 (function () {
     'use strict';
 
-    // ---------- Helpers ----------
+    // Help Needed?  
     function $id(id) { return document.getElementById(id); }
     function escapeHtml(text) {
         if (text === null || text === undefined) return '';
@@ -40,7 +34,7 @@
         return shuffled(arr).slice(0, n);
     }
 
-    // ---------- Study Modal ----------
+    // Take your astronomy book and get ready to study
     function openStudyModal() {
         const modal = $id('study-modal');
         if (!modal) return;
@@ -57,7 +51,7 @@
     window.openStudyModal = openStudyModal;
     window.closeStudyModal = closeStudyModal;
 
-    // ---------- Study Tabs ----------
+    // Study Tabs (not in browser)
     const STUDY_TABS = ['flashcards', 'quiz', 'challenges', 'compare', 'progress', 'discover'];
 
     function switchStudyTab(tab) {
@@ -79,7 +73,7 @@
     }
     window.switchStudyTab = switchStudyTab;
 
-    // ---------- 1) FLASHCARDS ----------
+    // Study tip 1: Flashcards
     let flashDeck = [];
     let flashIndex = 0;
     let flashFlipped = false;
@@ -166,7 +160,7 @@
     window.flashPrev = flashPrev;
     window.flashNext = flashNext;
 
-    // ---------- 2) QUIZ ----------
+    // Study tip 2: Let's take a Quiz
     let quizQuestions = [];
     let quizIndex = 0;
     let quizScore = 0;
@@ -208,7 +202,7 @@
         const planets = data.filter(d => d.pl_name);
         const asteroids = data.filter(d => d.name && !d.pl_name);
 
-        // 1) Highest ESI question
+        // 1) Highest ESI question? (4 Marks)
         if (planets.length > 3) {
             const sorted = planets.slice().sort((a, b) => num(b.esi) - num(a.esi));
             const correct = sorted[0];
@@ -223,7 +217,7 @@
             });
         }
 
-        // 2) Hazardous asteroid question
+        // 2) Hazardous asteroid question? (2 Marks)
         const haz = asteroids.filter(a => a.hazardous);
         const safe = asteroids.filter(a => !a.hazardous);
         if (haz.length && safe.length) {
@@ -239,7 +233,7 @@
             });
         }
 
-        // 3) Largest asteroid by diameter
+        // 3) Largest asteroid by diameter? (10 Marks)
         if (asteroids.length > 3) {
             const sorted = asteroids.slice().sort((a, b) => num(b.diameter_km) - num(a.diameter_km));
             const correct = sorted[0];
@@ -254,7 +248,7 @@
             });
         }
 
-        // 4) Fastest object
+        // 4) Fastest object (Free marks)
         const withVel = data.filter(d => num(d.velocity_kmh) > 0);
         if (withVel.length > 3) {
             const sorted = withVel.slice().sort((a, b) => num(b.velocity_kmh) - num(a.velocity_kmh));
@@ -287,7 +281,7 @@
             });
         }
 
-        // 6) Water status question
+        // 6) Water status question ( Each question contain 1 marks and 0 negative marks if gets wrong)
         const highWater = planets.filter(p => /High/i.test(p.water_status || ''));
         if (highWater.length > 1) {
             const correct = sample(highWater, 1)[0];
@@ -375,7 +369,7 @@
             </div>`;
     }
 
-    // ---------- 3) CHALLENGES ----------
+    // Study tip 3: Challenge your current study condition with the yesterday's version.
     function initChallenges() {
         const area = $id('challenges-area');
         if (!area) return;
@@ -392,7 +386,7 @@
             </div>`;
     }
 
-    // Guess the Object challenge
+    // Guess the Object (Do not guess during real MCQ exam)
     let guessItems = [];
     let guessIndex = 0;
     let guessScore = 0;
@@ -474,7 +468,7 @@
     }
     window.guessNext = guessNext;
 
-    // Hazard Radar challenge
+    // Hazard Radar challenge (Challenges have both win and loss. So, be careful while guessing)
     let hazardItems = [];
     let hazardIndex = 0;
     let hazardScore = 0;
@@ -536,7 +530,7 @@
     }
     window.answerHazard = answerHazard;
 
-    // ---------- 4) COMPARE ----------
+    // Study tip 4: Do not Compare your result with others
     function initCompare() {
         const area = $id('compare-area');
         if (!area) return;
@@ -628,7 +622,7 @@
         });
     }
 
-    // ---------- 5) PROGRESS ----------
+    // Study tip 4: Always keep a progress note of your study
     function getProgress() {
         try {
             return JSON.parse(localStorage.getItem('udb-progress') || '{}');
@@ -675,7 +669,7 @@
     }
     window.clearProgress = clearProgress;
 
-    // ---------- 6) DISCOVER / RESEARCH ----------
+    // Study tip 5: Do not discover anything new topic the night before exam but discover anything to study after the exam.
     function initDiscover() {
         const area = $id('discover-area');
         if (!area) return;
@@ -689,7 +683,7 @@
         const planets = data.filter(d => d.pl_name);
         const asteroids = data.filter(d => d.name && !d.pl_name);
 
-        // --- Correlation: ESI vs Radius ---
+        // ESI vs Radius
         if (planets.length > 5) {
             const pairs = planets.filter(p => num(p.pl_rade) > 0 && p.esi !== undefined);
             if (pairs.length > 5) {
@@ -706,7 +700,7 @@
             }
         }
 
-        // --- Extremes ---
+        // Extremes
         if (planets.length > 1) {
             const best = planets.slice().sort((a, b) => num(b.esi) - num(a.esi))[0];
             insights.push({
@@ -726,7 +720,7 @@
             });
         }
 
-        // --- Patterns ---
+        // Study tip 6: Understand the patterns.
         if (asteroids.length > 1) {
             const hazCount = asteroids.filter(a => a.hazardous).length;
             const pct = Math.round((hazCount / asteroids.length) * 100);
@@ -749,7 +743,7 @@
             });
         }
 
-        // --- Density anomaly (mass vs radius ratio) ---
+        // Mass vs Radius ratio (Remember Ratio of simal quantity have no unit but Ratio of different quantity have units)
         if (planets.length > 5) {
             const dense = planets.filter(p => num(p.pl_bmasse) > 0 && num(p.pl_rade) > 0)
                 .map(p => ({ p, density: num(p.pl_bmasse) / (num(p.pl_rade) ** 2) }))
@@ -765,7 +759,7 @@
             }
         }
 
-        // --- Velocity pattern ---
+        // Velocity Pattern (Remember it is not velocity graph from kinematics)
         const withVel = asteroids.filter(a => num(a.velocity_kmh) > 0);
         if (withVel.length > 3) {
             const avg = withVel.reduce((s, a) => s + num(a.velocity_kmh), 0) / withVel.length;
@@ -817,4 +811,3 @@
     }
 
 })();
-
