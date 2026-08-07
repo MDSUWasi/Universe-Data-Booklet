@@ -16,7 +16,6 @@ from client import fetch_asteroids, fetch_exoplanets
 from cache_manager import cleanup_old_cache
 
 PORT = int(os.getenv("SERVER_PORT", 8081))
-# Production Check: Default to DEBUG off unless explicitly enabled
 DEBUG_MODE = os.getenv("DEBUG_MODE", "false").lower() == "true"
 
 SERVER_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -34,7 +33,7 @@ RATE_LIMIT_MAX_REQUESTS = int(os.getenv("RATE_LIMIT_MAX_REQUESTS", "120"))
 _rate_limit_lock = threading.Lock()
 _rate_limit_counters = {}
 
-# Cache refresh lock to prevent race conditions
+# Cache refresh
 _refresh_lock = threading.Lock()
 
 print(f"\n🚀 SERVER STARTING")
@@ -70,12 +69,11 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
         directory = kwargs.pop('directory', FRONTEND_DIR)
         self.directory = os.fspath(directory)
 
-        # Check if running under WSGI wrapper (where the third positional argument is None)
+        # Check if running under WSGI wrapper
         if len(args) >= 3 and args[2] is None:
             self.request = args[0]
             self.client_address = args[1]
             self.server = args[2]
-            # Bypass the socket-binding stream actions of http.server to avoid initialization crashes
         else:
             # Fallback to standard local execution setup
             super().__init__(*args, directory=directory, **kwargs)
@@ -85,7 +83,7 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header('X-XSS-Protection', '1; mode=block')
         self.send_header('X-Content-Type-Options', 'nosniff')
 
-        # --- PRODUCTION CORS FIX ---
+        # For Production
         origin = self.headers.get('Origin')
         allowed_origins = os.getenv('ALLOWED_ORIGINS', 'http://localhost:3000,http://localhost:8080,http://localhost:8081').split(',')
         allowed_origins = [o.strip() for o in allowed_origins if o.strip()]
@@ -153,9 +151,7 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
                             print(f"✅ Refreshed asteroids ({len(new_data)})")
                             refreshed = True
                     except Exception as e:
-                        # Log locally, don't expose details to clients
                         print(f"⚠️ Cache refresh failed: {type(e).__name__}")
-                        # Keep serving stale data instead of failing
             else:
                 try:
                     new_data, _ = fetch_asteroids()
@@ -195,7 +191,7 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps({"error": "Too many requests. Please try again later."}).encode('utf-8'))
             return
 
-        # Fixed: Also block encoded traversals (%2e%2e)
+        # Block encoded traversals
         if '..' in path or '%2e' in path.lower():
             self.send_error_json(400, "Invalid path")
             return
@@ -211,7 +207,7 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
                 except (json.JSONDecodeError, IOError, KeyError):
                     data = []
 
-            # Pagination support (with input validation)
+            # Pagination support
             query = parse_qs(parsed.query)
             try:
                 page = max(1, int(query.get('page', [1])[0]))
@@ -228,8 +224,8 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
 
             self.send_json_response(200, {
                 "source": "NASA Cached",
-                "count": len(paginated_data),  # Fixed: Return current page count
-                "total_count": len(data),      # Added: Total available items
+                "count": len(paginated_data),
+                "total_count": len(data),
                 "page": page,
                 "total_pages": max(1, (len(data) + limit - 1) // limit) if data else 1,
                 "data": paginated_data
@@ -242,7 +238,6 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
                 if not isinstance(full_data, list):
                     full_data = []
 
-                # --- PAGINATION LOGIC (with input validation) ---
                 query = parse_qs(parsed.query)
                 try:
                     page = max(1, int(query.get('page', [1])[0]))
@@ -290,7 +285,7 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
                 data, _ = fetch_exoplanets()
                 if not isinstance(data, list):
                     data = []
-                # Normalize stored planet names to match the sanitized query
+                # Planet names to match the sanitized query
                 planet = next((p for p in data if re.sub(r'[^\w\-]', '', p.get('pl_name', '')).lower() == safe_name.lower()), None)
 
                 if not planet:
@@ -337,11 +332,10 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
             pass
 
     def send_error_json(self, code, message):
-        # NEVER expose detailed errors in production
         if DEBUG_MODE:
             safe_msg = str(message)[:200] if message else "Unknown Error"
         else:
-            safe_msg = "Internal Server Error"  # Hide all details from clients
+            safe_msg = "Internal Server Error"
 
         body = json.dumps({"error": safe_msg}).encode('utf-8')
         self.send_response(code)
@@ -351,7 +345,6 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
         self.wfile.write(body)
 
     def log_message(self, format, *args):
-        # Reduced logging to console
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         print(f"[{timestamp}] {format % args}")
 
@@ -377,7 +370,7 @@ if __name__ == '__main__':
         print(f"❌ ERROR: Frontend missing at {FRONTEND_DIR}")
         sys.exit(1)
 
-    # Verify data directory is writable
+    # Verifying that the data directory is writable
     if not os.access(DATA_DIR, os.W_OK):
         print(f"❌ ERROR: Data directory not writable at {DATA_DIR}")
         print("💡 This will cause cache failures. Fix permissions before deploying.")

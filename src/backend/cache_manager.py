@@ -5,8 +5,6 @@ import time
 from datetime import datetime
 import threading
 
-# Paths relative to this file's location inside src/backend
-# cache_manager.py lives in src/backend, so base is src/
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SRC_DIR = os.path.join(BASE_DIR, '..')
 CACHE_DIR = os.path.join(SRC_DIR, 'data')   # -> <root>/src/data

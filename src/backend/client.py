@@ -14,7 +14,7 @@ import threading
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from cache_manager import get_cached_data, save_to_cache
 
-# --- CONFIGURATION ---
+# Configuration
 NASA_API_KEY = os.getenv("NASA_API_KEY", "DEMO_KEY")
 if NASA_API_KEY == "DEMO_KEY":
     print("⚠️ Using NASA DEMO_KEY. For production, set NASA_API_KEY environment variable.")
@@ -22,10 +22,10 @@ else:
     print("✅ Production API key configured.")
 
 BASE_URL = "https://api.nasa.gov"
-# Unified cache TTL: matches server.py REFRESH_THRESHOLD_DAYS + cache_manager.py
+# Unified cache
 CACHE_DAYS = 30  
 
-# --- PATH CALCULATION ---
+# Paths
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))       
 SRC_DIR = os.path.dirname(SCRIPT_DIR)                          
 DATA_DIR = os.path.join(SRC_DIR, 'data')
@@ -39,19 +39,15 @@ print(f"📂 DATA DIR: {DATA_DIR}")
 print(f"📄 CSV PATH: {CSV_PATH}")
 print(f"✅ CSV EXISTS: {os.path.exists(CSV_PATH)}")
 if os.path.exists(DATA_DIR):
-    # Only print filenames, not full content
     files_list = os.listdir(DATA_DIR)
     print(f"📝 FILES IN DATA: {files_list}")
 else:
     print("❌ ERROR: Data directory NOT FOUND!")
 print("="*60 + "\n")
 
-# ========================================
 # 🚀 MEMORY CACHE
-# ========================================
-_EXOPLANET_CACHE = None          # Global variable to hold planet data in RAM
-_EXOPLANET_LOCK = threading.Lock()  # Prevent race conditions during initial load
-# ========================================
+_EXOPLANET_CACHE = None
+_EXOPLANET_LOCK = threading.Lock()
 
 def sanitize_input(text):
     """Fixed: Preserve dots, spaces, and hyphens so planet names like
@@ -172,7 +168,7 @@ def load_exoplanets_from_csv():
 
     except Exception as e:
         print(f"❌ Error reading CSV: {e}")
-        # Log full traceback to console only, not to user
+        # Log full traceback to console only, not to users
         import traceback
         traceback.print_exc()
         return None, False
@@ -215,7 +211,7 @@ def fetch_asteroids():
             return flat_list, False
     except Exception as e:
         print(f"⚠️ Asteroid Fetch Error: {type(e).__name__}. Using fallback data.")
-        # Return fallback data safely with metadata flag so frontend knows it's not live data
+        # Return fallback
         fallback_data = [
             {
                 "id": "1", 
@@ -224,26 +220,26 @@ def fetch_asteroids():
                 "diameter_km": 940.0, 
                 "velocity_kmh": 18000, 
                 "hazardous": False,
-                "is_fallback": True  # Added: Flag for frontend to indicate fallback data
+                "is_fallback": True
             }
         ]
         return fallback_data, False
 
 def fetch_exoplanets():
     """
-    Fixed: Uses in-memory cache to avoid reading CSV on every request.
+    Uses in-memory cache to avoid reading CSV on every request.
     First call loads from disk, subsequent calls serve from RAM instantly.
     Thread-safe with locking mechanism.
     """
     global _EXOPLANET_CACHE, _EXOPLANET_LOCK
     
-    # Fast path: Check if data already loaded in RAM
+    # Check if data already loaded in RAM (Fast)
     with _EXOPLANET_LOCK:
         if _EXOPLANET_CACHE is not None:
             # Return copy to prevent accidental modification of cached data
             return list(_EXOPLANET_CACHE), True
     
-    # Slow path: Load from CSV once at startup
+    # Load from CSV once at startup (Slow)
     with _EXOPLANET_LOCK:
         # Double-check another thread didn't load it while we were waiting
         if _EXOPLANET_CACHE is not None:
