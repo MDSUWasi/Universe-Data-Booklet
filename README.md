@@ -1,9 +1,8 @@
 <h1 align="center"> 🌌 Universe Data Booklet</h1>
 
 > **An interactive explorer for Near-Earth Asteroids and Exoplanets.**  
-> *Built for students, educators. (Not for serious astronomy project) and for study purpose*
+> *Built for students, educators and for study purpose* ``` I cannot gurrantee that all the data and calculations are accurate and correct. So, Please recheck before any serious use```
 
-![License](https://img.shields.io/badge/License-MIT-green)
 
 Universe Data Booklet transforms raw astronomical data into an intuitive and graphical experience. Whether you are tracking potentially hazardous asteroids or analyzing the habitability of distant exoplanets, this tool provides insights with **zero latency** thanks to its intelligent local caching architecture.
 
@@ -18,10 +17,13 @@ Seamlessly switch between two massive datasets:
 
 ### 🎨 **Immersive Visualization**
 - **Dynamic Charts:** Real-time bar charts pop up powered by Chart.js to visualize size and velocity distributions.
-- **3D Interactive View:** Explore objects as 3D spheres (Three.js) (pop up) with orbit rings and drag-to-rotate camera.
+- **3D Interactive View:** Explore objects as 3D spheres (Three.js) (pop up) with orbit rings and drag-to-rotate camera. Exoplanets and Asteroids have 2 different 3D view. Asteroids have a solar system simulation type 3D view.
 - **Theme Switcher:** Toggle between **Cream**,**Neon**, **Solar**, and **Lab** themes (persisted in localStorage).
 - **Detail Modal:** Click any row for a deep-dive into the object's data.
 - **Search & Stats:** Client-side search across both datasets plus live stat cards.
+- **Map View:** A visual map for locating both data. (Make sure to press the "more" button before viewing the map for exoplanets. because there are approximately 6,000 exoplanets and all of those data are not shown at once untill the more button is clicked and the Map view works on how many data is present on the interface.)
+- **Study Mode:** A tab for study section. There user can practice flashcards, quiz, challenge, Compare etc.
+- **Research Mode:** This mode gives user the ability to work on data which are present in the data but not specially sayed or identified.
 
 ### 🛡️ **Security & Privacy**
 - Secure HTTP headers (X-Frame-Options, XSS protection, nosniff, CORS allow-list, Referrer-Policy).
@@ -31,7 +33,7 @@ Seamlessly switch between two massive datasets:
 [I have tried my best to ensure security. But this is a solo project if there is still any issue, please let me know]
 ---
 
-<h2 align="center"> 🚀 Handling Thousands of Users</h2>
+<h2 align="center"> 🚀 Handling Thousands of Users (The best part)</h2>
 
 One of the biggest challenges in public API projects is hitting rate limits when traffic spikes. Universe Data Booklet solves this with a **Smart Caching Layer**:
 
@@ -41,6 +43,7 @@ One of the biggest challenges in public API projects is hitting rate limits when
 3.  **Automatic Refresh:** The cache remains valid for **30 days** (configurable). All subsequent users receive this cached data instantly.
 4.  **Zero API Burden:** Even if 10,000+ users visits the site, the site hit the NASA API **once every 30 days**, completely solving the standard rate limits.
 
+And, do not worry about storage. The site will automatically delete cache data which are older than 90 days. (This is because, I want to have the old data saved for some times before it is gone. This is because if we need the old data then this site have the saved version, But I can't gurrantee that it will be saved for 90 days.)
 ---
 
 
@@ -48,10 +51,10 @@ One of the biggest challenges in public API projects is hitting rate limits when
 
 - **Backend:** Python 3.13 (Standard Library `http.server`, `urllib`, `json`)
 - **Frontend:** HTML5, CSS3 (Custom Animations), Vanilla JavaScript (ES6+)
-- **Visualization:** Chart.js (Analytics), jsPDF (Reporting)
+- **Visualization:** Chart.js (Analytics), jsPDF (Reporting), annimation.js(It's name already told it's work by default.)
 - **Data:** NASA NEO Web API & JPL Small-Body Database (CSV)
 - **Deployment:** Run anywhere with Python 3.6+ (Linux, macOS, Windows/WSL)
-- **Screen:** Use screen wider than 10 inch. If using mobile phone, then set the browser to desktop site. 
+- **Screen:** Use screen wider than 10 inch. If using mobile phone, then set the browser to desktop site. Currently this site have no capabilities to be run on Phone (I mean the deployed site, not the source code). The mobile version may be available in the future updates (But I can't tell on which version)
 
 ---
 
@@ -96,9 +99,9 @@ Open a Pull Request
 
 
 ### 📜 License
-Distributed under the MIT License. See LICENSE for more information.
+Distributed under License. See LICENSE for more information.
 
-### 🙏 Acknowledgments
+### 🙏 Acknowledgments & Thank You
 
 NASA: For providing free, open-access space data APIs.
 
