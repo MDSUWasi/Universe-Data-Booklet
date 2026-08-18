@@ -362,13 +362,19 @@ body {
 }
 
 .result-success { 
-  border-color: var(--success); background: rgba(90, 158, 111, 0.08); color: var(--success); 
+  border-color: var(--success); 
+  background: rgba(90, 158, 111, 0.08); 
+  color: var(--success); 
 }
 .result-warning { 
-  border-color: var(--warning); background: rgba(212, 160, 74, 0.08); color: var(--warning); 
+  border-color: var(--warning); 
+  background: rgba(212, 160, 74, 0.08); 
+  color: var(--warning); 
 }
 .result-danger  { 
-  border-color: var(--danger);  background: rgba(198, 96, 90, 0.08);  color: var(--danger); 
+  border-color: var(--danger);  
+  background: rgba(198, 96, 90, 0.08);  
+  color: var(--danger); 
 }
 
 .disclaimer {
