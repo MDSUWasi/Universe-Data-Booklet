@@ -115,4 +115,4 @@ Three.js, Chart.js, jsPDF: For powerful, open-source visualization libraries.
 
 
 ---- 
-# Built with ❤️ for Curiosity.
+# Built with ❤️ for Curiosity & Universe.
