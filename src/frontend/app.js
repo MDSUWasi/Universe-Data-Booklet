@@ -471,6 +471,464 @@ async function checkHabitability() {
     }
 }
 
+function buildExplorerObjects(asteroids, exoplanets) {
+    const objects = [];
+    const asteroidItems = Array.isArray(asteroids) ? asteroids : [];
+    const exoItems = Array.isArray(exoplanets) ? exoplanets : [];
+
+    // Distribute asteroids across the galaxy using deterministic pseudo-random positions
+    const numAsteroids = Math.min(asteroidItems.length, 22);
+    asteroidItems.slice(0, numAsteroids).forEach((item, index) => {
+        const spread = 900;
+        const x = (50 + ((index * 97) % spread)) % 900;
+        const y = (50 + ((index * 161) % 470)) % 520;
+        objects.push({
+            id: `asteroid-${index}-${item.name || 'unknown'}`,
+            type: 'asteroid',
+            x: Math.max(20, Math.min(880, x)),
+            y: Math.max(20, Math.min(500, y)),
+            radius: Math.max(8, (parseFloat(item.diameter_km) || 5) / 10),
+            name: item.name || 'Unknown Asteroid',
+            data: item
+        });
+    });
+
+    // Distribute exoplanets with emphasis on higher ESI values
+    const numExoplanets = Math.min(exoItems.length, 18);
+    exoItems.slice(0, numExoplanets).forEach((item, index) => {
+        const esi = parseFloat(item.esi) || 0.5;
+        const safeRadius = Math.max(14, Math.min(28, esi * 25 + 8));
+        const spread = 900;
+        const x = (100 + ((index * 113) % spread)) % 900;
+        const y = (120 + ((index * 149) % 450)) % 520;
+        objects.push({
+            id: `exoplanet-${index}-${item.pl_name || 'unknown'}`,
+            type: 'exoplanet',
+            x: Math.max(20, Math.min(880, x)),
+            y: Math.max(20, Math.min(500, y)),
+            radius: safeRadius,
+            name: item.pl_name || 'Unknown Exoplanet',
+            data: item
+        });
+    });
+
+    return objects;
+}
+
+function renderExplorerScanCard(object) {
+    if (!object || !object.data) {
+        return '<p>No target in range. Keep moving.</p>';
+    }
+
+    if (object.type === 'asteroid') {
+        const item = object.data;
+        return `
+            <h3>🪨 ${escapeHtml(item.name || 'Unknown asteroid')}</h3>
+            <div class="data-grid">
+                <div><strong>Diameter:</strong> ${(parseFloat(item.diameter_km) || 0).toFixed(2)} km</div>
+                <div><strong>Velocity:</strong> ${(parseFloat(item.velocity_kmh) || 0).toFixed(2)} km/h</div>
+                <div><strong>Hazardous:</strong> ${item.hazardous ? 'Yes' : 'No'}</div>
+                <div><strong>Date:</strong> ${escapeHtml(item.date || 'N/A')}</div>
+            </div>
+        `;
+    }
+
+    const item = object.data;
+    return `
+        <h3>🪐 ${escapeHtml(item.pl_name || 'Unknown planet')}</h3>
+        <div class="data-grid">
+            <div><strong>Host Star:</strong> ${escapeHtml(item.hostname || 'Unknown')}</div>
+            <div><strong>ESI:</strong> ${item.esi !== undefined ? parseFloat(item.esi).toFixed(3) : 'N/A'}</div>
+            <div><strong>Water:</strong> ${escapeHtml(item.water_status || 'Unknown')}</div>
+            <div><strong>Radius:</strong> ${(parseFloat(item.pl_rade) || 0).toFixed(2)} R⊕</div>
+            <div><strong>Mass:</strong> ${(parseFloat(item.pl_bmasse) || 0).toFixed(2)} M⊕</div>
+        </div>
+    `;
+}
+
+function updateExplorerLog(logEl, visitedList) {
+    if (!logEl) return;
+    logEl.innerHTML = '<h4>Discovery Log</h4><ul>' + visitedList.slice(0, 6).map(entry => `<li>${escapeHtml(entry)}</li>`).join('') + '</ul>';
+}
+
+function distanceBetween(x1, y1, x2, y2) {
+    return Math.hypot(x2 - x1, y2 - y1);
+}
+
+async function openExplorerGame() {
+    closeChartModal();
+    closeThreeModal();
+    closeMapModal();
+
+    const modal = document.getElementById('explorer-modal');
+    if (!modal) return;
+
+    modal.classList.add('open');
+
+    const canvas = document.getElementById('explorer-canvas');
+    const statusEl = document.getElementById('explorer-status');
+    const dataEl = document.getElementById('explorer-data');
+    const logEl = document.getElementById('explorer-log');
+
+    if (!canvas || !statusEl || !dataEl || !logEl) return;
+
+    const ctx = canvas.getContext('2d');
+    const sceneWidth = canvas.width;
+    const sceneHeight = canvas.height;
+
+    const ship = {
+        x: sceneWidth / 2,
+        y: sceneHeight / 2,
+        radius: 12,
+        vx: 0,
+        vy: 0,
+        angle: -Math.PI / 2,
+        turnSpeed: 0.06,
+        fuel: 100,
+        maxFuel: 100
+    };
+    const keys = {};
+    const objectList = [];
+    const visitedList = [];
+    const visited = new Set();
+    const sectors = [
+        { name: 'Solar System', xMin: 0, xMax: 220, yMin: 0, yMax: 180, targetX: 100, targetY: 90, color: '#ffa500' },
+        { name: 'Sirius Expanse', xMin: 221, xMax: 450, yMin: 0, yMax: 180, targetX: 320, targetY: 80, color: '#00d4ff' },
+        { name: 'Kepler Reach', xMin: 451, xMax: 900, yMin: 0, yMax: 180, targetX: 650, targetY: 100, color: '#70d6ff' },
+        { name: 'Alpha Sector', xMin: 0, xMax: 220, yMin: 181, yMax: 360, targetX: 110, targetY: 250, color: '#ff6b9d' },
+        { name: 'Proxima Deep', xMin: 221, xMax: 450, yMin: 181, yMax: 360, targetX: 330, targetY: 280, color: '#c44cff' },
+        { name: 'TRAPPIST Frontier', xMin: 451, xMax: 900, yMin: 181, yMax: 360, targetX: 680, targetY: 290, color: '#a3e6ff' },
+        { name: 'Wolf 1061 Region', xMin: 0, xMax: 220, yMin: 361, yMax: 520, targetX: 110, targetY: 430, color: '#ffcc00' },
+        { name: 'Outer Reaches', xMin: 221, xMax: 900, yMin: 361, yMax: 520, targetX: 550, targetY: 440, color: '#7ef0a3' }
+    ];
+
+    try {
+        const [asteroidRes, exoRes] = await Promise.all([
+            fetch('/api/asteroids?limit=12'),
+            fetch('/api/exoplanets?limit=10')
+        ]);
+
+        const asteroidData = asteroidRes.ok ? (await asteroidRes.json()).data || [] : [];
+        const exoData = exoRes.ok ? (await exoRes.json()).data || [] : [];
+        const builtObjects = buildExplorerObjects(asteroidData, exoData);
+        builtObjects.forEach(obj => objectList.push(obj));
+
+        statusEl.textContent = `Free exploration active: ${objectList.length} objects detected across nearby sectors.`;
+    } catch (error) {
+        console.error('Explorer game fetch error:', error);
+        statusEl.textContent = 'Offline mode active: using a small local exploration sector.';
+
+        objectList.push(
+            { id: 'demo-asteroid', type: 'asteroid', x: 200, y: 220, radius: 18, name: 'Bennu', data: { name: 'Bennu', diameter_km: 0.49, velocity_kmh: 28000, hazardous: true, date: '2026-09-01' } },
+            { id: 'demo-exoplanet', type: 'exoplanet', x: 650, y: 260, radius: 24, name: 'TRAPPIST-1 e', data: { pl_name: 'TRAPPIST-1 e', hostname: 'TRAPPIST-1', esi: 0.91, water_status: 'High (Likely Liquid)', pl_rade: 1.12, pl_bmasse: 1.02 } }
+        );
+    }
+
+    const onKeyDown = (event) => {
+        keys[event.key.toLowerCase()] = true;
+        keys[event.key] = true;
+    };
+    const onKeyUp = (event) => {
+        keys[event.key.toLowerCase()] = false;
+        keys[event.key] = false;
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
+
+    function setExplorerSector(sectorName) {
+        const targetSector = sectors.find(item => item.name === sectorName);
+        if (!targetSector) return;
+        ship.x = targetSector.targetX;
+        ship.y = targetSector.targetY;
+        ship.vx = 0;
+        ship.vy = 0;
+        statusEl.textContent = `${sectorName} engaged. Free exploration is active.`;
+    }
+    window.__explorerSetSector = setExplorerSector;
+    window.setExplorerSector = setExplorerSector;
+
+    function getActiveSector() {
+        const sector = sectors.find(item => ship.x >= item.xMin && ship.x <= item.xMax && ship.y >= item.yMin && ship.y <= item.yMax);
+        return sector ? sector.name : 'Outer Void';
+    }
+
+    function drawBackground() {
+        ctx.fillStyle = '#020711';
+        ctx.fillRect(0, 0, sceneWidth, sceneHeight);
+
+        // Draw nebula layers with gradient effects
+        const nebulaGradient = ctx.createRadialGradient(sceneWidth * 0.3, sceneHeight * 0.2, 50, sceneWidth * 0.35, sceneHeight * 0.25, 300);
+        nebulaGradient.addColorStop(0, 'rgba(255, 107, 157, 0.08)');
+        nebulaGradient.addColorStop(1, 'rgba(255, 107, 157, 0)');
+        ctx.fillStyle = nebulaGradient;
+        ctx.fillRect(0, 0, sceneWidth, sceneHeight);
+
+        const nebula2Gradient = ctx.createRadialGradient(sceneWidth * 0.7, sceneHeight * 0.7, 40, sceneWidth * 0.75, sceneHeight * 0.75, 280);
+        nebula2Gradient.addColorStop(0, 'rgba(112, 214, 255, 0.06)');
+        nebula2Gradient.addColorStop(1, 'rgba(112, 214, 255, 0)');
+        ctx.fillStyle = nebula2Gradient;
+        ctx.fillRect(0, 0, sceneWidth, sceneHeight);
+
+        // Enhanced starfield with varied brightness
+        for (let i = 0; i < 250; i++) {
+            const x = (i * 79 + (i % 7) * 123) % sceneWidth;
+            const y = (i * 137 + (i % 11) * 89) % sceneHeight;
+            const brightness = ((i % 5) + 1) * 0.2;
+            const size = (i % 3) + 0.5;
+            ctx.fillStyle = i % 3 === 0 ? `rgba(246, 211, 101, ${brightness})` : i % 3 === 1 ? `rgba(191, 233, 255, ${brightness})` : `rgba(255, 200, 150, ${brightness})`;
+            ctx.beginPath();
+            ctx.arc(x, y, size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Sector boundaries
+        ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(220, 0);
+        ctx.lineTo(220, sceneHeight);
+        ctx.moveTo(450, 0);
+        ctx.lineTo(450, sceneHeight);
+        ctx.moveTo(0, 180);
+        ctx.lineTo(sceneWidth, 180);
+        ctx.moveTo(0, 360);
+        ctx.lineTo(sceneWidth, 360);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Sector labels
+        ctx.font = 'bold 11px system-ui, sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.25)';
+        const sectorLabels = ['Solar', 'Sirius', 'Kepler', 'Alpha', 'Proxima', 'TRAPPIST', 'Wolf', 'Outer'];
+        const labelPositions = [
+            { x: 60, y: 20 }, { x: 280, y: 20 }, { x: 580, y: 20 },
+            { x: 60, y: 240 }, { x: 280, y: 240 }, { x: 580, y: 240 },
+            { x: 60, y: 460 }, { x: 450, y: 460 }
+        ];
+        labelPositions.forEach((pos, i) => {
+            if (sectorLabels[i]) ctx.fillText(sectorLabels[i], pos.x, pos.y);
+        });
+    }
+
+    function drawShip() {
+        ctx.save();
+        ctx.translate(ship.x, ship.y);
+        ctx.rotate(ship.angle);
+        
+        // Ship body
+        ctx.fillStyle = '#c7e5ff';
+        ctx.beginPath();
+        ctx.moveTo(0, -16);
+        ctx.lineTo(12, 12);
+        ctx.lineTo(0, 8);
+        ctx.lineTo(-12, 12);
+        ctx.closePath();
+        ctx.fill();
+
+        // Engine glow
+        if (ship.vx !== 0 || ship.vy !== 0) {
+            ctx.fillStyle = 'rgba(126, 240, 163, 0.6)';
+            ctx.beginPath();
+            ctx.moveTo(-6, 12);
+            ctx.lineTo(6, 12);
+            ctx.lineTo(2, 20 + Math.random() * 4);
+            ctx.lineTo(-2, 20 + Math.random() * 4);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // Fuel bar
+        ctx.fillStyle = '#7ef0a3';
+        ctx.fillRect(-10, 16, 20 * (ship.fuel / ship.maxFuel), 5);
+        ctx.strokeStyle = '#7ef0a3';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(-10, 16, 20, 5);
+        
+        ctx.restore();
+    }
+
+    function drawRadar() {
+        const radarX = sceneWidth - 90;
+        const radarY = 20;
+        const radarRadius = 40;
+
+        // Radar background
+        ctx.fillStyle = 'rgba(2, 7, 17, 0.8)';
+        ctx.beginPath();
+        ctx.arc(radarX, radarY, radarRadius, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.strokeStyle = 'rgba(112, 214, 255, 0.5)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Radar grid
+        ctx.strokeStyle = 'rgba(112, 214, 255, 0.2)';
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.arc(radarX, radarY, radarRadius * 0.66, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Ship center
+        ctx.fillStyle = '#c7e5ff';
+        ctx.beginPath();
+        ctx.arc(radarX, radarY, 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Objects on radar (scale down to radar)
+        const radarScale = radarRadius / (Math.max(sceneWidth, sceneHeight) * 0.8);
+        objectList.slice(0, 15).forEach((obj) => {
+            const dx = (obj.x - ship.x) * radarScale;
+            const dy = (obj.y - ship.y) * radarScale;
+            const dist = Math.hypot(dx, dy);
+            
+            if (dist < radarRadius) {
+                const color = obj.type === 'asteroid' ? '#f5a623' : '#70d6ff';
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.arc(radarX + dx, radarY + dy, 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        });
+
+        // Radar label
+        ctx.font = 'bold 10px system-ui, sans-serif';
+        ctx.fillStyle = '#70d6ff';
+        ctx.fillText('RADAR', radarX - 18, radarY + radarRadius + 15);
+    }
+
+    function drawObjects() {
+        // Draw glow halos for visibility
+        objectList.forEach((obj) => {
+            const color = obj.type === 'asteroid' ? '#f5a623' : '#70d6ff';
+            
+            // Glow effect
+            ctx.beginPath();
+            ctx.arc(obj.x, obj.y, obj.radius + 8, 0, Math.PI * 2);
+            ctx.fillStyle = color.replace(')', ', 0.15)').replace('rgb', 'rgba');
+            ctx.fill();
+            
+            // Main object
+            ctx.beginPath();
+            ctx.arc(obj.x, obj.y, obj.radius, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.fill();
+
+            // Visited indicator - bright ring
+            if (visited.has(obj.id)) {
+                ctx.beginPath();
+                ctx.arc(obj.x, obj.y, obj.radius + 12, 0, Math.PI * 2);
+                ctx.strokeStyle = '#7ef0a3';
+                ctx.lineWidth = 2.5;
+                ctx.stroke();
+            }
+        });
+    }
+
+    function updateShip() {
+        const throttle = keys.shift ? 1.8 : 1;
+        const acceleration = 0.38 * throttle;
+
+        if (keys['arrowleft'] || keys['a']) ship.angle -= ship.turnSpeed * throttle;
+        if (keys['arrowright'] || keys['d']) ship.angle += ship.turnSpeed * throttle;
+
+        const forwardX = Math.cos(ship.angle);
+        const forwardY = Math.sin(ship.angle);
+
+        if (keys['arrowup'] || keys['w']) {
+            ship.vx += forwardX * acceleration;
+            ship.vy += forwardY * acceleration;
+        }
+        if (keys['arrowdown'] || keys['s']) {
+            ship.vx -= forwardX * acceleration * 0.5;
+            ship.vy -= forwardY * acceleration * 0.5;
+        }
+
+        if (ship.fuel > 0 && (keys['arrowup'] || keys['w'] || keys['arrowdown'] || keys['s'] || keys['arrowleft'] || keys['a'] || keys['arrowright'] || keys['d'])) {
+            ship.fuel = Math.max(0, ship.fuel - 0.18 * throttle);
+        } else {
+            ship.fuel = Math.min(ship.maxFuel, ship.fuel + 0.08);
+        }
+
+        ship.vx *= 0.96;
+        ship.vy *= 0.96;
+
+        ship.x += ship.vx;
+        ship.y += ship.vy;
+
+        ship.x = Math.max(18, Math.min(sceneWidth - 18, ship.x));
+        ship.y = Math.max(18, Math.min(sceneHeight - 18, ship.y));
+    }
+
+    function updateDiscovery() {
+        let nearest = null;
+        let nearestDistance = Infinity;
+
+        objectList.forEach((obj) => {
+            const dist = distanceBetween(ship.x, ship.y, obj.x, obj.y);
+            if (dist < nearestDistance) {
+                nearest = obj;
+                nearestDistance = dist;
+            }
+        });
+
+        const sectorName = getActiveSector();
+        const fuelPercent = ship.fuel.toFixed(0);
+        const speed = Math.hypot(ship.vx, ship.vy).toFixed(1);
+        
+        // Enhanced HUD status
+        let statusText = `[${sectorName}] Fuel: ${fuelPercent}% | Speed: ${speed} u/s`;
+        if (nearest && nearestDistance <= nearest.radius + ship.radius + 30) {
+            statusText += ` | Signal: ${nearest.name}`;
+        }
+        statusEl.textContent = statusText;
+
+        // Scanning and discovery
+        if (nearest && nearestDistance <= nearest.radius + ship.radius + 25) {
+            dataEl.innerHTML = renderExplorerScanCard(nearest);
+            if (!visited.has(nearest.id)) {
+                visited.add(nearest.id);
+                const discoveryEntry = `✓ ${nearest.name} (${sectorName})`;
+                visitedList.unshift(discoveryEntry);
+                updateExplorerLog(logEl, visitedList);
+            }
+        } else {
+            dataEl.innerHTML = '<p>Navigate toward glowing objects to scan and discover celestial bodies.</p>';
+        }
+    }
+
+    function gameLoop() {
+        updateShip();
+        drawBackground();
+        drawObjects();
+        drawShip();
+        drawRadar();
+        updateDiscovery();
+        window.requestAnimationFrame(gameLoop);
+    }
+
+    updateExplorerLog(logEl, visitedList);
+    gameLoop();
+
+    modal._explorerCleanup = () => {
+        window.removeEventListener('keydown', onKeyDown);
+        window.removeEventListener('keyup', onKeyUp);
+        statusEl.textContent = 'Free exploration closed.';
+    };
+}
+
+function closeExplorerGame() {
+    const modal = document.getElementById('explorer-modal');
+    if (!modal) return;
+    modal.classList.remove('open');
+    if (modal._explorerCleanup) {
+        modal._explorerCleanup();
+        modal._explorerCleanup = null;
+    }
+}
+
 async function askLocalChat() {
     const input = document.getElementById('chat-input');
     const resultBox = document.getElementById('chat-result');
@@ -533,6 +991,14 @@ window.showChart = showChart;
 window.toggle3DView = toggle3DView;
 window.checkHabitability = checkHabitability;
 window.askLocalChat = askLocalChat;
+window.openExplorerGame = openExplorerGame;
+window.closeExplorerGame = closeExplorerGame;
+window.setExplorerSector = function(sectorName) {
+    const modal = document.getElementById('explorer-modal');
+    if (!modal || !modal.classList.contains('open')) return;
+    const setter = window.__explorerSetSector;
+    if (typeof setter === 'function') setter(sectorName);
+};
 window.handleSearch = handleSearch;
 window.showDetail = showDetail;
 window.closeModal = closeModal;

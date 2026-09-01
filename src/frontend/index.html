@@ -40,6 +40,7 @@
                     <button class="action-btn" onclick="showChart()">📊 Charts View</button>
                     <button class="action-btn" onclick="toggle3DView()">🌍 3D View</button>
                     <button class="action-btn" onclick="showMap()">🗺️ Map View</button>
+                    <button class="action-btn" onclick="openExplorerGame()">🚀 Free Exploration</button>
                     <button class="action-btn" onclick="openStudyModal()">🎓 Study Mode</button>
                     <button class="action-btn" onclick="exportPDF()">📄 PDF Download</button>
                 </div>
@@ -166,6 +167,40 @@
             <button class="close-btn modal-close" onclick="closeMapModal()">✕</button>
             <h2 class="modal-title">🗺️ Data Map View</h2>
             <div class="map-modal-body" id="map-container"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="explorer-modal" onclick="closeExplorerGame()">
+        <div class="modal-content modal-lg explorer-modal" onclick="event.stopPropagation()">
+            <button class="close-btn modal-close" onclick="closeExplorerGame()">✕</button>
+            <h2 class="modal-title">🚀 Free Exploration Mode</h2>
+            <div class="explorer-layout">
+                <div class="explorer-canvas-wrap">
+                    <canvas id="explorer-canvas" width="900" height="520"></canvas>
+                </div>
+                <div class="explorer-sidebar">
+                    <div id="explorer-status" class="explorer-status">Use the ship freely and explore the sector.</div>
+                    <div class="explorer-mini-panel">
+                        <strong>Controls</strong>
+                        <p>WASD / Arrow keys to fly</p>
+                        <p>Hold Shift for a boost</p>
+                        <p>Approach objects to scan them</p>
+                        <p>There are no quests or required goals</p>
+                        <div class="explorer-sector-buttons">
+                            <button class="mini-sector-btn" onclick="setExplorerSector('Solar System')">Solar System</button>
+                            <button class="mini-sector-btn" onclick="setExplorerSector('Sirius Expanse')">Sirius Expanse</button>
+                            <button class="mini-sector-btn" onclick="setExplorerSector('Kepler Reach')">Kepler Reach</button>
+                            <button class="mini-sector-btn" onclick="setExplorerSector('Alpha Sector')">Alpha Sector</button>
+                            <button class="mini-sector-btn" onclick="setExplorerSector('Proxima Deep')">Proxima Deep</button>
+                            <button class="mini-sector-btn" onclick="setExplorerSector('TRAPPIST Frontier')">TRAPPIST Frontier</button>
+                            <button class="mini-sector-btn" onclick="setExplorerSector('Wolf 1061 Region')">Wolf 1061 Region</button>
+                            <button class="mini-sector-btn" onclick="setExplorerSector('Outer Reaches')">Outer Reaches</button>
+                        </div>
+                    </div>
+                    <div id="explorer-data" class="explorer-data">No target in range.</div>
+                    <div id="explorer-log" class="explorer-log"></div>
+                </div>
+            </div>
         </div>
     </div>
 
