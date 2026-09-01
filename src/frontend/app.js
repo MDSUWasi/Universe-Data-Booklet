@@ -585,12 +585,19 @@ async function openExplorerGame() {
         angle: -Math.PI / 2,
         turnSpeed: 0.06,
         fuel: 100,
-        maxFuel: 100
+        maxFuel: 100,
+        credits: 0,
+        shieldHealth: 100,
+        maxShield: 100,
+        upgrades: { engine: 1, shield: 1, scanner: 1 },
+        radiationExposure: 0
     };
     const keys = {};
     const objectList = [];
     const visitedList = [];
     const visited = new Set();
+    const hazardZones = [];
+    const gravityWells = [];
     const sectors = [
         { name: 'Solar System', xMin: 0, xMax: 220, yMin: 0, yMax: 180, targetX: 100, targetY: 90, color: '#ffa500' },
         { name: 'Sirius Expanse', xMin: 221, xMax: 450, yMin: 0, yMax: 180, targetX: 320, targetY: 80, color: '#00d4ff' },
@@ -601,6 +608,29 @@ async function openExplorerGame() {
         { name: 'Wolf 1061 Region', xMin: 0, xMax: 220, yMin: 361, yMax: 520, targetX: 110, targetY: 430, color: '#ffcc00' },
         { name: 'Outer Reaches', xMin: 221, xMax: 900, yMin: 361, yMax: 520, targetX: 550, targetY: 440, color: '#7ef0a3' }
     ];
+
+    // Generate hazard zones and gravity wells for each sector
+    sectors.forEach((sector, sectorIdx) => {
+        // 1-2 radiation zones per sector
+        for (let i = 0; i < (sectorIdx % 2 === 0 ? 1 : 2); i++) {
+            hazardZones.push({
+                x: Math.random() * (sector.xMax - sector.xMin) + sector.xMin,
+                y: Math.random() * (sector.yMax - sector.yMin) + sector.yMin,
+                radius: 60 + Math.random() * 40,
+                type: 'radiation',
+                intensity: 0.5 + Math.random() * 0.5
+            });
+        }
+        // 1 gravity well per sector near center
+        const gravX = sector.targetX + (Math.random() - 0.5) * 100;
+        const gravY = sector.targetY + (Math.random() - 0.5) * 100;
+        gravityWells.push({
+            x: Math.max(sector.xMin + 50, Math.min(sector.xMax - 50, gravX)),
+            y: Math.max(sector.yMin + 50, Math.min(sector.yMax - 50, gravY)),
+            radius: 80,
+            strength: 1.2 + Math.random() * 0.8
+        });
+    });
 
     try {
         const [asteroidRes, exoRes] = await Promise.all([
@@ -749,6 +779,34 @@ async function openExplorerGame() {
         ctx.restore();
     }
 
+    function drawHazards() {
+        // Draw radiation zones
+        hazardZones.forEach((zone) => {
+            const dist = distanceBetween(ship.x, ship.y, zone.x, zone.y);
+            const inZone = dist < zone.radius;
+            ctx.fillStyle = inZone ? 'rgba(255, 100, 100, 0.3)' : 'rgba(255, 100, 100, 0.1)';
+            ctx.beginPath();
+            ctx.arc(zone.x, zone.y, zone.radius, 0, Math.PI * 2);
+            ctx.fill();
+            if (inZone) {
+                ctx.strokeStyle = '#ff6464';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+        });
+        
+        // Draw gravity wells
+        gravityWells.forEach((well) => {
+            const dist = distanceBetween(ship.x, ship.y, well.x, well.y);
+            const inWell = dist < well.radius;
+            ctx.strokeStyle = inWell ? 'rgba(100, 200, 255, 0.5)' : 'rgba(100, 200, 255, 0.2)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.arc(well.x, well.y, well.radius, 0, Math.PI * 2);
+            ctx.stroke();
+        });
+    }
+
     function drawRadar() {
         const radarX = sceneWidth - 90;
         const radarY = 20;
@@ -828,8 +886,9 @@ async function openExplorerGame() {
     }
 
     function updateShip() {
+        const engineMult = 1 + (ship.upgrades.engine - 1) * 0.4;
         const throttle = keys.shift ? 1.8 : 1;
-        const acceleration = 0.38 * throttle;
+        const acceleration = 0.38 * throttle * engineMult;
 
         if (keys['arrowleft'] || keys['a']) ship.angle -= ship.turnSpeed * throttle;
         if (keys['arrowright'] || keys['d']) ship.angle += ship.turnSpeed * throttle;
@@ -852,14 +911,49 @@ async function openExplorerGame() {
             ship.fuel = Math.min(ship.maxFuel, ship.fuel + 0.08);
         }
 
-        ship.vx *= 0.96;
-        ship.vy *= 0.96;
+        // Apply gravity well effects
+        gravityWells.forEach((well) => {
+            const dx = well.x - ship.x;
+            const dy = well.y - ship.y;
+            const dist = Math.hypot(dx, dy);
+            if (dist < well.radius) {
+                const pull = (1 - dist / well.radius) * 0.06 * well.strength;
+                ship.vx += (dx / dist) * pull;
+                ship.vy += (dy / dist) * pull;
+            }
+        });
+
+        // Apply drag from hazard zones (radiation)
+        let dragMult = 1.0;
+        hazardZones.forEach((zone) => {
+            const dx = zone.x - ship.x;
+            const dy = zone.y - ship.y;
+            const dist = Math.hypot(dx, dy);
+            if (dist < zone.radius) {
+                dragMult *= (1 - (1 - dist / zone.radius) * 0.2);
+                ship.radiationExposure += (1 - dist / zone.radius) * 0.5;
+                ship.fuel = Math.max(0, ship.fuel - (1 - dist / zone.radius) * 0.1);
+            }
+        });
+
+        ship.vx *= 0.96 * dragMult;
+        ship.vy *= 0.96 * dragMult;
 
         ship.x += ship.vx;
         ship.y += ship.vy;
 
         ship.x = Math.max(18, Math.min(sceneWidth - 18, ship.x));
         ship.y = Math.max(18, Math.min(sceneHeight - 18, ship.y));
+        
+        // Shield auto-regenerate (slowly)
+        if (ship.shieldHealth < ship.maxShield) {
+            ship.shieldHealth += 0.05;
+        }
+        
+        // Radiation decay
+        if (ship.radiationExposure > 0) {
+            ship.radiationExposure = Math.max(0, ship.radiationExposure - 0.15);
+        }
     }
 
     function updateDiscovery() {
@@ -877,9 +971,12 @@ async function openExplorerGame() {
         const sectorName = getActiveSector();
         const fuelPercent = ship.fuel.toFixed(0);
         const speed = Math.hypot(ship.vx, ship.vy).toFixed(1);
+        const shieldPercent = ship.shieldHealth.toFixed(0);
+        const radExposure = ship.radiationExposure.toFixed(0);
         
-        // Enhanced HUD status
-        let statusText = `[${sectorName}] Fuel: ${fuelPercent}% | Speed: ${speed} u/s`;
+        // Enhanced HUD status with all stats
+        let statusText = `[${sectorName}] Fuel: ${fuelPercent}% | Shield: ${shieldPercent}% | Speed: ${speed} u/s | Credits: ${ship.credits}`;
+        if (radExposure > 10) statusText += ` | ⚠️ Radiation: ${radExposure}%`;
         if (nearest && nearestDistance <= nearest.radius + ship.radius + 30) {
             statusText += ` | Signal: ${nearest.name}`;
         }
@@ -890,26 +987,92 @@ async function openExplorerGame() {
             dataEl.innerHTML = renderExplorerScanCard(nearest);
             if (!visited.has(nearest.id)) {
                 visited.add(nearest.id);
-                const discoveryEntry = `✓ ${nearest.name} (${sectorName})`;
+                const reward = 10 + Math.floor(Math.random() * 20);
+                ship.credits += reward;
+                const discoveryEntry = `✓ ${nearest.name} (+${reward} Cr)`;
                 visitedList.unshift(discoveryEntry);
                 updateExplorerLog(logEl, visitedList);
             }
         } else {
-            dataEl.innerHTML = '<p>Navigate toward glowing objects to scan and discover celestial bodies.</p>';
+            dataEl.innerHTML = '<p>Navigate toward glowing objects to scan and discover celestial bodies. Watch for radiation zones (red) and gravity wells (blue circles).</p>';
         }
     }
 
+    function updateUpgradesUI() {
+        const upgradesPanel = document.getElementById('upgrades-panel');
+        if (!upgradesPanel) return;
+        
+        const upgradeCosts = { engine: 50, shield: 60, scanner: 40 };
+        const upgradeNames = { engine: 'Engine Boost', shield: 'Shield Upgrade', scanner: 'Scanner Range' };
+        
+        let html = '';
+        Object.keys(ship.upgrades).forEach(type => {
+            const currentLevel = ship.upgrades[type];
+            const maxLevel = 5;
+            const cost = upgradeCosts[type] * currentLevel;
+            const canAfford = ship.credits >= cost;
+            const isMaxed = currentLevel >= maxLevel;
+            
+            const btnDisabled = isMaxed || !canAfford;
+            const btnClass = btnDisabled ? 'upgrade-btn disabled' : 'upgrade-btn';
+            const btnText = isMaxed ? '✓ Max' : canAfford ? `Upgrade (${cost})` : `Need ${cost}`;
+            
+            html += `
+                <div class="upgrade-item">
+                    <span class="upgrade-name">${upgradeNames[type]}</span>
+                    <span class="upgrade-level">Lv${currentLevel}</span>
+                    <button class="${btnClass}" onclick="window.__upgradeShip && window.__upgradeShip('${type}')" ${btnDisabled ? 'disabled' : ''}>${btnText}</button>
+                </div>
+            `;
+        });
+        
+        upgradesPanel.innerHTML = html;
+    }
+
+    function upgradeShip(type) {
+        const upgradeCosts = { engine: 50, shield: 60, scanner: 40 };
+        const maxLevel = 5;
+        
+        if (!ship.upgrades[type]) return;
+        if (ship.upgrades[type] >= maxLevel) return;
+        
+        const cost = upgradeCosts[type] * ship.upgrades[type];
+        if (ship.credits < cost) return;
+        
+        ship.credits -= cost;
+        ship.upgrades[type]++;
+        
+        // Apply upgrade effects
+        if (type === 'shield') {
+            ship.maxShield = 100 + (ship.upgrades[type] - 1) * 30;
+            ship.shieldHealth = ship.maxShield;
+        }
+        
+        updateUpgradesUI();
+    }
+    window.__upgradeShip = upgradeShip;
+
+    let frameCount = 0;
     function gameLoop() {
+        frameCount++;
         updateShip();
         drawBackground();
+        drawHazards();
         drawObjects();
         drawShip();
         drawRadar();
         updateDiscovery();
+        
+        // Update UI every 30 frames
+        if (frameCount % 30 === 0) {
+            updateUpgradesUI();
+        }
+        
         window.requestAnimationFrame(gameLoop);
     }
 
     updateExplorerLog(logEl, visitedList);
+    updateUpgradesUI();
     gameLoop();
 
     modal._explorerCleanup = () => {
