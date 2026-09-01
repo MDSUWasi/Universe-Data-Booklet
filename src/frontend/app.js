@@ -471,6 +471,33 @@ async function checkHabitability() {
     }
 }
 
+async function askLocalChat() {
+    const input = document.getElementById('chat-input');
+    const resultBox = document.getElementById('chat-result');
+    const question = input?.value.trim();
+    if (!question) {
+        if (resultBox) resultBox.textContent = 'Please type a question about the dataset.';
+        return;
+    }
+
+    if (resultBox) {
+        resultBox.textContent = 'Thinking...';
+    }
+
+    try {
+        const res = await fetch(`/api/chat?question=${encodeURIComponent(question)}`);
+        const data = await res.json();
+        if (data.error) {
+            if (resultBox) resultBox.textContent = data.error;
+            return;
+        }
+        if (resultBox) resultBox.textContent = data.answer || 'No answer generated.';
+    } catch (error) {
+        console.error(error);
+        if (resultBox) resultBox.textContent = 'The local assistant is unavailable right now.';
+    }
+}
+
 function escapeHtml(text) {
     if (text === null || text === undefined) return '';
     const AMP = '&' + 'amp;';
@@ -505,6 +532,7 @@ window.switchTab = switchTab;
 window.showChart = showChart;
 window.toggle3DView = toggle3DView;
 window.checkHabitability = checkHabitability;
+window.askLocalChat = askLocalChat;
 window.handleSearch = handleSearch;
 window.showDetail = showDetail;
 window.closeModal = closeModal;

@@ -14,6 +14,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from client import fetch_asteroids, fetch_exoplanets
 from cache_manager import cleanup_old_cache
+from local_chat import answer_question
 
 PORT = int(os.getenv("SERVER_PORT", 8081))
 DEBUG_MODE = os.getenv("DEBUG_MODE", "false").lower() == "true"
@@ -311,6 +312,23 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
             except Exception as e:
                 print(f"⚠️ Habitability calculation error: {type(e).__name__}")
                 self.send_error_json(500, "Internal Server Error: Calculation failed")
+            return
+
+        if path == '/api/chat':
+            query = parse_qs(parsed.query)
+            question = query.get('question', [''])[0].strip()
+            if not question:
+                self.send_error_json(400, "Missing 'question' parameter")
+                return
+
+            try:
+                asteroid_data, _ = fetch_asteroids()
+                exoplanet_data, _ = fetch_exoplanets()
+                response = answer_question(question, asteroid_data, exoplanet_data)
+                self.send_json_response(200, {"answer": response})
+            except Exception as e:
+                print(f"⚠️ Chat answer error: {type(e).__name__}")
+                self.send_error_json(500, "Internal Server Error: Chat failed")
             return
 
         # 404 for unknown API routes

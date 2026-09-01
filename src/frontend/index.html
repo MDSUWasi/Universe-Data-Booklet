@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universe Data Booklet</title>
+    <title>Welcome to Universe Data Booklet</title>
     <meta name="description" content="Interactive explorer for Near-Earth Asteroids and Exoplanets">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -61,6 +61,15 @@
                     <button class="action-btn scan-btn" onclick="checkHabitability()">Scan</button>
                 </div>
                 <div id="habitability-result"></div>
+            </section>
+
+            <section class="glass-panel local-chat-panel">
+                <h2>🤖 Local Data Assistant</h2>
+                <div class="scanner-input">
+                    <input type="text" id="chat-input" placeholder="Ask about asteroid or exoplanet data...">
+                    <button class="action-btn scan-btn" onclick="askLocalChat()">Ask</button>
+                </div>
+                <div id="chat-result" class="chat-result">Try questions like: “Which exoplanet is most habitable?” or “How many hazardous asteroids?”</div>
             </section>
 
             <footer class="disclaimer">
@@ -135,7 +144,7 @@
     <div class="modal-overlay" id="chart-modal" onclick="closeChartModal()">
         <div class="modal-content modal-lg" onclick="event.stopPropagation()">
             <button class="close-btn modal-close" onclick="closeChartModal()">✕</button>
-            <h2 class="modal-title">📊 Data Chart</h2>
+            <h2 class="modal-title">📊 Chart View</h2>
             <div class="chart-modal-body">
                 <canvas id="chart-canvas"></canvas>
             </div>
@@ -145,7 +154,7 @@
     <div class="modal-overlay" id="three-modal" onclick="closeThreeModal()">
         <div class="modal-content modal-lg" onclick="event.stopPropagation()">
             <button class="close-btn modal-close" onclick="closeThreeModal()">✕</button>
-            <h2 class="modal-title">🌍 3D Solar System</h2>
+            <h2 class="modal-title">🌍 3D System</h2>
             <div class="three-modal-body">
                 <div id="three-view-container"></div>
             </div>
@@ -155,7 +164,7 @@
     <div class="modal-overlay" id="map-modal" onclick="closeMapModal()">
         <div class="modal-content modal-lg" onclick="event.stopPropagation()">
             <button class="close-btn modal-close" onclick="closeMapModal()">✕</button>
-            <h2 class="modal-title">🗺️ Data Map</h2>
+            <h2 class="modal-title">🗺️ Data Map View</h2>
             <div class="map-modal-body" id="map-container"></div>
         </div>
     </div>
