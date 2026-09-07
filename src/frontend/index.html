@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to Universe Data Booklet</title>
+    <title>Universe Data Booklet</title>
     <meta name="description" content="Interactive explorer for Near-Earth Asteroids and Exoplanets">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -13,7 +13,7 @@
     <nav class="topbar">
         <div class="topbar-left">
             <h1>Universe Data Booklet</h1>
-            <p>Data on Exoplanets and Near-Earth Asteroids</p>
+            <p>Welcome. Let's explore some data on Exoplanets and Near-Earth Asteroids</p>
         </div>
         <div class="topbar-right">
 <div class="theme-switcher">
@@ -32,7 +32,7 @@
         <main class="main-content">
             <section class="controls-section">
                 <div class="tab-group">
-                    <button class="tab-btn active" onclick="switchTab('asteroids')">Asteroids Data (Near Earth for last 30 daya)</button>
+                    <button class="tab-btn active" onclick="switchTab('asteroids')">Asteroids Data (Near Earth for last 30 days)</button>
                     <button class="tab-btn" onclick="switchTab('exoplanets')">Exoplanets Data</button>
                 </div>
                 <div class="action-group">
@@ -41,7 +41,7 @@
                     <button class="action-btn" onclick="toggle3DView()">🌍 3D View</button>
                     <button class="action-btn" onclick="showMap()">🗺️ Map View</button>
                     <button class="action-btn" onclick="openExplorerGame()">🚀 Free Exploration</button>
-                    <button class="action-btn" onclick="openStudyModal()">🎓 Study Mode</button>
+                    <button class="action-btn" onclick="openStudyModal()">🎓 Study & Research</button>
                     <button class="action-btn" onclick="exportPDF()">📄 PDF Download</button>
                 </div>
             </section>
@@ -70,7 +70,7 @@
                     <input type="text" id="chat-input" placeholder="Ask about asteroid or exoplanet data...">
                     <button class="action-btn scan-btn" onclick="askLocalChat()">Ask</button>
                 </div>
-                <div id="chat-result" class="chat-result">Try questions like: “Which exoplanet is most habitable?” or “How many hazardous asteroids?”</div>
+                <div id="chat-result" class="chat-result">Currently under development (It will not function properly in current condition)</div>
             </section>
 
             <footer class="disclaimer">
@@ -145,7 +145,7 @@
     <div class="modal-overlay" id="chart-modal" onclick="closeChartModal()">
         <div class="modal-content modal-lg" onclick="event.stopPropagation()">
             <button class="close-btn modal-close" onclick="closeChartModal()">✕</button>
-            <h2 class="modal-title">📊 Chart View</h2>
+            <h2 class="modal-title">📊 Charts View</h2>
             <div class="chart-modal-body">
                 <canvas id="chart-canvas"></canvas>
             </div>
@@ -155,7 +155,7 @@
     <div class="modal-overlay" id="three-modal" onclick="closeThreeModal()">
         <div class="modal-content modal-lg" onclick="event.stopPropagation()">
             <button class="close-btn modal-close" onclick="closeThreeModal()">✕</button>
-            <h2 class="modal-title">🌍 3D System</h2>
+            <h2 class="modal-title">🌍 3D View</h2>
             <div class="three-modal-body">
                 <div id="three-view-container"></div>
             </div>
@@ -165,7 +165,7 @@
     <div class="modal-overlay" id="map-modal" onclick="closeMapModal()">
         <div class="modal-content modal-lg" onclick="event.stopPropagation()">
             <button class="close-btn modal-close" onclick="closeMapModal()">✕</button>
-            <h2 class="modal-title">🗺️ Data Map View</h2>
+            <h2 class="modal-title">🗺️ Map View</h2>
             <div class="map-modal-body" id="map-container"></div>
         </div>
     </div>
@@ -173,7 +173,7 @@
     <div class="modal-overlay" id="explorer-modal" onclick="closeExplorerGame()">
         <div class="modal-content modal-lg explorer-modal" onclick="event.stopPropagation()">
             <button class="close-btn modal-close" onclick="closeExplorerGame()">✕</button>
-            <h2 class="modal-title">🚀 Free Exploration Mode</h2>
+            <h2 class="modal-title">🚀 Exploration Game (Currently a prototype)</h2>
             <div class="explorer-layout">
                 <div class="explorer-canvas-wrap">
                     <canvas id="explorer-canvas" width="900" height="520"></canvas>
@@ -185,7 +185,6 @@
                         <p>WASD / Arrow keys to fly</p>
                         <p>Hold Shift for a boost</p>
                         <p>Approach objects to scan them</p>
-                        <p>There are no quests or required goals</p>
                         <div class="explorer-sector-buttons">
                             <button class="mini-sector-btn" onclick="setExplorerSector('Solar System')">Solar System</button>
                             <button class="mini-sector-btn" onclick="setExplorerSector('Sirius Expanse')">Sirius Expanse</button>
@@ -197,10 +196,10 @@
                             <button class="mini-sector-btn" onclick="setExplorerSector('Outer Reaches')">Outer Reaches</button>
                         </div>
                     </div>
-                    <div id="explorer-data" class="explorer-data">No target in range.</div>
+                    <div id="explorer-data" class="explorer-data">Nothing in range.</div>
                     <div id="explorer-log" class="explorer-log"></div>
                     <div id="explorer-upgrades" class="explorer-upgrades">
-                        <h4>⚡ Ship Upgrades</h4>
+                        <h4>⚡ Ship Upgrades (Under Development)</h4>
                         <div id="upgrades-panel"></div>
                     </div>
                 </div>
@@ -211,7 +210,7 @@
     <div class="modal-overlay" id="study-modal" onclick="closeStudyModal()">
         <div class="modal-content modal-lg" onclick="event.stopPropagation()">
             <button class="close-btn modal-close" onclick="closeStudyModal()">✕</button>
-            <h2 class="modal-title">🎓 Study & Research Tab</h2>
+            <h2 class="modal-title">🎓 Study & Research</h2>
             <div class="study-tabs">
                 <button class="study-tab-btn active" data-tab="flashcards" onclick="switchStudyTab('flashcards')">📚 Flashcards</button>
                 <button class="study-tab-btn" data-tab="quiz" onclick="switchStudyTab('quiz')">🧠 Quiz</button>
