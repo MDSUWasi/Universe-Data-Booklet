@@ -1,7 +1,12 @@
+<h5 align="right"><i>Last README Update: 10 September 2026</i></h4>
 <h1 align="center"> 🌌 Universe Data Booklet</h1>
 
-> **An interactive explorer for Near-Earth Asteroids and Exoplanets.**  
-> *Built for students, educators and for study purpose* ``` I cannot gurrantee that all the data and calculations are accurate and correct. So, Please recheck before any serious use```
+> **An interactive data explorer for Near-Earth Asteroids and Exoplanets.**  
+> *Built for students, educators and for study purpose* 
+
+<h3>
+<p style="color:red"><b><u>I cannot gurrantee that all the data and calculations are accurate and correct. So, Please recheck before any serious use</b></u></p>
+</h3>
 
 ![License](https://img.shields.io/badge/License-MIT-green)
 
@@ -23,9 +28,8 @@ Seamlessly switch between two massive datasets:
 - **Detail Modal:** Click any row for a deep-dive into the object's data.
 - **Search & Stats:** Client-side search across both datasets plus live stat cards.
 - **Map View:** A visual map for locating both data. (Make sure to press the "more" button before viewing the map for exoplanets. because there are approximately 6,000 exoplanets and all of those data are not shown at once untill the more button is clicked and the Map view works on how many data is present on the interface.)
-- **Study Mode:** A tab for study section. There user can practice flashcards, quiz, challenge etc.
-- **Research Mode:** This mode gives user the ability to work on data which are present in the data but not specially sayed or identified. This mode is present inside ```Study Mode```
-- **Compare:** There is a comapre section inside ```Study Mode```, where users can compare at leat 2 expolanets/ asteroids in a diagram.
+- **Study & Research Mode:** A tab for study section. There user can practice flashcards, quiz, challenge etc. This section also comes with other features like:- *Discover:* This mode gives user the ability to work on data which are present in the data set but not specifically indicated. *Compare:* Here users can compare at leat 2 expolanets/ asteroids in a diagram.
+
 - **PDF Download:** Users can download the data loaded in the interphase as PDF inside their device. System will automatically create, edit and formate the PDF. To use this feature user must load all data in the site first (For example 50 exoplanets list are shown by default but the user want to download the PDF data of 100 exoplanets, then user have to click on load more once and then 100 exoplanets data will be shown) then click on PDF download button. Soon after this the PDF will get downloaded. 
 
 ### 🛡️ **Security & Privacy**
@@ -33,7 +37,7 @@ Seamlessly switch between two massive datasets:
 - Path-traversal & encoded-traversal protection on static files.
 - Sanitized user inputs (no raw HTML injection) & hidden internal errors in production.
 
-[I have tried my best to ensure security. But this is a solo project if there is still any issue, please let me know]
+<h4><p style="color:gray">[I have tried my best to ensure security. But this is a solo project (currently) if there is still any issue, please let me know]</p></h4>
 ---
 
 <h2 align="center"> 🚀 Handling Thousands of Users (The best part)</h2>
@@ -46,7 +50,7 @@ One of the biggest challenges in public API projects is hitting rate limits when
 3.  **Automatic Refresh:** The cache remains valid for **30 days** (configurable). All subsequent users receive this cached data instantly.
 4.  **Zero API Burden:** Even if 10,000+ users visits the site, the site hit the NASA API **once every 30 days**, completely solving the standard rate limits.
 
-And, do not worry about storage. The site will automatically delete cache data which are older than 90 days. (This is because, I want to have the old data saved for some times before it is gone. This is because if we need the old data then this site have the saved version, But I can't gurrantee that it will be saved for 90 days.)
+<h6>And, do not worry about storage. The site will automatically delete cache data which are older than 90 days. (This is because, I want to have the old data saved for some times before it is gone. This is because if we need the old data then this site have the saved version, But I can't gurrantee that it will be saved for 90 days.)</h6>
 ---
 
 
@@ -112,7 +116,9 @@ Three.js, Chart.js, jsPDF: For powerful, open-source visualization libraries.
 
 
 
-
+---
+<h2 align="center"><u>Current Status</u></h3>
+<h4 align="center"> Under <p style="color:green">Active</p> Development</h3>
 
 ---
 ---
