@@ -1,4 +1,4 @@
-<h5 align="right"><i>Last README Update: 10 September 2026</i></h4>
+<h5 align="right"><i>Last README Update: 28 September 2026</i></h4>
 <h1 align="center"> 🌌 Universe Data Booklet</h1>
 
 > **An interactive data explorer for Near-Earth Asteroids and Exoplanets.**  
@@ -9,6 +9,9 @@
 </h3>
 
 ![License](https://img.shields.io/badge/License-MIT-green)
+
+![Hackatime](https://hackatime.hackclub.com/api/v1/badge/U0B5XFH01GQ/MDSUWasi/Universe-Data-Booklet)
+
 
 Universe Data Booklet, as it's name suggest, it is a website (It's name is bookelt but it is a website) which contains data on exoplanets and near Earth asteroids. Universe Data Booklet transforms raw astronomical data into an intuitive and graphical experience. Whether you are tracking potentially hazardous asteroids or analyzing the habitability of distant exoplanets, this tool provides insights with **zero latency** thanks to its intelligent local caching architecture.
 
