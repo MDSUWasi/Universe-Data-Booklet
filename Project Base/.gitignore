@@ -1,0 +1,26 @@
+# Large data files
+data/
+*.tif
+*.tiff
+*.img
+*.jp2
+*.hdf
+*.nc
+
+# QGIS project backups
+*.qgz~
+*.qgs~
+
+# Credentials — NEVER commit these
+.netrc
+.env
+credentials*
+
+# Python
+__pycache__/
+*.pyc
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
