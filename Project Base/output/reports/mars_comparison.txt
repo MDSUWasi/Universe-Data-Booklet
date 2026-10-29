@@ -1,0 +1,19 @@
+========================================================================
+  MARS PATCH ANALYSIS
+========================================================================
+  slope raster : mars_slope_30m.tif
+  valid cover  : 69.48%
+  flat (<=3deg): 41.608% of valid = 1036.76 km2
+  patches      : 8942
+
+   1.   506.277 km2 | slope 1.50 | rough mean 2.110  p95 3.744  max 7.600
+   2.    32.588 km2 | slope 1.73 | rough mean 2.441  p95 3.932  max 5.543
+   3.    25.073 km2 | slope 1.79 | rough mean 2.578  p95 4.023  max 7.317
+   4.    20.763 km2 | slope 1.72 | rough mean 2.446  p95 3.973  max 5.682
+   5.    16.826 km2 | slope 1.73 | rough mean 2.448  p95 3.943  max 5.984
+
+  BEST NON-FILLED PATCH
+    area 506.277 km2 | rough mean 2.110  p95 3.744  max 7.600
+
+  Compare against the 30 m table in output/reports/analog_comparison.txt
+  Only valid if this raster is also on a 30 m grid.
