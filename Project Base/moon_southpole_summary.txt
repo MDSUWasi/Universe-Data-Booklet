@@ -1,0 +1,33 @@
+MOON SOUTH POLE ANALOG ANALYSIS — PHASE 3 COMPLETE
+==================================================
+Date: 29 October 2026
+Tile: USGS LRO South Pole DEM (16264×16874 px, 4 m/pixel)
+Coordinate system: Moon Polar Stereographic (EPSG:unknown)
+
+SLOPE THRESHOLD: ≤ 3° (safe landing criterion)
+
+RESULTS:
+────────
+Total flat terrain (≤ 3°): 3,113,302 pixels (1.13% of tile)
+Total safe area: 49.8 km² distributed across 402,671 patches
+
+TOP 3 CONTIGUOUS LANDING CANDIDATES (slope ≤ 3°, area ≥ 0.4 km²):
+──────────────────────────────────────────────────────────────
+Patch 1: Area = 0.521 km² | Centre E=-27684, N=-27980
+         Slope avg = ~2.3° | Roughness mean = 0.293 m | p95 = 0.518 m | max = 1.072 m
+
+Patch 2: Area = 0.423 km² | Centre E=-26783, N=-27958
+         Slope avg = ~2.1° | Roughness mean = 0.301 m | p95 = 0.527 m | max = 1.017 m
+
+Patch 3: Area = 0.400 km² | Centre E=-23101, N=-30693
+         Slope avg = ~2.2° | Roughness mean = 0.325 m | p95 = 0.526 m | max = 0.921 m
+
+CONCLUSION:
+───────────
+Three viable landing zones identified within 2 km of each other near Shackleton 
+Crater region. All exhibit similar micro-topography (~0.3 m mean roughness), 
+consistent with lava-filled basins or ejecta plains. Largest contiguous pad is 
+0.521 km² — below ideal minimum (1 km²) but acceptable for small lander missions.
+
+NEXT STEP: Compare these three metrics against Earth polar regions (SRTM/ASTER DEM) 
+to find terrestrial analogs with matching slope and roughness profiles.

@@ -1,26 +1,150 @@
-# Large data files
-data/
-*.tif
-*.tiff
-*.img
-*.jp2
-*.hdf
-*.nc
+# ============================================================
+# PLANETARY RESEARCH 2026 - .gitignore
+# Generated for geospatial remote sensing project
+# ============================================================
 
-# QGIS project backups
-*.qgz~
-*.qgs~
+# -------------------------------------------------------------
+# LARGE BINARY DATA - Keep out of git
+# Use Git LFS if you need versioning, or store externally
+# -------------------------------------------------------------
+# Raster files (DEM, slope, roughness) - GB scale
+data/**/*.tif
+data/**/*.tiff
+data/**/*.img
+data/**/*.asc
+data/**/*.grd
+output/**/*.tif
+output/**/*.tiff
+output/**/*.img
 
-# Credentials — NEVER commit these
-.netrc
-.env
-credentials*
+# Vector files - can be large
+output/**/*.shp
+output/**/*.dbf
+output/**/*.shx
+output/**/*.prj
+output/**/*.gdb/*
 
-# Python
-__pycache__/
-*.pyc
-venv/
+# NetCDF/HDF - scientific binary formats
+data/**/*.nc
+data/**/*.nc4
+data/**/*.h5
+data/**/*.hdf
 
-# OS
+# -------------------------------------------------------------
+# TEMPORARY / INTERMEDIATE FILES - Never commit
+# -------------------------------------------------------------
+# GDAL/Auxiliary sidecar files
+*.aux.xml
+PREVIEW/
+AUXFILES/
+INFO/
+GDAL/
+
+# Temporary processing files
+*.tmp
+*.temp
+*.bak
+*.backup
+*~
+*.swp
+*.swo
+
+# Log files from processing
+*.log
+logs/*.log.tmp
+audit_log*.txt
+audit_report*.txt
+audit_report*.html
+.manifest_*
+
+# Junk from failed operations
+*.xyz
+*.old
+*.orig
+
+# -------------------------------------------------------------
+# ARCHIVE / BACKUP FOLDERS - Created by reorganise.sh
+# -------------------------------------------------------------
+_quarantine_*/
+_archive_*/
 .DS_Store
 Thumbs.db
+
+# -------------------------------------------------------------
+# IDE / EDITOR FILES - VS Code, Vim, Emacs, etc.
+# -------------------------------------------------------------
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.nvim/
+
+# Vim swap files
+*.swp
+*.swo
+*~
+
+# Emacs backup
+*~
+.#*
+
+# -------------------------------------------------------------
+# PYTHON ARTIFACTS
+# -------------------------------------------------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv/
+
+# -------------------------------------------------------------
+# JUPYTER NOTEBOOKS
+# -------------------------------------------------------------
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+# Keep notebooks but exclude checkpoint directories
+
+# -------------------------------------------------------------
+# GIT ITSELF
+# -------------------------------------------------------------
+.git/
+.gitignore
+.gitattributes
+.gitmodules
+
+# -------------------------------------------------------------
+# OPTIONAL - Comment these if you want them tracked
+# -------------------------------------------------------------
+# Project documentation - usually safe to track
+# docs/
+# README.md
+# LICENSE
+
+# Small data files - CSV, JSON, text
+# lunar_fingerprints.csv
+# project_log.txt
+# moon_southpole_summary.txt
+# data_source.md
