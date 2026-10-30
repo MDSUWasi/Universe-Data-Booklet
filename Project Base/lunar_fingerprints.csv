@@ -1,4 +1,0 @@
-patch_id,area_km2,center_e,center_n,slope_mean_deg,roughness_mean_m,roughness_p95_m
-1,0.521,-27684,-27980,2.3,0.293,0.518
-2,0.423,-26783,-27958,2.1,0.301,0.527
-3,0.400,-23101,-30693,2.2,0.325,0.526
