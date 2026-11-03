@@ -10,281 +10,305 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <!-- Charts -->
 <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-<!-- Three.js (starfield) -->
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <!-- GSAP (animations) -->
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 
 <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="sidebar-open">
 
-<!-- ================= THREE.JS STARFIELD CANVAS ================= -->
+<!-- ================= MOVING STARFIELD (full-screen, behind everything) ================= -->
 <canvas id="starfield" aria-hidden="true"></canvas>
 
-<!-- ================= HERO / LANDING ================= -->
-<header class="hero">
-  <div class="hero-badge">Planetary Research 2026</div>
-  <h1 class="hero-title">Planetary <span class="accent">Analog</span> Explorer</h1>
-  <p class="hero-sub">
-    Explore terrain across <strong>Earth, the Moon, and Mars</strong>.
-    Compare polar analog candidates, the lunar South Pole reference, and Jezero Crater
-    through an interactive, data-grounded atlas.
-  </p>
-  <div class="hero-stats" id="hero-stats">
-    <div class="stat"><div class="stat-num" id="stat-sites">5</div><div class="stat-label">Sites Compared</div></div>
-    <div class="stat"><div class="stat-num" id="stat-bodies">3</div><div class="stat-label">Planetary Bodies</div></div>
-    <div class="stat"><div class="stat-num" id="stat-window">90&nbsp;m</div><div class="stat-label">Nominal Roughness Window</div></div>
-    <div class="stat"><div class="stat-num" id="stat-cache">0</div><div class="stat-label">Cached Lookups</div></div>
+<!-- ================= HAMBURGER ================= -->
+<button class="hamburger" id="hamburger" type="button"
+        onclick="Sidebar.toggle()"
+        aria-label="Toggle navigation" aria-expanded="true" aria-controls="sidebar">
+  <span class="bar"></span>
+  <span class="bar"></span>
+  <span class="bar"></span>
+</button>
+
+<!-- ================= SIDEBAR (open by default) ================= -->
+<aside class="sidebar open" id="sidebar" aria-label="Feature navigation">
+  <div class="sidebar-header">
+    <span class="sidebar-kicker">Navigate</span>
+    <button class="sidebar-close" type="button" onclick="Sidebar.close()" aria-label="Close navigation">&times;</button>
   </div>
 
-  <section class="planetary-focus" aria-label="Explore by planetary body">
-    <article class="body-card earth-card">
-      <div class="body-card-heading"><span class="body-symbol" aria-hidden="true">🌍</span><div><h2>Earth</h2><p>Analog candidates</p></div></div>
-      <p>McMurdo, Axel Heiberg, and Kerguelen. Compare polar and volcanic terrain against the lunar reference.</p>
-      <div class="body-card-metric"><strong>3</strong><span>candidate regions</span><strong>93%</strong><span>top lunar similarity</span></div>
-      <button class="body-card-action" type="button" onclick="UI.openModal('map','earth')">Explore Earth sites <span aria-hidden="true">→</span></button>
-    </article>
-    <article class="body-card moon-card">
-      <div class="body-card-heading"><span class="body-symbol" aria-hidden="true">🌙</span><div><h2>Moon</h2><p>Lunar South Pole reference</p></div></div>
-      <p>Shackleton-region terrain provides the primary reference for Earth analog screening.</p>
-      <div class="body-card-metric"><strong id="moon-area">3.875</strong><span>km² flat area</span><strong id="moon-rough">2.462</strong><span>mean roughness · m</span></div>
-      <button class="body-card-action" type="button" onclick="UI.openModal('map','moon')">Explore lunar reference <span aria-hidden="true">→</span></button>
-    </article>
-    <article class="body-card mars-card">
-      <div class="body-card-heading"><span class="body-symbol" aria-hidden="true">🔴</span><div><h2>Mars</h2><p>Jezero Crater reference</p></div></div>
-      <p>Perseverance’s landing region adds a Martian terrain reference to the cross-world comparison.</p>
-      <div class="body-card-metric"><strong id="mars-area">506.277</strong><span>km² flat area</span><strong id="mars-rough">2.110</strong><span>mean roughness · m</span></div>
-      <button class="body-card-action" type="button" onclick="UI.openModal('map','mars')">Explore Jezero <span aria-hidden="true">→</span></button>
-    </article>
-  </section>
-
-  <nav class="feature-nav" aria-label="Main features">
-    <button class="nav-card" onclick="UI.openModal('map')">
+  <nav class="side-nav" aria-label="Main features">
+    <button class="side-nav-item" type="button" onclick="UI.openModal('map')">
       <span class="nav-icon">🗺️</span>
       <span class="nav-title">Explore Map</span>
       <span class="nav-desc">Earth · Moon · Mars</span>
     </button>
-    <button class="nav-card" onclick="UI.openModal('discovery')">
+    <button class="side-nav-item" type="button" onclick="UI.openModal('discovery')">
       <span class="nav-icon">🔭</span>
       <span class="nav-title">Discovery Lab</span>
       <span class="nav-desc">Screen any Earth coordinate</span>
     </button>
-    <button class="nav-card" onclick="UI.openModal('selector')">
+    <button class="side-nav-item" type="button" onclick="UI.openModal('selector')">
       <span class="nav-icon">🎮</span>
       <span class="nav-title">Base Site Selector</span>
       <span class="nav-desc">Play mission architect</span>
     </button>
-    <button class="nav-card" onclick="UI.openModal('calculator')">
+    <button class="side-nav-item" type="button" onclick="UI.openModal('calculator')">
       <span class="nav-icon">🧮</span>
       <span class="nav-title">Analogy Calculator</span>
       <span class="nav-desc">Tune thresholds, re-rank</span>
     </button>
-    <button class="nav-card" onclick="UI.openModal('planner')">
+    <button class="side-nav-item" type="button" onclick="UI.openModal('planner')">
       <span class="nav-icon">🧭</span>
       <span class="nav-title">Mission Planner</span>
       <span class="nav-desc">Design a field campaign</span>
     </button>
-    <button class="nav-card" onclick="UI.openModal('compare')">
+    <button class="side-nav-item" type="button" onclick="UI.openModal('compare')">
       <span class="nav-icon">📊</span>
       <span class="nav-title">Full Comparison</span>
       <span class="nav-desc">The numbers, verified</span>
     </button>
-    <button class="nav-card" onclick="UI.openModal('terrain')">
+    <button class="side-nav-item" type="button" onclick="UI.openModal('terrain')">
       <span class="nav-icon">⛰️</span>
       <span class="nav-title">3D Terrain Lab</span>
       <span class="nav-desc">Explore real DEM windows</span>
     </button>
-    <button class="nav-card" onclick="UI.openModal('patches')">
+    <button class="side-nav-item" type="button" onclick="UI.openModal('patches')">
       <span class="nav-icon">🧩</span>
       <span class="nav-title">Patch Explorer</span>
       <span class="nav-desc">Inspect every classified patch</span>
     </button>
-    <button class="nav-card" onclick="UI.openModal('scale')">
+    <button class="side-nav-item" type="button" onclick="UI.openModal('scale')">
       <span class="nav-icon">📏</span>
       <span class="nav-title">Scale Sensitivity</span>
       <span class="nav-desc">See why window size matters</span>
     </button>
   </nav>
-</header>
+</aside>
 
-<!-- ================= MODALS ================= -->
-<div class="modal-overlay" id="modal-terrain" onclick="UI.overlayClose(event,'terrain')">
-  <div class="modal-panel modal-wide">
-    <div class="modal-head"><h2>⛰️ 3D Terrain Lab</h2><button class="x" onclick="UI.closeModal('terrain')" aria-label="Close terrain lab">&times;</button></div>
-    <p class="modal-intro">A 3 km window sampled from the local DEM and matching slope/roughness rasters. The vertical scale is exaggerated for visibility; colors show the selected metric, not suitability.</p>
-    <div class="terrain-controls">
-      <label>Body<select id="terrain-body"><option value="Earth">Earth</option><option value="Moon">Moon</option><option value="Mars">Mars</option></select></label>
-      <label>Site<select id="terrain-site"></select></label>
-      <label>Surface<select id="terrain-mode"><option value="elevation">Elevation</option><option value="slope">Slope</option><option value="roughness">Roughness</option><option value="safe">≤3° slope screen</option></select></label>
-      <label>Vertical exaggeration <output id="terrain-exaggeration-value">4×</output><input id="terrain-exaggeration" type="range" min="1" max="10" step="0.5" value="4"></label>
-    </div>
-    <div class="terrain-stage"><canvas id="terrain-canvas" aria-label="Interactive three-dimensional terrain surface"></canvas><div id="terrain-status" class="terrain-status" aria-live="polite">Select a site to load its terrain.</div></div>
-    <div class="terrain-meta" id="terrain-meta"></div>
-  </div>
-</div>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="Sidebar.close()"></div>
 
-<div class="modal-overlay" id="modal-patches" onclick="UI.overlayClose(event,'patches')">
-  <div class="modal-panel modal-wide">
-    <div class="modal-head"><h2>🧩 Patch Explorer</h2><button class="x" onclick="UI.closeModal('patches')" aria-label="Close patch explorer">&times;</button></div>
-    <p class="modal-intro">Rows come from the committed patch-comparison report. Filled-surface flags are shown as recorded so water, ice, and other zero-filled regions can be inspected rather than hidden.</p>
-    <div class="patch-controls">
-      <label>Planetary body<select id="patch-body"><option value="all">All bodies</option><option value="Moon">Moon</option><option value="Earth">Earth</option><option value="Mars">Mars</option></select></label>
-      <label>Classification<select id="patch-kind"><option value="all">All patches</option><option value="valid">Non-filled</option><option value="filled">Filled / flagged</option></select></label>
-      <span id="patch-count" aria-live="polite">Loading patch report…</span>
-    </div>
-    <div class="cmp-table-wrap"><table class="cmp-table patch-table"><thead><tr><th>Site</th><th>Body</th><th>Area km²</th><th>Mean rough m</th><th>p95 rough m</th><th>Max rough m</th><th>Zero fraction</th><th>Flag</th></tr></thead><tbody id="patch-rows"></tbody></table></div>
-    <div id="patch-status" class="calc-notes" aria-live="polite"></div>
-  </div>
-</div>
+<!-- ================= MAIN CONTENT ================= -->
+<main class="main-content" id="main-content">
 
-<div class="modal-overlay" id="modal-scale" onclick="UI.overlayClose(event,'scale')">
-  <div class="modal-panel modal-wide">
-    <div class="modal-head"><h2>📏 Scale Sensitivity</h2><button class="x" onclick="UI.closeModal('scale')" aria-label="Close scale sensitivity">&times;</button></div>
-    <p class="modal-intro">The lunar fingerprint samples use a nominal 12 m roughness window; the main comparison uses a nominal 90 m window. The points below show the scale difference explicitly and must not be read as a direct analog ranking.</p>
-    <div class="scale-callout" id="scale-summary" aria-live="polite">Loading recorded fingerprints…</div>
-    <div class="chart-wrap"><canvas id="scale-chart"></canvas></div>
-    <div id="scale-status" class="calc-notes" aria-live="polite"></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modal-map" onclick="UI.overlayClose(event,'map')">
-  <div class="modal-panel modal-wide">
-    <div class="modal-head"><h2>🗺️ Atlas of Analogs</h2><button class="x" onclick="UI.closeModal('map')">&times;</button></div>
-    <div class="layer-switch" id="layer-switch">
-      <button class="layer-btn active" type="button" data-layer="earth" aria-pressed="true">🌍 Earth <span class="layer-count">3</span></button>
-      <button class="layer-btn" type="button" data-layer="moon" aria-pressed="false">🌙 Moon <span class="layer-count">1</span></button>
-      <button class="layer-btn" type="button" data-layer="mars" aria-pressed="false">🔴 Mars <span class="layer-count">1</span></button>
-    </div>
-    <div id="map"></div>
-    <div class="map-status" aria-live="polite">
-      <span id="map-status">Map tiles will load when the atlas opens.</span>
-      <button class="btn-ghost btn-small" id="map-retry" type="button" hidden>Retry tiles</button>
-    </div>
-    <section class="map-explorer" aria-labelledby="map-sites-title">
-      <div class="map-explorer-head"><h3 id="map-sites-title">All five catalogued sites</h3><span id="map-site-count" aria-live="polite">Showing 3 Earth sites</span></div>
-      <div class="map-sites" id="map-sites"></div>
-    </section>
-    <div class="map-footnote" id="map-footnote">Select any site or map marker to zoom in and view its terrain metrics.</div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modal-discovery" onclick="UI.overlayClose(event,'discovery')">
-  <div class="modal-panel modal-wide">
-    <div class="modal-head"><h2>🔭 Discovery Lab</h2><button class="x" onclick="UI.closeModal('discovery')">&times;</button></div>
-    <p class="modal-intro">
-      Enter any <strong>Earth</strong> coordinate. We sample a 3&times;3 elevation grid from the
-      <a href="https://open-meteo.com/en/docs/elevation-api" target="_blank" rel="noopener">Open-Meteo elevation API</a>
-      and estimate local slope and relief <em>in your browser</em>. These coarse API-based indicators are not a matched-scale analog score.
-      Results are cached in this browser to avoid repeat requests.
+  <header class="hero">
+    <div class="hero-badge">Planetary Research 2026</div>
+    <h1 class="hero-title">Planetary <span class="highlight">Analog</span> Explorer</h1>
+    <p class="hero-sub">
+      Explore terrain across <strong>Earth, the Moon, and Mars</strong>.
+      Compare polar analog candidates, the lunar South Pole reference, and Jezero Crater
+      through an interactive, data-grounded atlas.
     </p>
-    <div class="disc-controls">
-      <label>Latitude<input type="number" id="disc-lat" step="0.0001" placeholder="-77.6" min="-85" max="85"></label>
-      <label>Longitude<input type="number" id="disc-lng" step="0.0001" placeholder="162.2" min="-180" max="180"></label>
-      <button class="btn-primary" id="disc-run">Analyze Terrain</button>
-      <button class="btn-ghost" id="disc-random">🎲 Surprise Me</button>
+
+    <div class="hero-stats" id="hero-stats">
+      <div class="stat"><div class="stat-num" id="stat-sites">5</div><div class="stat-label">Sites Compared</div></div>
+      <div class="stat"><div class="stat-num" id="stat-bodies">3</div><div class="stat-label">Planetary Bodies</div></div>
+      <div class="stat"><div class="stat-num" id="stat-window">90&nbsp;m</div><div class="stat-label">Nominal Roughness Window</div></div>
+      <div class="stat"><div class="stat-num" id="stat-cache">0</div><div class="stat-label">Cached Lookups</div></div>
     </div>
-    <div class="disc-result" id="disc-result" aria-live="polite">
-      <div class="disc-placeholder">Awaiting coordinates… discoveries are screened, not guessed — we only claim what open data can support.</div>
-    </div>
-    <details class="disc-cache">
-      <summary>⚙️ Smart-cache internals <span id="cache-summary"></span></summary>
-      <div class="cache-grid">
-        <div>Hits: <strong id="cache-hits">0</strong></div>
-        <div>Misses: <strong id="cache-misses">0</strong></div>
-        <div>Entries: <strong id="cache-entries">0</strong></div>
-        <div>In-flight dedup: <strong id="cache-live">0</strong></div>
+
+    <section class="planetary-focus" aria-label="Explore by planetary body">
+      <article class="body-card earth-card">
+        <div class="body-card-heading"><span class="body-symbol" aria-hidden="true">🌍</span><div><h2>Earth</h2><p>Analog candidates</p></div></div>
+        <p>McMurdo, Axel Heiberg, and Kerguelen. Compare polar and volcanic terrain against the lunar reference.</p>
+        <div class="body-card-metric"><strong>3</strong><span>candidate regions</span><strong>93%</strong><span>top lunar similarity</span></div>
+        <button class="body-card-action" type="button" onclick="UI.openModal('map','earth')">Explore Earth sites <span aria-hidden="true">→</span></button>
+      </article>
+      <article class="body-card moon-card">
+        <div class="body-card-heading"><span class="body-symbol" aria-hidden="true">🌙</span><div><h2>Moon</h2><p>Lunar South Pole reference</p></div></div>
+        <p>Shackleton-region terrain provides the primary reference for Earth analog screening.</p>
+        <div class="body-card-metric"><strong id="moon-area">3.875</strong><span>km² flat area</span><strong id="moon-rough">2.462</strong><span>mean roughness · m</span></div>
+        <button class="body-card-action" type="button" onclick="UI.openModal('map','moon')">Explore lunar reference <span aria-hidden="true">→</span></button>
+      </article>
+      <article class="body-card mars-card">
+        <div class="body-card-heading"><span class="body-symbol" aria-hidden="true">🔴</span><div><h2>Mars</h2><p>Jezero Crater reference</p></div></div>
+        <p>Perseverance's landing region adds a Martian terrain reference to the cross-world comparison.</p>
+        <div class="body-card-metric"><strong id="mars-area">506.277</strong><span>km² flat area</span><strong id="mars-rough">2.110</strong><span>mean roughness · m</span></div>
+        <button class="body-card-action" type="button" onclick="UI.openModal('map','mars')">Explore Jezero <span aria-hidden="true">→</span></button>
+      </article>
+    </section>
+  </header>
+
+  <!-- ================= MODALS ================= -->
+
+  <div class="modal-overlay" id="modal-terrain" onclick="UI.overlayClose(event,'terrain')">
+    <div class="modal-panel modal-wide">
+      <div class="modal-head"><h2>⛰️ 3D Terrain Lab</h2><button class="x" type="button" onclick="UI.closeModal('terrain')" aria-label="Close terrain lab">&times;</button></div>
+      <p class="modal-intro">A 3 km window sampled from the local DEM and matching slope/roughness rasters. The vertical scale is exaggerated for visibility; colors show the selected metric, not suitability.</p>
+      <div class="terrain-controls">
+        <label>Body<select id="terrain-body"><option value="Earth">Earth</option><option value="Moon">Moon</option><option value="Mars">Mars</option></select></label>
+        <label>Site<select id="terrain-site"></select></label>
+        <label>Surface<select id="terrain-mode"><option value="elevation">Elevation</option><option value="slope">Slope</option><option value="roughness">Roughness</option><option value="safe">≤3° slope screen</option></select></label>
+        <label>Vertical exaggeration <output id="terrain-exaggeration-value">4×</output><input id="terrain-exaggeration" type="range" min="1" max="10" step="0.5" value="4"></label>
       </div>
-      <button class="btn-ghost btn-small" onclick="Cache.clear(); Discovery.renderCacheStats(); Toast.show('Cache cleared')">Clear cache</button>
-    </details>
+      <div class="terrain-stage"><canvas id="terrain-canvas" aria-label="Interactive three-dimensional terrain surface"></canvas><div id="terrain-status" class="terrain-status" aria-live="polite">Select a site to load its terrain.</div></div>
+      <div class="terrain-meta" id="terrain-meta"></div>
+    </div>
   </div>
-</div>
 
-<div class="modal-overlay" id="modal-selector" onclick="UI.overlayClose(event,'selector')">
-  <div class="modal-panel">
-    <div class="modal-head"><h2>🎮 Base Site Selector</h2><button class="x" onclick="UI.closeModal('selector')">&times;</button></div>
-    <p class="modal-intro">You are the mission architect. Weight what matters — the ranker re-scores every site instantly.</p>
-    <div class="sliders">
-      <label>Smoothness (low roughness)
-        <input type="range" id="w-smooth" min="0" max="10" value="7"><span class="w-val" id="wv-smooth">7</span></label>
-      <label>Hazard tolerance (p95 roughness)
-        <input type="range" id="w-hazard" min="0" max="10" value="5"><span class="w-val" id="wv-hazard">5</span></label>
-      <label>Area demand (km² available)
-        <input type="range" id="w-area" min="0" max="10" value="6"><span class="w-val" id="wv-area">6</span></label>
-      <label>Slope strictness (&le;3&deg; discipline)
-        <input type="range" id="w-slope" min="0" max="10" value="8"><span class="w-val" id="wv-slope">8</span></label>
+  <div class="modal-overlay" id="modal-patches" onclick="UI.overlayClose(event,'patches')">
+    <div class="modal-panel modal-wide">
+      <div class="modal-head"><h2>🧩 Patch Explorer</h2><button class="x" type="button" onclick="UI.closeModal('patches')" aria-label="Close patch explorer">&times;</button></div>
+      <p class="modal-intro">Rows come from the committed patch-comparison report. Filled-surface flags are shown as recorded so water, ice, and other zero-filled regions can be inspected rather than hidden.</p>
+      <div class="patch-controls">
+        <label>Planetary body<select id="patch-body"><option value="all">All bodies</option><option value="Moon">Moon</option><option value="Earth">Earth</option><option value="Mars">Mars</option></select></label>
+        <label>Classification<select id="patch-kind"><option value="all">All patches</option><option value="valid">Non-filled</option><option value="filled">Filled / flagged</option></select></label>
+        <span id="patch-count" aria-live="polite">Loading patch report…</span>
+      </div>
+      <div class="cmp-table-wrap"><table class="cmp-table patch-table"><thead><tr><th>Site</th><th>Body</th><th>Area km²</th><th>Mean rough m</th><th>p95 rough m</th><th>Max rough m</th><th>Zero fraction</th><th>Flag</th></tr></thead><tbody id="patch-rows"></tbody></table></div>
+      <div id="patch-status" class="calc-notes" aria-live="polite"></div>
     </div>
-    <div id="selector-results" class="rank-list"></div>
   </div>
-</div>
 
-<div class="modal-overlay" id="modal-calculator" onclick="UI.overlayClose(event,'calculator')">
-  <div class="modal-panel modal-wide">
-    <div class="modal-head"><h2>🧮 Analogy Calculator</h2><button class="x" onclick="UI.closeModal('calculator')">&times;</button></div>
-    <p class="modal-intro">Adjusted Euclidean distance in terrain-metric space (mean roughness, p95 roughness, slope discipline) → similarity %.</p>
-    <div class="sliders two-col">
-      <label>Mean roughness target (m)
-        <input type="range" id="c-rough" min="1.0" max="4.0" step="0.05" value="2.462"><span class="w-val mono" id="cv-rough">2.462</span></label>
-      <label>p95 hazard ceiling (m)
-        <input type="range" id="c-p95" min="2.0" max="6.0" step="0.05" value="4.138"><span class="w-val mono" id="cv-p95">4.138</span></label>
-      <label>Minimum area passing 3° slope (%)
-        <input type="range" id="c-slope" min="0" max="100" step="5" value="0"><span class="w-val mono" id="cv-slope">0%</span></label>
-      <label>Area gate (km²)
-        <input type="range" id="c-area" min="0" max="500" step="1" value="1"><span class="w-val mono" id="cv-area">1</span></label>
+  <div class="modal-overlay" id="modal-scale" onclick="UI.overlayClose(event,'scale')">
+    <div class="modal-panel modal-wide">
+      <div class="modal-head"><h2>📏 Scale Sensitivity</h2><button class="x" type="button" onclick="UI.closeModal('scale')" aria-label="Close scale sensitivity">&times;</button></div>
+      <p class="modal-intro">The lunar fingerprint samples use a nominal 12 m roughness window; the main comparison uses a nominal 90 m window. The points below show the scale difference explicitly and must not be read as a direct analog ranking.</p>
+      <div class="scale-callout" id="scale-summary" aria-live="polite">Loading recorded fingerprints…</div>
+      <div class="chart-wrap"><canvas id="scale-chart"></canvas></div>
+      <div id="scale-status" class="calc-notes" aria-live="polite"></div>
     </div>
-    <div class="chart-wrap"><canvas id="calc-chart"></canvas></div>
-    <div id="calc-notes" class="calc-notes"></div>
   </div>
-</div>
 
-<div class="modal-overlay" id="modal-planner" onclick="UI.overlayClose(event,'planner')">
-  <div class="modal-panel">
-    <div class="modal-head"><h2>🧭 Mission Planner</h2><button class="x" onclick="UI.closeModal('planner')">&times;</button></div>
-    <div id="planner-steps"></div>
-    <div class="planner-actions">
-      <button class="btn-ghost" id="planner-back">← Back</button>
-      <button class="btn-primary" id="planner-next">Next →</button>
+  <div class="modal-overlay" id="modal-map" onclick="UI.overlayClose(event,'map')">
+    <div class="modal-panel modal-wide">
+      <div class="modal-head"><h2>🗺️ Atlas of Analogs</h2><button class="x" type="button" onclick="UI.closeModal('map')" aria-label="Close atlas">&times;</button></div>
+      <div class="layer-switch" id="layer-switch">
+        <button class="layer-btn active" type="button" data-layer="earth" aria-pressed="true">🌍 Earth <span class="layer-count">3</span></button>
+        <button class="layer-btn" type="button" data-layer="moon" aria-pressed="false">🌙 Moon <span class="layer-count">1</span></button>
+        <button class="layer-btn" type="button" data-layer="mars" aria-pressed="false">🔴 Mars <span class="layer-count">1</span></button>
+      </div>
+      <div id="map"></div>
+      <div class="map-status" aria-live="polite">
+        <span id="map-status">Map tiles will load when the atlas opens.</span>
+        <button class="btn-ghost btn-small" id="map-retry" type="button" hidden>Retry tiles</button>
+      </div>
+      <section class="map-explorer" aria-labelledby="map-sites-title">
+        <div class="map-explorer-head"><h3 id="map-sites-title">All five catalogued sites</h3><span id="map-site-count" aria-live="polite">Showing 3 Earth sites</span></div>
+        <div class="map-sites" id="map-sites"></div>
+      </section>
+      <div class="map-footnote" id="map-footnote">Select any site or map marker to zoom in and view its terrain metrics.</div>
     </div>
-    <div id="planner-output"></div>
   </div>
-</div>
 
-<div class="modal-overlay" id="modal-compare" onclick="UI.overlayClose(event,'compare')">
-  <div class="modal-panel modal-wide">
-    <div class="modal-head"><h2>📊 Full Comparison</h2><button class="x" onclick="UI.closeModal('compare')">&times;</button></div>
-    <p class="modal-intro">Comparison metrics are derived offline from LRO, CTX, and Copernicus DEMs. The processing records describe a common 30&nbsp;m grid and nominal 90&nbsp;m roughness window. Similarity percentages are relative to the lunar reference, not a universal cross-body score.</p>
-    <div class="comparison-filters" role="group" aria-label="Filter sites by planetary body">
-      <button class="cmp-filter active" type="button" data-body="all" aria-pressed="true">All bodies</button>
-      <button class="cmp-filter" type="button" data-body="earth" aria-pressed="false">🌍 Earth</button>
-      <button class="cmp-filter" type="button" data-body="moon" aria-pressed="false">🌙 Moon</button>
-      <button class="cmp-filter" type="button" data-body="mars" aria-pressed="false">🔴 Mars</button>
+  <div class="modal-overlay" id="modal-discovery" onclick="UI.overlayClose(event,'discovery')">
+    <div class="modal-panel modal-wide">
+      <div class="modal-head"><h2>🔭 Discovery Lab</h2><button class="x" type="button" onclick="UI.closeModal('discovery')" aria-label="Close discovery lab">&times;</button></div>
+      <p class="modal-intro">
+        Enter any <strong>Earth</strong> coordinate. We sample a 3×3 elevation grid from the
+        <a href="https://open-meteo.com/en/docs/elevation-api" target="_blank" rel="noopener">Open-Meteo elevation API</a>
+        and estimate local slope and relief <em>in your browser</em>. These coarse API-based indicators are not a matched-scale analog score.
+        Results are cached in this browser to avoid repeat requests.
+      </p>
+      <div class="disc-controls">
+        <label>Latitude<input type="number" id="disc-lat" step="0.0001" placeholder="-77.6" min="-85" max="85"></label>
+        <label>Longitude<input type="number" id="disc-lng" step="0.0001" placeholder="162.2" min="-180" max="180"></label>
+        <button class="btn-primary" id="disc-run" type="button">Analyze Terrain</button>
+        <button class="btn-ghost" id="disc-random" type="button">🎲 Surprise Me</button>
+      </div>
+      <div class="disc-result" id="disc-result" aria-live="polite">
+        <div class="disc-placeholder">Awaiting coordinates… discoveries are screened, not guessed — we only claim what open data can support.</div>
+      </div>
+      <details class="disc-cache">
+        <summary>⚙️ Smart-cache internals <span id="cache-summary"></span></summary>
+        <div class="cache-grid">
+          <div>Hits: <strong id="cache-hits">0</strong></div>
+          <div>Misses: <strong id="cache-misses">0</strong></div>
+          <div>Entries: <strong id="cache-entries">0</strong></div>
+          <div>In-flight dedup: <strong id="cache-live">0</strong></div>
+        </div>
+        <button class="btn-ghost btn-small" type="button" onclick="Cache.clear(); Discovery.renderCacheStats(); Toast.show('Cache cleared')">Clear cache</button>
+      </details>
     </div>
-    <div class="cmp-table-wrap">
-    <table class="cmp-table" id="cmp-table">
-      <thead><tr>
-        <th scope="col" data-sort="name" tabindex="0" aria-sort="none">Site</th><th scope="col" data-sort="body" tabindex="0" aria-sort="none">Body</th>
-        <th scope="col" data-sort="area" tabindex="0" aria-sort="none">Flat area km²</th><th scope="col" data-sort="rough" tabindex="0" aria-sort="none">Mean rough m</th>
-        <th scope="col" data-sort="p95" tabindex="0" aria-sort="none">p95 rough m</th><th scope="col" data-sort="sim" tabindex="0" aria-sort="none">Moon similarity %</th>
-      </tr></thead>
-      <tbody></tbody>
-    </table>
+  </div>
+
+  <div class="modal-overlay" id="modal-selector" onclick="UI.overlayClose(event,'selector')">
+    <div class="modal-panel">
+      <div class="modal-head"><h2>🎮 Base Site Selector</h2><button class="x" type="button" onclick="UI.closeModal('selector')" aria-label="Close selector">&times;</button></div>
+      <p class="modal-intro">You are the mission architect. Weight what matters — the ranker re-scores every site instantly.</p>
+      <div class="sliders">
+        <label>Smoothness (low roughness)
+          <input type="range" id="w-smooth" min="0" max="10" value="7"><span class="w-val" id="wv-smooth">7</span></label>
+        <label>Hazard tolerance (p95 roughness)
+          <input type="range" id="w-hazard" min="0" max="10" value="5"><span class="w-val" id="wv-hazard">5</span></label>
+        <label>Area demand (km² available)
+          <input type="range" id="w-area" min="0" max="10" value="6"><span class="w-val" id="wv-area">6</span></label>
+        <label>Slope strictness (&le;3&deg; discipline)
+          <input type="range" id="w-slope" min="0" max="10" value="8"><span class="w-val" id="wv-slope">8</span></label>
+      </div>
+      <div id="selector-results" class="rank-list"></div>
     </div>
-    <section class="cross-body-section" aria-labelledby="cross-body-title">
-      <h3 id="cross-body-title">Cross-body terrain matches</h3>
-      <p class="modal-intro">Pairwise, symmetric heuristic based on mean and p95 roughness for the five catalogued sites. This ranks available data; it does not search for new regions or establish mission suitability.</p>
+  </div>
+
+  <div class="modal-overlay" id="modal-calculator" onclick="UI.overlayClose(event,'calculator')">
+    <div class="modal-panel modal-wide">
+      <div class="modal-head"><h2>🧮 Analogy Calculator</h2><button class="x" type="button" onclick="UI.closeModal('calculator')" aria-label="Close calculator">&times;</button></div>
+      <p class="modal-intro">Adjusted Euclidean distance in terrain-metric space (mean roughness, p95 roughness, slope discipline) → similarity %.</p>
+      <div class="sliders two-col">
+        <label>Mean roughness target (m)
+          <input type="range" id="c-rough" min="1.0" max="4.0" step="0.05" value="2.462"><span class="w-val mono" id="cv-rough">2.462</span></label>
+        <label>p95 hazard ceiling (m)
+          <input type="range" id="c-p95" min="2.0" max="6.0" step="0.05" value="4.138"><span class="w-val mono" id="cv-p95">4.138</span></label>
+        <label>Minimum area passing 3° slope (%)
+          <input type="range" id="c-slope" min="0" max="100" step="5" value="0"><span class="w-val mono" id="cv-slope">0%</span></label>
+        <label>Area gate (km²)
+          <input type="range" id="c-area" min="0" max="500" step="1" value="1"><span class="w-val mono" id="cv-area">1</span></label>
+      </div>
+      <div class="chart-wrap"><canvas id="calc-chart"></canvas></div>
+      <div id="calc-notes" class="calc-notes"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-planner" onclick="UI.overlayClose(event,'planner')">
+    <div class="modal-panel">
+      <div class="modal-head"><h2>🧭 Mission Planner</h2><button class="x" type="button" onclick="UI.closeModal('planner')" aria-label="Close planner">&times;</button></div>
+      <div id="planner-steps"></div>
+      <div class="planner-actions">
+        <button class="btn-ghost" id="planner-back" type="button">← Back</button>
+        <button class="btn-primary" id="planner-next" type="button">Next →</button>
+      </div>
+      <div id="planner-output"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-compare" onclick="UI.overlayClose(event,'compare')">
+    <div class="modal-panel modal-wide">
+      <div class="modal-head"><h2>📊 Full Comparison</h2><button class="x" type="button" onclick="UI.closeModal('compare')" aria-label="Close comparison">&times;</button></div>
+      <p class="modal-intro">Comparison metrics are derived offline from LRO, CTX, and Copernicus DEMs. The processing records describe a common 30 m grid and nominal 90 m roughness window. Similarity percentages are relative to the lunar reference, not a universal cross-body score.</p>
+      <div class="comparison-filters" role="group" aria-label="Filter sites by planetary body">
+        <button class="cmp-filter active" type="button" data-body="all" aria-pressed="true">All bodies</button>
+        <button class="cmp-filter" type="button" data-body="earth" aria-pressed="false">🌍 Earth</button>
+        <button class="cmp-filter" type="button" data-body="moon" aria-pressed="false">🌙 Moon</button>
+        <button class="cmp-filter" type="button" data-body="mars" aria-pressed="false">🔴 Mars</button>
+      </div>
       <div class="cmp-table-wrap">
-        <table class="cmp-table cross-cmp-table" id="cross-cmp-table">
-          <thead><tr><th scope="col">Site A</th><th scope="col">Body</th><th scope="col">Site B</th><th scope="col">Body</th><th scope="col">Roughness similarity</th></tr></thead>
+        <table class="cmp-table" id="cmp-table">
+          <thead><tr>
+            <th scope="col" data-sort="name" tabindex="0" aria-sort="none">Site</th>
+            <th scope="col" data-sort="body" tabindex="0" aria-sort="none">Body</th>
+            <th scope="col" data-sort="area" tabindex="0" aria-sort="none">Flat area km²</th>
+            <th scope="col" data-sort="rough" tabindex="0" aria-sort="none">Mean rough m</th>
+            <th scope="col" data-sort="p95" tabindex="0" aria-sort="none">p95 rough m</th>
+            <th scope="col" data-sort="sim" tabindex="0" aria-sort="none">Moon similarity %</th>
+          </tr></thead>
           <tbody></tbody>
         </table>
       </div>
-    </section>
-    <div class="chart-wrap"><canvas id="cmp-chart"></canvas></div>
+      <section class="cross-body-section" aria-labelledby="cross-body-title">
+        <h3 id="cross-body-title">Cross-body terrain matches</h3>
+        <p class="modal-intro">Pairwise, symmetric heuristic based on mean and p95 roughness for the five catalogued sites. This ranks available data; it does not search for new regions or establish mission suitability.</p>
+        <div class="cmp-table-wrap">
+          <table class="cmp-table cross-cmp-table" id="cross-cmp-table">
+            <thead><tr><th scope="col">Site A</th><th scope="col">Body</th><th scope="col">Site B</th><th scope="col">Body</th><th scope="col">Roughness similarity</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+      <div class="chart-wrap"><canvas id="cmp-chart"></canvas></div>
+    </div>
   </div>
-</div>
 
-<!-- Toasts -->
-<div id="toast-root"></div>
+  <div id="toast-root"></div>
+</main>
 
 <footer class="credits">
   Terrain metrics: NASA LRO (Moon) · MRO CTX (Mars) · Copernicus GLO-30 (Earth), processed offline with GDAL ·
