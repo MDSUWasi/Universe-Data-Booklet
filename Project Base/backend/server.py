@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import csv
 import json
 import math
 import os
@@ -168,6 +169,12 @@ class AppHandler(SimpleHTTPRequestHandler):
         parsed = urlsplit(self.path)
         if parsed.path == "/api/health":
             self._json(200, {"status": "ok", "cache": "sqlite", "static_ttl_days": 30})
+        elif parsed.path == "/api/sites":
+            self._sites()
+        elif parsed.path == "/api/patches":
+            self._patches()
+        elif parsed.path == "/api/scale-sensitivity":
+            self._scale_sensitivity()
         elif parsed.path == "/api/elevation":
             self._elevation(parse_qs(parsed.query))
         elif parsed.path == "/api/weather":
@@ -206,6 +213,105 @@ class AppHandler(SimpleHTTPRequestHandler):
 
         key = _cache_key("elevation", params)
         self._proxy(key, fetch_elevation, STATIC_TTL, STATIC_STALE_TTL, "application/json")
+
+    @staticmethod
+    def _read_csv(path: Path) -> list[dict[str, str]]:
+        with path.open("r", encoding="utf-8-sig", newline="") as source:
+            return list(csv.DictReader(source))
+
+    def _sites(self) -> None:
+        path = ROOT / "output/reports/all_sites_comparison.csv"
+        if not path.is_file():
+            self._json(404, {"error": "Site summary data is missing"})
+            return
+        site_ids = {
+            "moon south pole": "moon",
+            "mcmurdo dry valleys": "mcmurdo",
+            "axel heiberg island": "axel",
+            "kerguelen islands": "kerguelen",
+            "jezero crater (mars)": "jezero",
+        }
+        sites = []
+        for row in self._read_csv(path):
+            site_id = site_ids.get(row.get("site", "").strip().lower())
+            if site_id is None:
+                continue
+            try:
+                sites.append({
+                    "id": site_id,
+                    "area_km2": float(row["area_km2"]),
+                    "mean_rough_m": float(row["rough_mean_m"]),
+                    "p95_rough_m": float(row["rough_p95_m"]),
+                    "max_rough_m": float(row["rough_max_m"]),
+                })
+            except (KeyError, ValueError):
+                continue
+        expected = set(site_ids.values())
+        if {site["id"] for site in sites} != expected:
+            self._json(500, {"error": "Site summary is incomplete or invalid"})
+            return
+        self._json(200, {"source": "output/reports/all_sites_comparison.csv", "sites": sites})
+
+    def _patches(self) -> None:
+        path = ROOT / "output/reports/analog_comparison.csv"
+        if not path.is_file():
+            self._json(404, {"error": "Patch comparison data is missing"})
+            return
+        records = self._read_csv(path)
+        numeric_fields = (
+            "area_km2", "centre_x", "centre_y", "slope_mean_deg", "rough_mean_m",
+            "rough_p95_m", "rough_max_m", "zero_frac",
+        )
+        parsed_records: list[dict[str, object]] = []
+        for record in records:
+            parsed: dict[str, object] = dict(record)
+            site_name = record.get("site", "").lower()
+            parsed["body"] = "Moon" if site_name.startswith("moon") else "Mars" if "mars" in site_name or "jezero" in site_name else "Earth"
+            for name in numeric_fields:
+                try:
+                    parsed[name] = float(record[name])
+                except (KeyError, ValueError):
+                    parsed[name] = None
+            parsed["filled"] = record.get("filled", "").strip().lower() == "true"
+            parsed_records.append(parsed)
+        self._json(200, {"source": "output/reports/analog_comparison.csv", "records": parsed_records})
+
+    def _scale_sensitivity(self) -> None:
+        fingerprint_path = ROOT / "data/raw/lunar_fingerprints.csv"
+        summary_path = ROOT / "output/reports/all_sites_comparison.csv"
+        if not fingerprint_path.is_file() or not summary_path.is_file():
+            self._json(404, {"error": "Scale sensitivity source data is missing"})
+            return
+        fingerprints = self._read_csv(fingerprint_path)
+        summaries = self._read_csv(summary_path)
+        matched = next((row for row in summaries if row.get("site", "").lower().startswith("moon")), None)
+        if matched is None:
+            self._json(500, {"error": "Matched-window lunar reference is missing"})
+            return
+        try:
+            matched_mean = float(matched["rough_mean_m"])
+            matched_p95 = float(matched["rough_p95_m"])
+        except (KeyError, ValueError):
+            self._json(500, {"error": "Matched-window lunar metrics are invalid"})
+            return
+        points = []
+        for row in fingerprints:
+            try:
+                points.append({
+                    "patch_id": int(row["patch_id"]),
+                    "area_km2": float(row["area_km2"]),
+                    "roughness_mean_m": float(row["roughness_mean_m"]),
+                    "roughness_p95_m": float(row["roughness_p95_m"]),
+                })
+            except (KeyError, ValueError):
+                continue
+        self._json(200, {
+            "fingerprint_window_m": 12,
+            "comparison_window_m": 90,
+            "fingerprints": points,
+            "comparison_reference": {"mean_roughness_m": matched_mean, "p95_roughness_m": matched_p95},
+            "warning": "Different roughness windows are shown for scale sensitivity, not as directly comparable scores.",
+        })
 
     def _weather(self, query: dict[str, list[str]]) -> None:
         try:

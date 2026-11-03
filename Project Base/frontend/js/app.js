@@ -110,6 +110,45 @@ const PLANET_COLORS = {
     Mars: '#ff7a59'
 };
 
+const SiteMetrics = {
+    async load() {
+        try {
+            const response = await fetch('/api/sites');
+            if (!response.ok) throw new Error(`Site summary returned HTTP ${response.status}`);
+            const payload = await response.json();
+            if (!Array.isArray(payload.sites) || payload.sites.length !== Object.keys(SITE_DATA).length) {
+                throw new Error('Site summary does not contain all five expected records');
+            }
+            payload.sites.forEach(record => {
+                const site = SITE_DATA[record.id];
+                if (!site || !['area_km2', 'mean_rough_m', 'p95_rough_m', 'max_rough_m'].every(key => Number.isFinite(record[key]))) {
+                    throw new Error(`Invalid metrics for ${record.id || 'unknown site'}`);
+                }
+                site.area = record.area_km2;
+                site.meanRough = record.mean_rough_m;
+                site.p95Rough = record.p95_rough_m;
+                site.maxRough = record.max_rough_m;
+            });
+            document.getElementById('moon-area').textContent = SITE_DATA.moon.area.toFixed(3);
+            document.getElementById('moon-rough').textContent = SITE_DATA.moon.meanRough.toFixed(3);
+            document.getElementById('mars-area').textContent = SITE_DATA.jezero.area.toFixed(3);
+            document.getElementById('mars-rough').textContent = SITE_DATA.jezero.meanRough.toFixed(3);
+            const refreshOpenView = (id, refresh) => {
+                if (document.getElementById(`modal-${id}`)?.classList.contains('open')) refresh();
+            };
+            refreshOpenView('map', () => {
+                MapViewer.renderSiteList();
+                MapViewer.updateSiteList();
+            });
+            refreshOpenView('selector', () => Selector.run());
+            refreshOpenView('calculator', () => Calculator.updateChart());
+            refreshOpenView('compare', () => Comparator.render());
+        } catch (error) {
+            console.warn(`Using bundled site metrics: ${error.message}`);
+        }
+    }
+};
+
 /* =========================== SMART CACHE (Discovery Lab) =========================== */
 
 const Cache = {
@@ -358,6 +397,9 @@ const UI = {
         if (id === 'calculator') Calculator.init();
         if (id === 'planner') Planner.start();
         if (id === 'compare') Comparator.render();
+        if (id === 'terrain') window.TerrainLab?.open();
+        if (id === 'patches') window.PatchExplorer?.open();
+        if (id === 'scale') window.ScaleSensitivity?.open();
     },
 
     closeModal(id) {
@@ -1105,6 +1147,7 @@ document.addEventListener('DOMContentLoaded', () => {
     Starfield.init();
     Cache.init();
     Discovery.renderCacheStats();
+    SiteMetrics.load();
 
     // Wire up discovery lab
     document.getElementById('disc-run').onclick = () => {
@@ -1135,3 +1178,4 @@ window.Calculator = Calculator;
 window.Planner = Planner;
 window.Comparator = Comparator;
 window.Toast = Toast;
+window.SITE_DATA = SITE_DATA;
