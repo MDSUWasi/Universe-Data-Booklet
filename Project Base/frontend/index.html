@@ -39,7 +39,7 @@
   <nav class="side-nav" aria-label="Main features">
     <button class="side-nav-item" type="button" onclick="UI.openModal('map')">
       <span class="nav-icon">🗺️</span>
-      <span class="nav-title">Explore Map</span>
+      <span class="nav-title">Map View</span>
       <span class="nav-desc">Earth · Moon · Mars</span>
     </button>
     <button class="side-nav-item" type="button" onclick="UI.openModal('discovery')">
@@ -59,17 +59,17 @@
     </button>
     <button class="side-nav-item" type="button" onclick="UI.openModal('planner')">
       <span class="nav-icon">🧭</span>
-      <span class="nav-title">Mission Planner</span>
+      <span class="nav-title">Plan Mission</span>
       <span class="nav-desc">Design a field campaign</span>
     </button>
     <button class="side-nav-item" type="button" onclick="UI.openModal('compare')">
       <span class="nav-icon">📊</span>
-      <span class="nav-title">Full Comparison</span>
+      <span class="nav-title">Comparison</span>
       <span class="nav-desc">The numbers, verified</span>
     </button>
     <button class="side-nav-item" type="button" onclick="UI.openModal('terrain')">
       <span class="nav-icon">⛰️</span>
-      <span class="nav-title">3D Terrain Lab</span>
+      <span class="nav-title">3D View</span>
       <span class="nav-desc">Explore real DEM windows</span>
     </button>
     <button class="side-nav-item" type="button" onclick="UI.openModal('patches')">
@@ -91,7 +91,7 @@
 <main class="main-content" id="main-content">
 
   <header class="hero">
-    <div class="hero-badge">Planetary Research 2026</div>
+    <div class="hero-badge">Project-Base</div>
     <h1 class="hero-title">Planetary <span class="highlight">Analog</span> Explorer</h1>
     <p class="hero-sub">
       Explore terrain across <strong>Earth, the Moon, and Mars</strong>.
@@ -171,7 +171,7 @@
 
   <div class="modal-overlay" id="modal-map" onclick="UI.overlayClose(event,'map')">
     <div class="modal-panel modal-wide">
-      <div class="modal-head"><h2>🗺️ Atlas of Analogs</h2><button class="x" type="button" onclick="UI.closeModal('map')" aria-label="Close atlas">&times;</button></div>
+      <div class="modal-head"><h2>🗺️ Map View of Analogs</h2><button class="x" type="button" onclick="UI.closeModal('map')" aria-label="Close atlas">&times;</button></div>
       <div class="layer-switch" id="layer-switch">
         <button class="layer-btn active" type="button" data-layer="earth" aria-pressed="true">🌍 Earth <span class="layer-count">3</span></button>
         <button class="layer-btn" type="button" data-layer="moon" aria-pressed="false">🌙 Moon <span class="layer-count">1</span></button>
