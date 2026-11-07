@@ -103,6 +103,8 @@
         window.Toast.show('Mission draft generated');
         const next = document.getElementById('planner-next');
         if (next) next.textContent = 'Restart';
+        const pdfBtn = document.getElementById('planner-pdf');
+        if (pdfBtn) pdfBtn.disabled = false;
     };
 
     window.Planner = P;

@@ -32,11 +32,13 @@ window.onload = () => {
     // Mission Planner: wire the wizard buttons (independent of the step UI).
     const plannerBack = document.getElementById('planner-back');
     const plannerNext = document.getElementById('planner-next');
+    const plannerPdf = document.getElementById('planner-pdf');
     if (plannerBack) plannerBack.onclick = () => { if (window.Planner) window.Planner.back(); };
     if (plannerNext) plannerNext.onclick = () => {
         if (window.Planner && plannerNext.textContent === 'Restart') window.Planner.start();
         else if (window.Planner) window.Planner.next();
     };
+    if (plannerPdf) plannerPdf.onclick = () => { if (window.Planner) window.Planner.savePdf(); };
 
     document.getElementById('stat-sites').textContent = '5';
     document.getElementById('stat-bodies').textContent = '3';
