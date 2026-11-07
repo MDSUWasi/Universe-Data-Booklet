@@ -35,7 +35,7 @@ class DataEndpointTests(unittest.TestCase):
         payload = self.call_endpoint(AppHandler._patches)
         records = payload["records"]
         self.assertGreater(len(records), 5)
-        self.assertEqual({record["body"] for record in records}, {"Moon", "Earth"})
+        self.assertEqual({record["body"] for record in records}, {"Moon", "Earth", "Mars"})
         self.assertTrue(any(record["filled"] for record in records))
         self.assertTrue(any(not record["filled"] for record in records))
 
