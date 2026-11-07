@@ -564,7 +564,19 @@ const MapViewer = {
     map: null,
     layerGroup: null,
     markers: [],
+    markerLayer: null,
     currentLayer: 'earth',
+    hoverTooltip: null,
+    activeMarker: null,
+
+    // Real satellite imagery basemaps
+    basemaps: [
+        { name: 'Esri Satellite', url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attribution: '&copy; Esri &mdash; Sources: Esri, Maxar, Earthstar Geographics' },
+        { name: 'NASA Imagery', url: 'https://basemap.nationalmap.gov/arcgis/rest/services/Imagery/MapServer/tile/{z}/{y}/{x}', attribution: '&copy; USGS The National Map' },
+        { name: 'OpenStreetMap', url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', attribution: '&copy; OpenStreetMap contributors' },
+        { name: 'Carto Dark', url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', attribution: '&copy; CARTO' }
+    ],
+    basemapIndex: 0,
 
     init(layerName = 'earth') {
         if (this.map) {
@@ -578,11 +590,30 @@ const MapViewer = {
         this.map = L.map('map', {
             center: [10, 20],
             zoom: 2,
+            minZoom: 2,
             zoomControl: true,
-            attributionControl: true
+            attributionControl: true,
+            doubleClickZoom: false,
+            fadeAnimation: true,
+            zoomAnimation: true,
+            markerZoomAnimation: true
         });
 
+        // Double-click to focus nearest site
+        this.map.on('dblclick', e => {
+            const nearest = this.findNearestSite(e.latlng.lat, e.latlng.lng);
+            if (nearest) this.focusOnSite(nearest.id);
+        });
+
+        // Hover tooltip for nearest marker
+        this.map.on('mousemove', e => this.updateHoverTooltip(e.latlng));
+
         this.layerGroup = L.layerGroup().addTo(this.map);
+        this.markerLayer = L.layerGroup().addTo(this.map);
+
+        // Scale control
+        this.scale = L.control.scale({ position: 'bottomright', metric: true, imperial: false, maxLength: 80 });
+        this.scale.addTo(this.map);
 
         // Add Markers
         this.renderSiteList();
@@ -594,9 +625,19 @@ const MapViewer = {
             btn.onclick = () => this.switchLayer(btn.dataset.layer);
         });
 
-        // Retry Button
+        // Toolbar buttons
+        const fitBtn = document.getElementById('map-fit');
+        if (fitBtn) fitBtn.onclick = () => this.fitAll();
+        const baseBtn = document.getElementById('map-tiles');
+        if (baseBtn) baseBtn.onclick = () => this.cycleBasemap();
         const retryBtn = document.getElementById('map-retry');
         if (retryBtn) retryBtn.onclick = () => this.retryTiles();
+
+        // Search
+        const search = document.getElementById('map-search');
+        if (search) search.oninput = () => this.filterSiteList(search.value);
+
+        this.clearDetail();
     },
 
     switchLayer(name) {
@@ -608,31 +649,45 @@ const MapViewer = {
             b.setAttribute('aria-pressed', isActive);
         });
 
-        // Clear existing markers
+        // Clear existing markers and only show those matching the current layer
         this.layerGroup.clearLayers();
-        this.markers.forEach(m => this.layerGroup.addLayer(m));
+        const bodyFilter = name === 'earth' ? 'Earth' : name === 'moon' ? 'Moon' : 'Mars';
+        this.markers.forEach(m => {
+            const site = this._markerSite(m);
+            if (site && site.body === bodyFilter) this.layerGroup.addLayer(m);
+        });
 
-        // Tiles (Mocking Moon/Mars with colored divs since no public tile servers guaranteed)
-        // In production, use NASA Worldview or similar URLs.
-        const url = name === 'earth' 
-            ? 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-            : (name === 'moon'
-                ? 'https://tiles.maps.eox.at/?service=WMTS&request=GetTile&version=1.0.0&layer=sso&Style=default&TileMatrixSet=GoogleMapsCompatible&TileMatrix={z}&TileRow={y}&TileCol={x}'
-                : 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}'); // Placeholder for Mars
-        
+        // Build tile URL — use local NASA Trek proxy for Moon/Mars, Esri for Earth
+        // Server pattern is /api/tiles/{body}/{z}/{row}/{column}.jpg
+        // Leaflet substitutes {y}=row, {x}=column
+        let url;
+        let attribution;
+        if (name === 'moon') {
+            url = '/api/tiles/moon/{z}/{y}/{x}.jpg';
+            attribution = '&copy; NASA LRO WAC Mosaic (via Trek proxy, SQLite cached)';
+        } else if (name === 'mars') {
+            url = '/api/tiles/mars/{z}/{y}/{x}.jpg';
+            attribution = '&copy; NASA Mars Viking MDIM21 (via Trek proxy, SQLite cached)';
+        } else {
+            const bm = this.basemaps[this.basemapIndex];
+            url = bm.url;
+            attribution = bm.attribution;
+        }
+
         try {
-            if (window.L && !this.map.hasLayer(this.tileLayer)) {
-                this.tileLayer = L.tileLayer(url, {
-                    attribution: '&copy; OpenStreetMap contributors',
-                    maxZoom: 19
-                }).addTo(this.map);
-            } else if (this.map.hasLayer(this.tileLayer) && this.tileLayer._url !== url) {
+            // Remove any existing tile layer before adding a new one
+            if (this.tileLayer && this.map.hasLayer(this.tileLayer)) {
                 this.map.removeLayer(this.tileLayer);
-                this.tileLayer = L.tileLayer(url).addTo(this.map);
             }
+            this.tileLayer = L.tileLayer(url, {
+                attribution: attribution,
+                maxZoom: 6,
+                opacity: 0.92
+            }).addTo(this.map);
         } catch (e) {
             console.error('Tile Load Error', e);
-            document.getElementById('map-status').textContent = 'Tiles loading... (fallback active)';
+            const status = document.getElementById('map-status');
+            if (status) status.textContent = 'Tiles loading... (fallback active)';
         }
 
         this.updateSiteCount();
@@ -648,8 +703,19 @@ const MapViewer = {
             card.className = 'map-site';
             card.type = 'button';
             card.dataset.id = site.id;
+            card.dataset.name = site.name.toLowerCase();
             card.onclick = () => this.focusOnSite(site.id);
-            
+
+            // Hover preview on card
+            card.onmouseenter = () => {
+                const marker = this.markers.find(m => m.getLatLng().lat === site.lat);
+                if (marker) marker.openPopup();
+            };
+            card.onmouseleave = () => {
+                if (this.activeMarker) return; // keep open if user clicked
+                this.markers.forEach(m => m.closePopup());
+            };
+
             card.innerHTML = `
                 <b>${site.name}</b>
                 <span>${site.body}</span>
@@ -657,16 +723,34 @@ const MapViewer = {
             `;
             list.appendChild(card);
 
-            // Create Marker
+            // Create Marker with popups
             const marker = L.marker([site.lat, site.lng], {
                 icon: L.divIcon({
                     className: 'custom-pin',
-                    html: `<div style="background:${site.color};width:12px;height:12px;border-radius:50%;border:2px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3)"></div>`,
-                    iconSize: [12, 12],
-                    iconAnchor: [6, 6]
+                    html: `<div style="background:${site.color};width:14px;height:14px;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.4)"></div>`,
+                    iconSize: [14, 14],
+                    iconAnchor: [7, 7]
                 })
-            }).bindPopup(`<b>${site.name}</b><br>${fmt(site.meanRough)} m roughness`);
-            
+            });
+
+            // Click marker → focus + detail panel
+            marker.on('popupopen', () => {
+                this.setActiveMarker(marker);
+                this.activeMarker = marker;
+                this.renderDetail(site);
+            });
+            marker.on('popupclose', () => {
+                this.activeMarker = null;
+                this.setActiveMarker(null);
+            });
+
+            marker.bindPopup(`
+                <b>${site.name}</b><br>
+                <span style="color:${PLANET_COLORS[site.body]}">●</span> ${site.body}<br>
+                <b>${fmt(site.meanRough)} m</b> mean roughness<br>
+                <b>${site.vsMoon}%</b> vs Moon reference
+            `);
+
             this.markers.push(marker);
         });
     },
@@ -681,12 +765,49 @@ const MapViewer = {
     focusOnSite(id) {
         const site = SITE_DATA[id];
         if (!site) return;
+        // Switch to the correct body layer (Earth/Moon/Mars)
+        const bodyLayer = site.body === 'Moon' ? 'moon' : site.body === 'Mars' ? 'mars' : 'earth';
+        if (bodyLayer !== this.currentLayer) this.switchLayer(bodyLayer);
         this.map.setView([site.lat, site.lng], 8);
-        this.markers.find(m => m.getLatLng().lat === site.lat)?.openPopup();
-        
-        // Highlight card
+
+        // Open the marker popup
+        const marker = this.markers.find(m => m.getLatLng().lat === site.lat);
+        if (marker) {
+            this.markers.forEach(m => m.closePopup());
+            marker.openPopup();
+            this.setActiveMarker(marker);
+        }
+
+        // Highlight card + render detail panel
         document.querySelectorAll('.map-site').forEach(c => {
             c.classList.toggle('active', c.dataset.id === id);
+        });
+        this.renderDetail(site);
+    },
+
+    /* ---------- Find nearest site to a lat/lng ---------- */
+    findNearestSite(lat, lng) {
+        let best = null;
+        let bestDist = Infinity;
+        Object.values(SITE_DATA).forEach(site => {
+            const d = (site.lat - lat) ** 2 + (site.lng - lng) ** 2;
+            if (d < bestDist) { bestDist = d; best = site; }
+        });
+        return bestDist < 200 ? best : null;
+    },
+
+    /* ---------- Map a marker back to its site ---------- */
+    _markerSite(marker) {
+        const ll = marker.getLatLng();
+        return Object.values(SITE_DATA).find(s => s.lat === ll.lat && s.lng === ll.lng) || null;
+    },
+
+    /* ---------- Filter site cards by search ---------- */
+    filterSiteList(query) {
+        const q = query.trim().toLowerCase();
+        document.querySelectorAll('.map-site').forEach(card => {
+            const match = !q || card.dataset.name.includes(q) || card.querySelector('span').textContent.toLowerCase().includes(q);
+            card.style.display = match ? '' : 'none';
         });
     },
 
@@ -694,7 +815,6 @@ const MapViewer = {
         const counter = document.getElementById('map-site-count');
         if (!counter) return;
         const count = SITES().filter(s => s.body.toLowerCase() === (this.currentLayer === 'earth' ? 'earth' : this.currentLayer)).length;
-        const total = SITES().length;
         const text = this.currentLayer === 'all' ? 'Showing 5 sites' : `Showing ${count} ${this.currentLayer} sites`;
         counter.textContent = text;
     },
@@ -703,6 +823,124 @@ const MapViewer = {
         const btn = document.getElementById('map-retry');
         if (btn) btn.hidden = true;
         if (this.map) this.map.invalidateSize();
+    },
+
+    /* ---------- Basemap cycling ---------- */
+    basemaps: [
+        { name: 'Esri Satellite', url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attribution: '&copy; Esri &mdash; Sources: Esri, Maxar, Earthstar Geographics' },
+        { name: 'NASA Imagery', url: 'https://basemap.nationalmap.gov/arcgis/rest/services/Imagery/MapServer/tile/{z}/{y}/{x}', attribution: '&copy; USGS The National Map' },
+        { name: 'OpenStreetMap', url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', attribution: '&copy; OpenStreetMap contributors' },
+        { name: 'Carto Dark', url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', attribution: '&copy; CARTO' }
+    ],
+    basemapIndex: 0,
+
+    cycleBasemap() {
+        if (this.currentLayer !== 'earth') {
+            Toast.show('Basemap cycling is for Earth only; Moon/Mars use NASA Trek imagery');
+            return;
+        }
+        this.basemapIndex = (this.basemapIndex + 1) % this.basemaps.length;
+        this.switchLayer(this.currentLayer);
+        Toast.show(`Basemap: ${this.basemaps[this.basemapIndex].name}`);
+    },
+
+    /* ---------- Hover tooltip on mouse move ---------- */
+    updateHoverTooltip(latlng) {
+        if (!this.map || !latlng || !latlng.lat) return;
+        const nearest = this.findNearestSite(latlng.lat, latlng.lng);
+        if (!nearest) {
+            if (this.hoverTooltip) {
+                this.map.removeLayer(this.hoverTooltip);
+                this.hoverTooltip = null;
+            }
+            return;
+        }
+        const dist = Math.sqrt(
+            Math.pow(latlng.lat - nearest.lat, 2) + Math.pow(latlng.lng - nearest.lng, 2)
+        );
+        // Only show tooltip when reasonably close to a marker
+        if (dist > 15) {
+            if (this.hoverTooltip) {
+                this.map.removeLayer(this.hoverTooltip);
+                this.hoverTooltip = null;
+            }
+            return;
+        }
+        const content = `<b>${nearest.name}</b><br>${fmt(nearest.meanRough)} m rough · ${nearest.vsMoon}% vs Moon`;
+        if (!this.hoverTooltip) {
+            this.hoverTooltip = L.tooltip({
+                permanent: false,
+                direction: 'top',
+                offset: [0, -14],
+                className: 'map-hover-tooltip'
+            });
+        }
+        this.hoverTooltip.setLatLng(latlng).setContent(content).openOn(this.map);
+    },
+
+    /* ---------- Fit all sites ---------- */
+    fitAll() {
+        if (!this.map || !this.markers.length) return;
+        const bounds = L.latLngBounds(this.markers.map(m => m.getLatLng()));
+        this.map.fitBounds(bounds, { padding: [40, 40] });
+    },
+
+    /* ---------- Active marker tracking ---------- */
+    setActiveMarker(marker) {
+        this.markers.forEach(m => {
+            const el = m.getElement?.();
+            if (el) el.classList.toggle('active', m === marker);
+        });
+    },
+
+    /* ---------- Site detail panel ---------- */
+    renderDetail(site) {
+        const el = document.getElementById('map-detail');
+        if (!el) return;
+        const body = PLANET_COLORS[site.body];
+        el.innerHTML = `
+            <div class="map-detail-head">
+                <div>
+                    <h3 style="color:${body}">${site.name}</h3>
+                    <span style="font-size:0.76rem;color:var(--ink-mute)">${site.body} • ${site.analogy}</span>
+                </div>
+            </div>
+            <div class="map-detail-body">
+                <div class="map-detail-stat"><span class="mds-label">Flat area</span><span class="mds-value">${fmt(site.area)} km²</span></div>
+                <div class="map-detail-stat"><span class="mds-label">Mean rough</span><span class="mds-value">${fmt(site.meanRough)} m</span></div>
+                <div class="map-detail-stat"><span class="mds-label">p95 rough</span><span class="mds-value">${fmt(site.p95Rough)} m</span></div>
+                <div class="map-detail-stat"><span class="mds-label">vs Moon</span><span class="mds-value">${site.vsMoon}%</span></div>
+            </div>
+            <p class="map-detail-desc">${site.description}</p>
+            <div class="map-detail-actions">
+                <button class="btn-primary btn-small" type="button" onclick="MapViewer.focusOnSite('${site.id}')">📍 Focus on map</button>
+                <button class="btn-ghost btn-small" type="button" onclick="window.UI.openModal('compare')">📊 Compare</button>
+                <button class="btn-ghost btn-small" type="button" onclick="MapViewer.openTerrainFor('${site.id}')">⛰️ View 3D terrain</button>
+</div>`;
+        },
+
+    /* ---------- Open 3D Terrain Lab for this site ---------- */
+    openTerrainFor(siteId) {
+        const site = SITE_DATA[siteId];
+        if (!site) return;
+        window.UI.openModal('terrain');
+        if (window.TerrainLab) {
+            const bodySelect = document.getElementById('terrain-body');
+            if (bodySelect) {
+                bodySelect.value = site.body;
+                TerrainLab.populateSites(site.body);
+            }
+            const siteSelect = document.getElementById('terrain-site');
+            if (siteSelect) {
+                siteSelect.value = siteId;
+                TerrainLab.loadSelectedSite();
+            }
+        }
+    },
+
+    clearDetail() {
+        const el = document.getElementById('map-detail');
+        if (el) el.innerHTML = '<div class="map-detail-empty">Select a site or map marker to view its terrain metrics.</div>';
     }
 };
 
