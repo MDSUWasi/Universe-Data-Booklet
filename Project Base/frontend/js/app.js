@@ -13,6 +13,9 @@ window.onload = () => {
     if (window.Cache) window.Cache.init();
     if (window.Toast) window.Toast.init();
     if (window.Selector) window.Selector.init();
+    // Theme must be applied before any feature renders so the palette is
+    // consistent from the first paint.
+    if (window.Theme) window.Theme.init();
 
     const discRun = document.getElementById('disc-run');
     const discRand = document.getElementById('disc-random');

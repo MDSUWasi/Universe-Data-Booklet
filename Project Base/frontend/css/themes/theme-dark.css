@@ -1,0 +1,49 @@
+/* THEME 2: DARK — deep-space purples, dark surfaces, glowing accents.
+   Active when <html> has data-theme="dark". */
+[data-theme="dark"] {
+    --purple-light: #9B6DFF;
+    --purple: #7C5CE6;
+    --purple-deep: #4A3B8A;
+    --tint-1: #1A1626;
+    --tint-2: #241E33;
+    --tint-3: #2E2640;
+    --tint-4: #3D3252;
+    --warm-1: #2A2230;
+    --warm-2: #342A3A;
+    --warm-3: #3E3246;
+    --terracotta: #FF9E7A;
+    --terracotta-deep: #E07A5F;
+    --gold: #F2CC8F;
+    --gold-deep: #E0A944;
+    --coral: #F08080;
+    --sage: #81B29A;
+    --sage-deep: #4E8C6E;
+    --sky: #62B6CB;
+    --sky-deep: #2E7D9A;
+    --plum: #9B8AB8;
+    --ink: #E6DFF5;
+    --ink-soft: #C4B4D8;
+    --ink-mute: #8E7EA8;
+    --ink-on-fill: #1A1626;
+    --surface: rgba(26, 22, 38, 0.9);
+    --surface-solid: #1E1A28;
+    --border: rgba(124, 92, 230, 0.28);
+    --border-warm: rgba(224, 122, 95, 0.4);
+    --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 8px 26px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 18px 50px rgba(0, 0, 0, 0.6);
+    --bg: #120E1C;
+    --panel: var(--surface);
+    --panel-solid: var(--surface-solid);
+    --accent: var(--terracotta-deep);
+    --accent-soft: rgba(155, 109, 255, 0.28);
+    --text-primary: var(--ink);
+    --text-secondary: var(--ink-soft);
+    --text-muted: var(--ink-mute);
+    --grad-a: rgba(124, 92, 230, 0.3);
+    --grad-b: rgba(224, 122, 95, 0.22);
+    --grad-c: rgba(124, 92, 230, 0.22);
+    --grad-d: #1A1626;
+    --grad-e: #241E33;
+    --grad-f: #2A2230;
+}

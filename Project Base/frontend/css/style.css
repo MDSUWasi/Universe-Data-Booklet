@@ -1,10 +1,15 @@
 /* ============================================================
  *  Planetary Analog Explorer — style.css
- *  LIGHT THEME · purple fills + terracotta highlights · no black
- *  #B200ED · #8F00FF · #81007F  →  backgrounds / fills only
+ *  BASE STYLES + THEME STRUCTURE (position/layout rules).
+ *  Colour palettes live in css/themes/theme-{light,dark,planetary}.css
+ *  and are toggled on <html> via data-theme="light"|"dark"|"planetary".
+ *  Light is the default theme.
  * ============================================================ */
 
 /* ---------- 1. TOKENS ---------- */
+/* Three independent themes.  Each sets the same CSS custom properties but with
+   its own colour palette, surface feel, and layout position.  The active theme
+   is toggled on <html> via data-theme="light"|"dark"|"planetary". */
 :root {
     /* Saturated purples — FILLS & BACKGROUNDS ONLY */
     --purple-light: #B200ED;
@@ -74,14 +79,74 @@
     --text-primary: var(--ink);
     --text-secondary: var(--ink-soft);
     --text-muted: var(--ink-mute);
+
+    /* Theme-aware body gradients (used by the body background-image). */
+    --grad-a: rgba(178, 0, 237, 0.15);
+    --grad-b: rgba(224, 122, 95, 0.17);
+    --grad-c: rgba(143, 0, 255, 0.14);
+    --grad-d: #FDFAFF;
+    --grad-e: #F7F0FF;
+    --grad-f: #FFF7F1;
 }
 
 /* ---------- 2. RESET / BASE ---------- */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* ================= THEME STRUCTURE =================
+   Each theme repositions the same elements differently so the layout feels
+   distinct, not just recoloured.  Defaults below are the LIGHT theme. */
+
+/* DARK: sidebar slides in from the right; main content hugs the left edge. */
+[data-theme="dark"] .sidebar {
+    left: auto;
+    right: 0;
+    transform: translateX(100%);
+    box-shadow: -6px 0 30px rgba(0, 0, 0, 0.5);
+}
+[data-theme="dark"] .sidebar.open { transform: translateX(0); }
+[data-theme="dark"] .hamburger { left: auto; right: 16px; }
+
+/* DARK: modals sit slightly lower and narrower for a focused feel. */
+[data-theme="dark"] .modal-panel { max-width: 580px; }
+
+/* PLANETARY: sidebar becomes a bottom drawer; main content flows full-width. */
+[data-theme="planetary"] .sidebar {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: auto;
+    max-height: 60vh;
+    transform: translateY(100%);
+    border-right: none;
+    border-top: 2px solid var(--border);
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -10px 40px rgba(139, 90, 43, 0.2);
+    padding: 70px 18px 18px;
+}
+[data-theme="planetary"] .sidebar.open { transform: translateY(0); }
+[data-theme="planetary"] .sidebar::-webkit-scrollbar { display: none; }
+[data-theme="planetary"] .side-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+[data-theme="planetary"] .side-nav-item {
+    flex: 1 1 auto;
+    min-width: 120px;
+}
+[data-theme="planetary"] .hamburger {
+    bottom: 16px;
+    top: auto;
+    left: 50%;
+    transform: translateX(-50%);
+}
+[data-theme="planetary"] .main-content { padding-bottom: 80px; }
+
 html {
     scroll-behavior: smooth;
-    background-color: #FCF8FF;
+    background-color: var(--bg);
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
 }
@@ -93,12 +158,12 @@ body {
     font-family: var(--font);
     line-height: 1.6;
     color: var(--ink-soft);
-    background-color: #FCF8FF;
+    background-color: var(--bg);
     background-image:
-        radial-gradient(ellipse 940px 540px at 6% -8%, rgba(178, 0, 237, 0.15), transparent 62%),
-        radial-gradient(ellipse 820px 470px at 97% 3%, rgba(224, 122, 95, 0.17), transparent 60%),
-        radial-gradient(ellipse 880px 540px at 48% 114%, rgba(143, 0, 255, 0.14), transparent 64%),
-        linear-gradient(160deg, #FDFAFF 0%, #F7F0FF 48%, #FFF7F1 100%);
+        radial-gradient(ellipse 940px 540px at 6% -8%, var(--grad-a), transparent 62%),
+        radial-gradient(ellipse 820px 470px at 97% 3%, var(--grad-b), transparent 60%),
+        radial-gradient(ellipse 880px 540px at 48% 114%, var(--grad-c), transparent 64%),
+        linear-gradient(160deg, var(--grad-d) 0%, var(--grad-e) 48%, var(--grad-f) 100%);
     background-attachment: fixed;
     transition: padding-left var(--ease);
 }
@@ -332,6 +397,56 @@ h1, h2, h3 { color: var(--ink); line-height: 1.25; }
     line-height: 1.5;
 }
 .sidebar-author::before { content: "\270E "; }
+
+/* --- theme switcher (independent module) --- */
+.theme-switcher {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 14px 14px 0;
+    padding: 12px 14px 14px;
+    border-top: 2px solid var(--border);
+    border-radius: 14px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,255,255,0.35));
+}
+.theme-label {
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    text-align: center;
+}
+.theme-buttons {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+}
+.theme-btn {
+    flex: 1;
+    min-width: 0;
+    padding: 8px 6px;
+    font-family: inherit;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.7);
+    color: var(--ink-soft);
+    transition: background var(--ease), color var(--ease), border-color var(--ease), transform var(--ease);
+}
+.theme-btn:hover { transform: translateY(-2px); }
+.theme-btn[aria-pressed="true"] {
+    background: linear-gradient(120deg, var(--purple), var(--purple-deep));
+    color: var(--ink-on-fill);
+    border-color: var(--gold);
+    box-shadow: var(--shadow-md);
+}
+[data-theme="dark"] .theme-btn { background: rgba(255, 255, 255, 0.06); color: var(--ink-soft); }
+[data-theme="dark"] .theme-btn[aria-pressed="true"] { background: linear-gradient(120deg, var(--purple), var(--purple-deep)); color: var(--ink-on-fill); }
+[data-theme="planetary"] .theme-btn { background: rgba(255, 255, 255, 0.7); color: var(--ink-soft); }
+[data-theme="planetary"] .theme-btn[aria-pressed="true"] { background: linear-gradient(120deg, var(--purple), var(--purple-deep)); color: var(--ink-on-fill); }
 
 .sidebar-credits {
     margin: 10px 14px 0;

@@ -19,6 +19,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <link rel="stylesheet" href="css/style.css">
+<!-- Three independent themes. Light is the default; the Theme module
+     toggles data-theme on <html> and persists the choice. -->
+<link rel="stylesheet" href="css/themes/theme-light.css">
+<link rel="stylesheet" href="css/themes/theme-dark.css">
+<link rel="stylesheet" href="css/themes/theme-planetary.css">
 </head>
 <body class="sidebar-open">
 
@@ -39,6 +44,16 @@
   <div class="sidebar-header">
     <span class="sidebar-kicker">Navigate</span>
     <button class="sidebar-close" type="button" onclick="Sidebar.close()" aria-label="Close navigation">&times;</button>
+  </div>
+
+  <!-- ================= THEME SWITCHER (independent module) ================= -->
+  <div class="theme-switcher" id="theme-switcher" role="group" aria-label="Choose a theme">
+    <span class="theme-label">Theme</span>
+    <div class="theme-buttons">
+      <button class="theme-btn" data-theme="light" type="button" aria-pressed="true" title="Light">☀️ Light</button>
+      <button class="theme-btn" data-theme="dark" type="button" aria-pressed="false" title="Dark">🌙 Dark</button>
+      <button class="theme-btn" data-theme="planetary" type="button" aria-pressed="false" title="Planetary">🪐 Planetary</button>
+    </div>
   </div>
 
   <nav class="side-nav" aria-label="Main features">
@@ -489,6 +504,7 @@
 <script src="js/modules/core/sidebar.js"></script>
 <script src="js/modules/core/ui.js"></script>
 <script src="js/modules/core/cache.js"></script>
+<script src="js/modules/core/theme.js"></script>
 
 <script src="js/modules/discovery/discovery.js"></script>
 <script src="js/modules/map/basemaps.js"></script>
