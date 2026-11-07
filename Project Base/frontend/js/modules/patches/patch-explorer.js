@@ -42,8 +42,9 @@
             tbody.replaceChildren(...records.map(record => {
                 const row = document.createElement('tr');
                 if (record.filled) row.classList.add('is-filled');
-                const values = [
+                    const values = [
                     record.site, record.body, this.number(record.area_km2, 3),
+                    this.number(record.slope_mean_deg, 3), this.number(record.centre_x, 1), this.number(record.centre_y, 1),
                     this.number(record.rough_mean_m, 3), this.number(record.rough_p95_m, 3),
                     this.number(record.rough_max_m, 3), this.number(record.zero_frac, 4),
                     record.filled ? 'Filled / flagged' : 'Non-filled'

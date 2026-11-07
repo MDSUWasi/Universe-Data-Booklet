@@ -112,6 +112,9 @@ def scale_sensitivity_payload() -> dict:
             points.append({
                 "patch_id": int(row["patch_id"]),
                 "area_km2": float(row["area_km2"]),
+                "slope_mean_deg": float(row["slope_mean_deg"]) if row.get("slope_mean_deg") else None,
+                "centre_x": float(row["centre_x"]) if row.get("centre_x") else None,
+                "centre_y": float(row["centre_y"]) if row.get("centre_y") else None,
                 "roughness_mean_m": float(row["roughness_mean_m"]),
                 "roughness_p95_m": float(row["roughness_p95_m"]),
             })

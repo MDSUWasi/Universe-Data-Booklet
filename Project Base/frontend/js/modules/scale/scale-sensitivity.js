@@ -35,7 +35,9 @@
             const means = fingerprints.map(point => point.roughness_mean_m).concat([reference.mean_roughness_m]);
             const p95s = fingerprints.map(point => point.roughness_p95_m).concat([reference.p95_roughness_m]);
             document.getElementById('scale-summary').textContent = warning;
-            document.getElementById('scale-status').textContent = 'Recorded ' + shortWindow + ' m fingerprints: mean ' + means.slice(0, -1).map(value => value.toFixed(3)).join(', ') + ' m. ' + longWindow + ' m reference: mean ' + reference.mean_roughness_m.toFixed(3) + ' m, p95 ' + reference.p95_roughness_m.toFixed(3) + '.';
+            const areas = fingerprints.map(point => point.area_km2);
+            const slopes = fingerprints.map(point => point.slope_mean_deg);
+            document.getElementById('scale-status').textContent = 'Recorded ' + shortWindow + ' m fingerprints: mean ' + means.slice(0, -1).map(value => value.toFixed(3)).join(', ') + ' m; area ' + areas.map(value => value.toFixed(3)).join(', ') + ' km²; slope ' + slopes.map(value => (Number.isFinite(value) ? value.toFixed(3) : '-') ).join(', ') + '°. ' + longWindow + ' m reference: mean ' + reference.mean_roughness_m.toFixed(3) + ' m, p95 ' + reference.p95_roughness_m.toFixed(3) + '.';
             if (typeof Chart === 'undefined') return;
             const canvas = document.getElementById('scale-chart');
             const chartData = {
