@@ -29,6 +29,15 @@ window.onload = () => {
         if (window.MapViewer) window.MapViewer.retryTiles();
     });
 
+    // Mission Planner: wire the wizard buttons (independent of the step UI).
+    const plannerBack = document.getElementById('planner-back');
+    const plannerNext = document.getElementById('planner-next');
+    if (plannerBack) plannerBack.onclick = () => { if (window.Planner) window.Planner.back(); };
+    if (plannerNext) plannerNext.onclick = () => {
+        if (window.Planner && plannerNext.textContent === 'Restart') window.Planner.start();
+        else if (window.Planner) window.Planner.next();
+    };
+
     document.getElementById('stat-sites').textContent = '5';
     document.getElementById('stat-bodies').textContent = '3';
 
