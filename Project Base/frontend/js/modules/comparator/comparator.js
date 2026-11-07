@@ -52,7 +52,7 @@
             let va = a[this.sortCol], vb = b[this.sortCol];
             if (typeof va === 'string') va = va.toLowerCase();
             if (typeof vb === 'string') vb = vb.toLowerCase();
-            return this.sortDir === 'asc' ? va > vb : va < vb;
+            return this.sortDir === 'asc' ? (va > vb ? 1 : va < vb ? -1 : 0) : (va < vb ? 1 : va > vb ? -1 : 0);
         });
     };
 
@@ -96,7 +96,7 @@
         const ctx = document.getElementById('cmp-chart');
         if (!ctx || !window.Chart) return;
         if (window.CmpChart) window.CmpChart.destroy();
-        const data = this.getData().map(s => ({ site: s.name, sim: s.vsMoon }));
+        const data = this.getData().map(s => ({ site: s.name, body: s.body, sim: s.vsMoon }));
         window.CmpChart = new Chart(ctx, {
             type: 'bar',
             data: {
@@ -104,7 +104,7 @@
                 datasets: [{
                     label: 'Moon Similarity %',
                     data: data.map(d => d.sim),
-                    backgroundColor: data.map(d => window.PLANET_COLORS[window.SITE_DATA[d.site.split(' ')[0].toLowerCase()] ? window.SITE_DATA[d.site.split(' ')[0].toLowerCase()].body : 'Earth'])
+                    backgroundColor: data.map(d => window.PLANET_COLORS[d.body])
                 }]
             },
             options: { responsive: true, maintainAspectRatio: false }

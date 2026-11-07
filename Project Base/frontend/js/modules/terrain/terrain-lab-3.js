@@ -10,6 +10,7 @@
         const site = Object.values(window.SITE_DATA).find(candidate => candidate.id === id);
         if (!site) return;
         this.site = site;
+        const gen = ++this._loadGen;
         this.setStatus('Loading ' + site.name + ' DEM window\u2026');
         (async () => {
             try {
@@ -21,6 +22,9 @@
                     this.validateAsset(asset, id);
                     this.assets.set(id, asset);
                 }
+                // If a newer load started while we were awaiting, discard this one
+                // so a stale asset cannot overwrite the geometry of the current site.
+                if (gen !== this._loadGen) return;
                 this.asset = asset;
                 this.updateGeometry();
                 document.getElementById('terrain-meta').innerHTML =
@@ -31,6 +35,7 @@
                     '<span>Elevation range: <strong>' + asset.elevation_min_m.toFixed(1) + '\u2013' + asset.elevation_max_m.toFixed(1) + ' m</strong></span>';
                 this.setStatus(site.name + ' terrain loaded from local DEM assets.');
             } catch (error) {
+                if (gen !== this._loadGen) return;
                 this.setStatus('Terrain unavailable: ' + error.message);
             }
         })();

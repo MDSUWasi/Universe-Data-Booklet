@@ -188,7 +188,8 @@
       <div class="patch-controls">
         <label>Planetary body<select id="patch-body"><option value="all">All bodies</option><option value="Moon">Moon</option><option value="Earth">Earth</option><option value="Mars">Mars</option></select></label>
         <label>Classification<select id="patch-kind"><option value="all">All patches</option><option value="valid">Non-filled</option><option value="filled">Filled / flagged</option></select></label>
-        <span id="patch-count" aria-live="polite">Loading patch report…</span>
+        <p id="patch-formulas"><strong>Formulas:</strong> area = patch cells × pixel area; slope (Horn); roughness = max − min in 3×3 window; filled if zero fraction > 0.5.</p>
+      <span id="patch-count" aria-live="polite">Loading patch report…</span>
       </div>
       <div class="cmp-table-wrap"><table class="cmp-table patch-table"><thead><tr><th>Site</th><th>Body</th><th>Area km²</th><th>Slope mean °</th><th>Centre X</th><th>Centre Y</th><th>Mean rough m</th><th>p95 rough m</th><th>Max rough m</th><th>Zero fraction</th><th>Flag</th></tr></thead><tbody id="patch-rows"></tbody></table></div>
       <div id="patch-status" class="calc-notes" aria-live="polite"></div>
@@ -264,7 +265,7 @@
         Results are cached in this browser to avoid repeat requests.
       </p>
       <div class="disc-controls">
-        <label>Latitude<input type="number" id="disc-lat" step="0.0001" placeholder="-77.6" min="-85" max="85"></label>
+        <label>Latitude<input type="number" id="disc-lat" step="0.0001" placeholder="-77.6" min="-90" max="90"></label>
         <label>Longitude<input type="number" id="disc-lng" step="0.0001" placeholder="162.2" min="-180" max="180"></label>
         <button class="btn-primary" id="disc-run" type="button">Analyze Terrain</button>
         <button class="btn-ghost" id="disc-random" type="button">🎲 Surprise Me</button>

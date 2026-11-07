@@ -17,6 +17,9 @@
         rotationX: -0.75,
         rotationY: 0.45,
         initialized: false,
+        // Incremented on every loadSelectedSite call so a slow in-flight
+        // load for an older site cannot overwrite the geometry of a newer one.
+        _loadGen: 0,
 
         open() {
             if (!this.initialized) this.initialize();

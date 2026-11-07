@@ -8,7 +8,7 @@
         _live: {},
 
         async analyze(lat, lng) {
-            if (!Number.isFinite(lat) || !Number.isFinite(lng) || lat < -85 || lat > 85 || lng < -180 || lng > 180) {
+            if (!Number.isFinite(lat) || !Number.isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
                 this.renderError('Enter a valid Earth coordinate.');
                 return null;
             }
@@ -86,16 +86,30 @@
                     relief.push(Math.max(...w) - Math.min(...w));
                 }
             }
-            const gradX = (grid[5] - grid[3]) / (2 * 278);
-            const gradY = (grid[7] - grid[1]) / (2 * 278);
-            const sortedRelief = [...relief].sort((a, b) => a - b);
-            return {
-                slope: Math.atan(Math.hypot(gradX, gradY)) * 180 / Math.PI,
-                meanRelief: relief.reduce((a, b) => a + b, 0) / relief.length,
-                p95Relief: sortedRelief[Math.ceil(sortedRelief.length * 0.95) - 1],
-                range: Math.max(...grid) - Math.min(...grid)
-            };
-        },
+                    const gradX = (grid[5] - grid[3]) / (2 * 278);
+                    const gradY = (grid[7] - grid[1]) / (2 * 278);
+                    const sortedRelief = [...relief].sort((a, b) => a - b);
+                return {
+                    slope: Math.atan(Math.hypot(gradX, gradY)) * 180 / Math.PI,
+                    meanRelief: relief.reduce((a, b) => a + b, 0) / relief.length,
+                    p95Relief: this._percentile(sortedRelief, 0.95),
+                    range: Math.max(...grid) - Math.min(...grid)
+                };
+            },
+
+            // Linear-interpolation percentile (matches the numpy default).
+            // With only 4 relief samples a nearest-rank method would always
+            // return the max; interpolation gives a true 95th percentile.
+            _percentile(sorted, p) {
+                if (sorted.length === 0) return 0;
+                if (sorted.length === 1) return sorted[0];
+                const rank = (sorted.length - 1) * p;
+                const lower = Math.floor(rank);
+                const upper = Math.ceil(rank);
+                if (lower === upper) return sorted[lower];
+                const frac = rank - lower;
+                return sorted[lower] * (1 - frac) + sorted[upper] * frac;
+            },
 
         render(result) {
             const el = document.getElementById('disc-result');

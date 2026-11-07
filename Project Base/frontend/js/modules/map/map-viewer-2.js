@@ -16,7 +16,7 @@
             card.dataset.name = site.name.toLowerCase();
             card.onclick = () => this.focusOnSite(site.id);
             card.onmouseenter = () => {
-                const marker = this.markers.find(m => m.getLatLng().lat === site.lat);
+                const marker = this.markers.find(m => m._siteId === site.id);
                 if (marker) marker.openPopup();
             };
             card.onmouseleave = () => {
@@ -33,6 +33,7 @@
                     iconSize: [14, 14], iconAnchor: [7, 7]
                 })
             });
+            marker._siteId = site.id;
             marker.on('popupopen', () => {
                 this.setActiveMarker(marker);
                 this.activeMarker = marker;
@@ -59,7 +60,7 @@
         const bodyLayer = site.body === 'Moon' ? 'moon' : site.body === 'Mars' ? 'mars' : 'earth';
         if (bodyLayer !== this.currentLayer) this.switchLayer(bodyLayer);
         this.map.setView([site.lat, site.lng], 8);
-        const marker = this.markers.find(m => m.getLatLng().lat === site.lat);
+        const marker = this.markers.find(m => m._siteId === id);
         if (marker) {
             this.markers.forEach(m => m.closePopup());
             marker.openPopup();
@@ -88,7 +89,7 @@
     M.filterSiteList = function (query) {
         const q = query.trim().toLowerCase();
         document.querySelectorAll('.map-site').forEach(card => {
-            const match = !q || card.dataset.name.includes(q) || card.querySelector('span').textContent.toLowerCase().includes(q);
+            const match = !q || card.dataset.name.includes(q) || (card.querySelector('span') ? card.querySelector('span').textContent.toLowerCase().includes(q) : false);
             card.style.display = match ? '' : 'none';
         });
     };

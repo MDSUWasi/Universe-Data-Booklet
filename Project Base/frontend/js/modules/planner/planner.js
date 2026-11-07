@@ -67,7 +67,7 @@
         const out = document.getElementById('planner-output');
         if (!out) return;
         const plan = this.plan;
-        const items = Object.entries(plan).map(([k, v]) => '<b>' + k + ':</b> ' + v).join('</li><li>');
+        const items = Object.entries(plan).map(([k, v]) => '<li><b>' + k + ':</b> ' + v + '</li>').join('');
 
         // Mathematical scoring: rank every catalogued site for this mission.
         const ranked = this.rankSites(plan);
@@ -88,7 +88,7 @@
 
         out.innerHTML =
             '<h3>Mission Draft Ready</h3>' +
-            '<ul><li>' + items + '</li></ul>' +
+            '<ul>' + items + '</ul>' +
             '<h4 style="margin-top:16px">Site viability for this mission</h4>' +
             '<p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:8px">' +
             'Score = science (' + (this.weights.science * 100) + '%) + inverse cost (' + (this.weights.cost * 100) + '%) + inverse risk (' + (this.weights.risk * 100) + '%). ' +

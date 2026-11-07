@@ -74,6 +74,10 @@
             this.canvas.height = this.height * this.dpr;
             this.canvas.style.width = this.width + 'px';
             this.canvas.style.height = this.height + 'px';
+            // Reset any previously accumulated transform before re-applying
+            // the device-pixel-ratio scale, so repeated resizes do not
+            // compound the scale factor and drift the starfield.
+            this.ctx.setTransform(1, 0, 0, 1, 0, 0);
             this.ctx.scale(this.dpr, this.dpr);
         },
 
