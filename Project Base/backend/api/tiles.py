@@ -1,5 +1,9 @@
 """NASA Solar System Treks WMTS tile proxy, cached as immutable JPEGs.
 
+ATTRIBUTION: both products are NASA/JPL public-domain data served through the
+Solar System Treks WMTS service (https://trek.nasa.gov).  Recommended credit:
+"NASA/JPL-Caltech" or "NASA/JPL Solar System Treks".
+
 Moon uses the LRO WAC Mosaic; Mars uses the Viking MDIM21 global mosaic.
 Tiles are versioned upstream products, so they are cached with no TTL and
 served until capacity eviction removes them.

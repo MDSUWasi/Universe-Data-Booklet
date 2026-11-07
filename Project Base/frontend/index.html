@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#FBF6FF">
 <title>Planetary Analog Explorer — Earth, Moon &amp; Mars Terrain</title>
 <meta name="description" content="Explore terrain data and reference sites across Earth, the Moon, and Mars with an interactive planetary comparison atlas.">
 
@@ -87,6 +88,22 @@
       <span class="nav-desc">See why window size matters</span>
     </button>
   </nav>
+
+  <!-- ================= SIDEBAR FOOTER: legal + authoring notes ================= -->
+  <div class="sidebar-footer">
+    <div class="sidebar-legal">
+      <a href="#privacy" class="legal-link" onclick="UI.openModal('legal')">Privacy Policy</a>
+      <span class="legal-dot" aria-hidden="true">·</span>
+      <a href="#terms" class="legal-link" onclick="UI.openModal('legal')">Terms of Service</a>
+      <span class="legal-dot" aria-hidden="true">·</span>
+      <a href="#credits" class="legal-link" onclick="UI.openModal('credits')">Credits</a>
+    </div>
+    <p class="sidebar-author">Author notes &amp; writing space — edit me.</p>
+    <div class="sidebar-credits">
+      Data: NASA/USGS · ESA/Copernicus · OpenStreetMap · Open-Meteo ·
+      <a href="#credits" onclick="UI.openModal('credits')">Full provenance</a>
+    </div>
+  </div>
 </aside>
 
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="Sidebar.close()"></div>
@@ -343,11 +360,124 @@
   <div id="toast-root"></div>
 </main>
 
+<!-- ================= LEGAL MODAL (Privacy Policy + Terms of Service) ================= -->
+<div class="modal-overlay" id="modal-legal" onclick="UI.overlayClose(event,'legal')">
+  <div class="modal-panel modal-wide">
+    <div class="modal-head">
+      <h2>📋 Legal</h2>
+      <button class="x" type="button" onclick="UI.closeModal('legal')" aria-label="Close legal">&times;</button>
+    </div>
+
+    <h3 style="margin:14px 0 6px;font-size:1.05rem">Privacy Policy</h3>
+    <p style="font-size:0.82rem;color:var(--ink-soft)">
+      Project-Base is a client-side research tool. It runs entirely in your browser and does
+      not create an account, store a username, or track you across devices.
+    </p>
+    <ul style="font-size:0.82rem;color:var(--ink-soft);margin:6px 0 14px 18px">
+      <li><b>Local storage.</b> A small discovery cache (≈300 entries) is kept in your browser so repeated lookups are instant. It contains only coordinates and terrain metrics — no personal data.</li>
+      <li><b>Upstream calls.</b> Elevation and weather queries are sent to Open-Meteo (public, no API key). Tile requests go to NASA/JPL Solar System Treks and open basemap providers.</li>
+      <li><b>No analytics.</b> No third-party analytics, advertising, or tracking scripts are loaded.</li>
+      <li><b>Data you provide.</b> Any text you type into the planner or authoring notes stays in your browser and is never uploaded.</li>
+    </ul>
+
+    <h3 style="margin:14px 0 6px;font-size:1.05rem">Terms of Service</h3>
+    <p style="font-size:0.82rem;color:var(--ink-soft)">
+      By using this tool you accept the following:
+    </p>
+    <ul style="font-size:0.82rem;color:var(--ink-soft);margin:6px 0 14px 18px">
+      <li><b>Informational only.</b> Terrain metrics, rankings, and mission scores are research estimates, not engineering or safety advice. Do not use them for life-critical decisions.</li>
+      <li><b>Third-party data.</b> All underlying data is provided by NASA, USGS, ESA/Airbus, OpenStreetMap contributors, and Open-Meteo under their respective open licences. Attribution is given in the footer.</li>
+      <li><b>No warranty.</b> The tool is provided "as is". Availability, accuracy, and timeliness of upstream services are not guaranteed.</li>
+      <li><b>Acceptable use.</b> Do not abuse the upstream services with automated scraping. Rate-limit your requests.</li>
+    </ul>
+    <p style="font-size:0.74rem;color:var(--ink-mute);margin-top:10px">
+      These notes are a starting point — review them against your own legal requirements before publishing.
+    </p>
+  </div>
+</div>
+
+<!-- ================= CREDITS MODAL (full provenance) ================= -->
+<div class="modal-overlay" id="modal-credits" onclick="UI.overlayClose(event,'credits')">
+  <div class="modal-panel modal-wide">
+    <div class="modal-head">
+      <h2>📋 Credits &amp; Provenance</h2>
+      <button class="x" type="button" onclick="UI.closeModal('credits')" aria-label="Close credits">&times;</button>
+    </div>
+    <p class="modal-intro">Every dataset, service, and library used by Project-Base, with its provider, licence, and the guidance each requires.</p>
+
+    <h3 style="margin:14px 0 6px;font-size:1.05rem">1. Datasets</h3>
+    <table class="cmp-table">
+      <thead><tr><th>Dataset</th><th>Provider</th><th>Licence</th><th>Guidance</th></tr></thead>
+      <tbody>
+        <tr><td><b>LRO South Pole DEM</b></td><td>USGS Astrogeology / NASA</td><td>Public domain</td><td>Citation good practice</td></tr>
+        <tr><td><b>Copernicus DEM GLO-30</b></td><td>ESA / Airbus (AWS Open Data)</td><td>Free, attribution required</td><td>Attribute "ESA, Copernicus"</td></tr>
+        <tr><td><b>MRO CTX Controlled DTM</b></td><td>USGS Astrogeology / NASA</td><td>Public domain</td><td>"Data provided by USGS Astrogeology Science Center"</td></tr>
+        <tr><td><b>Derived slope / roughness rasters</b></td><td>Computed locally with GDAL</td><td>Inherit source terms</td><td>—</td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="margin:14px 0 6px;font-size:1.05rem">2. Live services</h3>
+    <table class="cmp-table">
+      <thead><tr><th>Service</th><th>Used for</th><th>Licence</th></tr></thead>
+      <tbody>
+        <tr><td><b>Open-Meteo Elevation API</b></td><td>Discovery Lab 3×3 elevation grid</td><td>CC BY 4.0</td></tr>
+        <tr><td><b>Open-Meteo Forecast API</b></td><td>Current temperature &amp; wind</td><td>CC BY 4.0</td></tr>
+        <tr><td><b>NASA Solar System Treks (WMTS)</b></td><td>Moon LRO WAC Mosaic, Mars Viking MDIM21</td><td>Public domain</td></tr>
+        <tr><td><b>Esri World Imagery</b></td><td>Earth satellite basemap</td><td>Esri terms</td></tr>
+        <tr><td><b>USGS The National Map</b></td><td>Earth imagery basemap</td><td>Public domain</td></tr>
+        <tr><td><b>OpenStreetMap</b></td><td>Earth street basemap</td><td>ODbL</td></tr>
+        <tr><td><b>CARTO</b></td><td>Earth dark basemap</td><td>CARTO terms</td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="margin:14px 0 6px;font-size:1.05rem">3. Libraries (CDN)</h3>
+    <table class="cmp-table">
+      <thead><tr><th>Library</th><th>Version</th><th>Used for</th></tr></thead>
+      <tbody>
+        <tr><td><b>Leaflet</b></td><td>1.9.4</td><td>Interactive map atlas</td></tr>
+        <tr><td><b>Chart.js</b></td><td>4.4.3</td><td>Every chart</td></tr>
+        <tr><td><b>GSAP</b></td><td>3.12.5</td><td>Modal animations</td></tr>
+        <tr><td><b>Three.js</b></td><td>0.160.0</td><td>3D Terrain Lab</td></tr>
+        <tr><td><b>jsPDF</b></td><td>2.5.1</td><td>Mission Planner PDF export</td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="margin:14px 0 6px;font-size:1.05rem">4. Offline tooling</h3>
+    <p style="font-size:0.82rem;color:var(--ink-soft)">GDAL 3.10.3 (<code>gdalwarp</code>, <code>gdaldem</code>), Python 3.13, NumPy, SciPy — used to prepare the DEMs, slope/roughness rasters, and comparison reports.</p>
+
+    <p style="font-size:0.76rem;color:var(--ink-mute);margin-top:14px">Full provenance is also recorded in <code>docs/data_source.md</code> and <code>docs/how_to_description.md</code>. No commercial, restricted, or paid dataset was used.</p>
+  </div>
+</div>
+
 <footer class="credits">
-  Terrain metrics: NASA LRO (Moon) · MRO CTX (Mars) · Copernicus GLO-30 (Earth), processed offline with GDAL ·
-  Live elevation &amp; weather: <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a> (CC BY 4.0) ·
-  Map data &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors ·
-  Planetary basemaps: NASA/JPL Solar System Treks
+  <div class="credit-line">
+    <strong>Datasets.</strong> Lunar terrain: <a href="https://astrogeology.usgs.gov/search/map/moon_lro_south_pole_dem" target="_blank" rel="noopener">LRO South Pole DEM</a> — USGS Astrogeology, NASA (public domain). ·
+    Earth terrain: <a href="https://registry.opendata.aws/copernicus-dem/" target="_blank" rel="noopener">Copernicus DEM GLO-30</a> — ESA / Airbus via AWS Open Data (free, attribution required). ·
+    Mars terrain: <a href="https://stac.astrogeology.usgs.gov/docs/data/mars/ctxdtms" target="_blank" rel="noopener">MRO CTX Controlled DTM</a> — USGS Astrogeology, NASA (public domain; attribution recommended).
+  </div>
+  <div class="credit-line">
+    <strong>Live services.</strong> Elevation &amp; weather: <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a> (CC BY 4.0). ·
+    Planetary basemaps: <a href="https://trek.nasa.gov" target="_blank" rel="noopener">NASA/JPL Solar System Treks</a> (LRO WAC Mosaic · Viking MDIM21). ·
+    Earth basemaps: <a href="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer" target="_blank" rel="noopener">Esri World Imagery</a> (Esri, Maxar, Earthstar Geographics) ·
+    <a href="https://basemap.nationalmap.gov/" target="_blank" rel="noopener">USGS The National Map</a> ·
+    <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors (ODbL) ·
+    <a href="https://carto.com/" target="_blank" rel="noopener">CARTO</a>.
+  </div>
+  <div class="credit-line">
+    <strong>Libraries.</strong> <a href="https://leafletjs.com/" target="_blank" rel="noopener">Leaflet</a> 1.9.4 ·
+    <a href="https://www.chartjs.org/" target="_blank" rel="noopener">Chart.js</a> 4.4.3 ·
+    <a href="https://greensock.com/gsap/" target="_blank" rel="noopener">GSAP</a> 3.12.5 ·
+    <a href="https://threejs.org/" target="_blank" rel="noopener">Three.js</a> 0.160.0 ·
+    <a href="https://github.com/parallax/jsPDF" target="_blank" rel="noopener">jsPDF</a> 2.5.1 ·
+    <a href="https://gdal.org/" target="_blank" rel="noopener">GDAL</a> 3.10.3 (offline processing). ·
+    <a href="https://www.python.org/" target="_blank" rel="noopener">Python</a> 3.13 + NumPy/SciPy.
+  </div>
+  <div class="credit-line">
+    <strong>Project.</strong> Planetary Research 2026 · "Identifying Terrestrial Analogs for Lunar and Martian Bases." ·
+    <a href="#privacy" style="margin-left:8px" onclick="UI.openModal('legal')">Privacy Policy</a> ·
+    <a href="#terms" onclick="UI.openModal('legal')">Terms of Service</a> ·
+    <a href="#credits" onclick="UI.openModal('credits')">Full credits &amp; provenance</a>
+  </div>
 </footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

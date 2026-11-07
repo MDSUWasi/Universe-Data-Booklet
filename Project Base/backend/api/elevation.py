@@ -1,5 +1,9 @@
 """Open-Meteo elevation service, proxied and cached.
 
+ATTRIBUTION: Open-Meteo is licensed CC BY 4.0.  Cite it as "Open-Meteo
+(https://open-meteo.com)".  No API key is required; the service is free for
+non-commercial and commercial use under that licence.
+
 The Discovery Lab samples a 3x3 elevation grid around any Earth coordinate and
 computes local slope/relief in the browser.  This module owns the upstream call,
 the response validation and the cache policy for that call.

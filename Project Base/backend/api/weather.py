@@ -1,5 +1,8 @@
 """Open-Meteo current-weather service, proxied and cached.
 
+ATTRIBUTION: Open-Meteo is licensed CC BY 4.0.  Cite it as "Open-Meteo
+(https://open-meteo.com)".  No API key is required.
+
 Independent of: elevation, tiles, the HTTP layer.  Owns its own TTL policy
 (15-minute fresh window, 30-day stale fallback) so weather can never be confused
 with the 30-day elevation policy.

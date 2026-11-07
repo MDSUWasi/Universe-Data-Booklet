@@ -1,5 +1,14 @@
 /* Shared core: site data + helpers. Classic script: registers window.SITE_DATA,
-   window.PLANET_COLORS, window.SITES, window.fmt, window.setText. */
+   window.PLANET_COLORS, window.SITES, window.fmt, window.setText.
+
+   DATA PROVENANCE: every figure below is derived from the committed reports
+   in output/reports/ (see docs/data_source.md for full provenance):
+     - Moon  (Shackleton): LRO South Pole DEM, USGS/NASA (public domain)
+     - McMurdo, Axel Heiberg, Kerguelen: Copernicus GLO-30, ESA/Airbus (free, attribution required)
+     - Jezero: MRO CTX Controlled DTM, USGS/NASA (public domain)
+   All metrics were computed on a common 30 m grid with a nominal 90 m roughness
+   window, so the numbers are comparable across bodies.
+   */
 'use strict';
 
 (function () {

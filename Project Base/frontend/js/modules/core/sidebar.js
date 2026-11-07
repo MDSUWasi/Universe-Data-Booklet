@@ -60,6 +60,11 @@
             if (this.overlay) {
                 this.overlay.classList.toggle('visible', open && window.innerWidth <= this.MOBILE_BREAKPOINT);
             }
+            // On mobile the drawer sits on top of the page; freeze the body so
+            // the footer and hero cannot scroll out from under it while open.
+            if (window.innerWidth <= this.MOBILE_BREAKPOINT) {
+                document.body.classList.toggle('scroll-locked', open);
+            }
 
             if (window.MapViewer && window.MapViewer.map) {
                 requestAnimationFrame(() => window.MapViewer.map.invalidateSize());
