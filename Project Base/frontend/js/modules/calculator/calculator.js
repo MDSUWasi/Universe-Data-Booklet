@@ -1,4 +1,4 @@
-/* Analogy Calculator: adjusted Euclidean distance in terrain-metric space.
+/* Comparison Calculator: adjusted Euclidean distance in terrain-metric space.
    Classic script: registers window.Calculator. */
 'use strict';
 

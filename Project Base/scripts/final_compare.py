@@ -8,8 +8,8 @@ Comparing roughness over 12 m windows (4 m lunar DEM) against 90 m
 windows (30 m Earth DEMs) is not a valid comparison; this removes that bias.
 
 Outputs:
-  output/reports/analog_comparison.csv
-  output/reports/analog_comparison.txt
+  output/reports/site_comparison.csv
+  output/reports/site_comparison.txt
 """
 
 import os
@@ -248,7 +248,7 @@ def main():
     emit("  not a site-wide average and should be described as such in any write-up.")
 
     # ---- write outputs
-    csv_path = os.path.join(REP, "analog_comparison.csv")
+    csv_path = os.path.join(REP, "site_comparison.csv")
     with open(csv_path, "w", newline="") as fh:
         w = csv.writer(fh)
         w.writerow(["site", "area_km2", "centre_x", "centre_y", "slope_mean_deg",
@@ -261,7 +261,7 @@ def main():
                             p["slope_mean"], p["r_mean"], p["r_p95"],
                             p["r_max"], p["zero_frac"], p["filled"]])
 
-    txt_path = os.path.join(REP, "analog_comparison.txt")
+    txt_path = os.path.join(REP, "site_comparison.txt")
     with open(txt_path, "w") as fh:
         fh.write("\n".join(lines) + "\n")
 

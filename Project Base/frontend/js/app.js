@@ -48,5 +48,20 @@ window.onload = () => {
 
     if (window.SiteMetrics) window.SiteMetrics.load();
 
-    if (window.Toast) window.Toast.show('Welcome to Planetary Analog Explorer');
+    if (window.Toast) window.Toast.show('Welcome to Planetary Explorer');
+
+    // Update hero stats from encyclopedia data once loaded.
+    fetch('/api/encyclopedia')
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+            if (data) {
+                const planets = data.planets || [];
+                const sites = data.sites || [];
+                const moons = data.moons || [];
+                document.getElementById('stat-bodies').textContent = planets.length + ' bodies';
+                document.getElementById('stat-sites').textContent = sites.length + ' sites';
+                document.getElementById('stat-moons').textContent = moons.length + ' moons';
+            }
+        })
+        .catch(() => {});
 };

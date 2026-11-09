@@ -128,7 +128,7 @@
                 '<div class="disc-grid">' + result.grid.map((e, i) =>
                     '<div class="disc-cell">' + (Number.isFinite(e) ? e.toFixed(1) : '-') + '</div>'
                 ).join('') + '</div>' +
-                '<div style="margin-top:10px;font-size:0.78rem;color:var(--text-muted)">Grid: 3\u00d73 at ~278 m spacing. Not a direct analog score.</div>';
+                '<div style="margin-top:10px;font-size:0.78rem;color:var(--text-muted)">Grid: 3\u00d73 at ~278 m spacing. Not a direct terrain score.</div>';
         },
 
         renderError(msg) {

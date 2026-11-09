@@ -2,7 +2,7 @@
 'use strict';
 
 (function () {
-    const KEY = 'analog_cache_v1';
+    const KEY = 'explorer_cache_v1';
     const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
     const MAX_ENTRIES = 300;
 
@@ -62,25 +62,25 @@
         clear() {
             this._store = {};
             this._write(this.KEY, '{}');
-            this._write('analog_hits', '0');
-            this._write('analog_misses', '0');
+            this._write('explorer_hits', '0');
+            this._write('explorer_misses', '0');
             this.updateStats();
         },
 
         recordHit() {
-            this._write('analog_hits', String(Number(this._read('analog_hits', '0')) + 1));
+            this._write('explorer_hits', String(Number(this._read('explorer_hits', '0')) + 1));
             this.updateStats();
         },
 
         incrementMiss() {
-            this._write('analog_misses', String(Number(this._read('analog_misses', '0')) + 1));
+            this._write('explorer_misses', String(Number(this._read('explorer_misses', '0')) + 1));
             this.updateStats();
         },
 
         updateStats() {
             const entries = Object.keys(this._store).length;
-            const hits = this._read('analog_hits', '0');
-            const misses = this._read('analog_misses', '0');
+            const hits = this._read('explorer_hits', '0');
+            const misses = this._read('explorer_misses', '0');
             setText('cache-hits', hits);
             setText('cache-entries', entries);
             setText('cache-misses', misses);

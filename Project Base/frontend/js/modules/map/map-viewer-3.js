@@ -13,14 +13,14 @@
             '<div class="map-detail-head">' +
             '<div>' +
             '<h3 style="color:' + body + '">' + site.name + '</h3>' +
-            '<span style="font-size:0.76rem;color:var(--ink-mute)">' + site.body + ' \u2022 ' + site.analogy + '</span>' +
+            '<span style="font-size:0.76rem;color:var(--ink-mute)">' + site.body + ' \u2022 ' + site.siteClass + '</span>' +
             '</div>' +
             '</div>' +
             '<div class="map-detail-body">' +
             '<div class="map-detail-stat"><span class="mds-label">Flat area</span><span class="mds-value">' + window.fmt(site.area) + ' km\u00b2</span></div>' +
             '<div class="map-detail-stat"><span class="mds-label">Mean rough</span><span class="mds-value">' + window.fmt(site.meanRough) + ' m</span></div>' +
             '<div class="map-detail-stat"><span class="mds-label">p95 rough</span><span class="mds-value">' + window.fmt(site.p95Rough) + ' m</span></div>' +
-            '<div class="map-detail-stat"><span class="mds-label">vs Moon</span><span class="mds-value">' + site.vsMoon + '%</span></div>' +
+            '<div class="map-detail-stat"><span class="mds-label">Site class</span><span class="mds-value">' + site.siteClass + '</span></div>' +
             '</div>' +
             '<p class="map-detail-desc">' + site.description + '</p>' +
             '<div class="map-detail-actions">' +

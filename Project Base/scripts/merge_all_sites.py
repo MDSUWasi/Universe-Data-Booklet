@@ -3,7 +3,7 @@
 import csv, os
 
 BASE = os.path.expanduser("~/spaceapps-2026")
-CSV_PATH = os.path.join(BASE, "output/reports/analog_comparison.csv")
+CSV_PATH = os.path.join(BASE, "output/reports/site_comparison.csv")
 MARS_CSV = os.path.join(BASE, "output/reports/mars_comparison.csv")
 OUT_PATH = os.path.join(BASE, "output/reports/all_sites_comparison.csv")
 REP_PATH = os.path.join(BASE, "output/reports/all_sites_comparison.txt")
@@ -64,12 +64,12 @@ emit("=" * 80)
 emit("")
 emit("All five sites have best non-filled patches with mean roughness within 14% of")
 emit("each other, indicating that suitable landing/base sites on the Moon have")
-emit("terrestrial analogs and can be characterized using identical methods.")
+emit("terrestrial sites and can be characterized using identical methods.")
 emit("")
 emit("Mars Jezero Crater offers the LARGEST contiguous safe zone at 506 km².")
 emit("This exceeds the lunar South Pole's 3.9 km² by over 100x.")
 emit("")
-emit("Conclusion: At matched measurement scales, Earth and Mars analogs demonstrate")
+emit("Conclusion: At matched measurement scales, Earth and Mars sites demonstrate")
 emit("comparable terrain roughness to potential lunar base locations.")
 emit("=" * 80)
 

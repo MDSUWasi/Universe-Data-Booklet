@@ -1,6 +1,8 @@
-"""Route handlers for the data endpoints backed by committed CSV reports.
+"""Route handlers for the data endpoints backed by committed CSV reports and
+free public APIs.
 
-These handlers read the checked-in comparison reports and return JSON.  They are
+These handlers read the checked-in comparison reports and serve encyclopedia /
+real-time data from free public NASA, Open Notify, and USGS endpoints.  They are
 independent of the upstream service modules (elevation/weather/tiles) and of the
 HTTP transport layer -- the tests call them directly via ``AppHandler._sites``
 etc., so the public method names are part of the contract and must not change.
@@ -12,6 +14,8 @@ import csv
 from pathlib import Path
 
 from .cache import ROOT
+
+from . import encyclopedia, nasa, opennotify, earth_events
 
 # site name (lowercased, as it appears in the CSV) -> canonical id
 SITE_IDS = {
@@ -62,8 +66,8 @@ def sites_payload() -> dict:
 
 
 def patches_payload() -> dict:
-    """Build the /api/patches payload from output/reports/analog_comparison.csv."""
-    path = ROOT / "output/reports/analog_comparison.csv"
+    """Build the /api/patches payload from output/reports/site_comparison.csv."""
+    path = ROOT / "output/reports/site_comparison.csv"
     if not path.is_file():
         return {"error": "Patch comparison data is missing"}, 404
 
@@ -84,7 +88,7 @@ def patches_payload() -> dict:
         parsed["filled"] = record.get("filled", "").strip().lower() == "true"
         records.append(parsed)
 
-    return {"source": "output/reports/analog_comparison.csv", "records": records}, 200
+    return {"source": "output/reports/site_comparison.csv", "records": records}, 200
 
 
 def scale_sensitivity_payload() -> dict:
@@ -128,3 +132,102 @@ def scale_sensitivity_payload() -> dict:
         "comparison_reference": {"mean_roughness_m": matched_mean, "p95_roughness_m": matched_p95},
         "warning": "Different roughness windows are shown for scale sensitivity, not as directly comparable scores.",
     }, 200
+
+
+# --------------------------------------------------------------------------- #
+# Encyclopedia endpoints (static planetary data)
+# --------------------------------------------------------------------------- #
+
+def encyclopedia_payload() -> dict:
+    """Return all encyclopedia data: planets, moons, and diverse terrain sites."""
+    return {
+        "planets": encyclopedia.list_planets(),
+        "moons": encyclopedia.list_moons(),
+        "sites": encyclopedia.list_sites(),
+    }, 200
+
+
+def planets_payload() -> dict:
+    """Return the list of planetary bodies."""
+    return {"planets": encyclopedia.list_planets()}, 200
+
+
+def moons_payload() -> dict:
+    """Return the list of moons."""
+    return {"moons": encyclopedia.list_moons()}, 200
+
+
+def sites_payload_v2() -> dict:
+    """Return diverse terrain candidate sites across all bodies."""
+    return {"sites": encyclopedia.list_sites()}, 200
+
+
+def sites_by_body_payload(body: str) -> dict:
+    """Return terrain candidate sites filtered by planetary body."""
+    sites = encyclopedia.list_sites(body)
+    if not sites:
+        return {"error": f"No sites found for body '{body}'"}, 404
+    return {"body": body, "sites": sites}, 200
+
+
+def planet_payload(body_id: str) -> dict:
+    """Return a single planet's encyclopedia entry."""
+    planet = encyclopedia.get_planet(body_id)
+    if planet is None:
+        return {"error": f"Planet '{body_id}' not found"}, 404
+    return planet, 200
+
+
+def moon_payload(moon_id: str) -> dict:
+    """Return a single moon's encyclopedia entry."""
+    moon = encyclopedia.get_moon(moon_id)
+    if moon is None:
+        return {"error": f"Moon '{moon_id}' not found"}, 404
+    return moon, 200
+
+
+def site_payload(site_id: str) -> dict:
+    """Return a single terrain site's entry."""
+    site = encyclopedia.get_site(site_id)
+    if site is None:
+        return {"error": f"Site '{site_id}' not found"}, 404
+    return site, 200
+
+
+# --------------------------------------------------------------------------- #
+# Real-time / public API endpoints
+# --------------------------------------------------------------------------- #
+
+def apod_payload() -> dict:
+    """NASA Astronomy Picture of the Day."""
+    return nasa.get_apod(), 200
+
+
+def earth_events_payload() -> dict:
+    """Recent Earth natural events (EONET)."""
+    return nasa.get_earth_events(), 200
+
+
+def mars_weather_payload() -> dict:
+    """Latest InSight Mars weather report."""
+    return nasa.get_mars_weather(), 200
+
+
+def space_weather_payload() -> dict:
+    """Recent space weather notifications (DONKI)."""
+    return nasa.get_space_weather(), 200
+
+
+def iss_position_payload() -> dict:
+    """Current ISS position (Open Notify)."""
+    return opennotify.get_iss_position(), 200
+
+
+def astronauts_payload() -> dict:
+    """Who is in space right now (Open Notify)."""
+    return opennotify.get_astronauts(), 200
+
+
+def earthquakes_payload() -> dict:
+    """Recent earthquakes worldwide (USGS)."""
+    return earth_events.get_recent_earthquakes(), 200

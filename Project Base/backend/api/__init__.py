@@ -1,4 +1,4 @@
-"""Planetary Analog Explorer -- backend API package.
+"""Planetary Explorer -- backend API package.
 
 Reorganised from the monolithic ``backend/server.py`` so that each concern lives
 in its own independent module:

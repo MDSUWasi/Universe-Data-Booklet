@@ -30,7 +30,7 @@
         let y = margin;
 
         doc.setFontSize(18);
-        doc.text('Planetary Analog Explorer - Mission Planner', margin, y);
+        doc.text('Planetary Explorer - Mission Planner', margin, y);
         y += 22;
         doc.setFontSize(11);
         doc.text('Generated: ' + date, margin, y);

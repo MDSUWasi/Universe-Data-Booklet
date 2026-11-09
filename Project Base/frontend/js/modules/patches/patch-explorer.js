@@ -59,11 +59,11 @@
             }));
             document.getElementById('patch-count').textContent = records.length + ' of ' + this.records.length + ' recorded patches';
             if (!records.length && bodyFilter === 'Mars') {
-                this.setStatus('No Mars patch-level records are present in analog_comparison.csv. Jezero is available in the site-summary report, but its patch classifications are not in this checkout.');
+                this.setStatus('No Mars patch-level records are present in site_comparison.csv. Jezero is available in the site-summary report, but its patch classifications are not in this checkout.');
             } else if (!records.length) {
                 this.setStatus('No recorded patches match these filters.');
             } else {
-                this.setStatus('Source: output/reports/analog_comparison.csv. Values and flags are shown as recorded.');
+                this.setStatus('Source: output/reports/site_comparison.csv. Values and flags are shown as recorded.');
             }
         },
 

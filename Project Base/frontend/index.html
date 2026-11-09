@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#FBF6FF">
-<title>Planetary Analog Explorer — Earth, Moon &amp; Mars Terrain</title>
+<title>Planetary Explorer — Solar System Exploration</title>
 <meta name="description" content="Explore terrain data and reference sites across Earth, the Moon, and Mars with an interactive planetary comparison atlas.">
 
 <!-- Leaflet (map) -->
@@ -62,30 +62,35 @@
       <span class="nav-title">Map View</span>
       <span class="nav-desc">Earth · Moon · Mars</span>
     </button>
+    <button class="side-nav-item" type="button" onclick="UI.openModal('encyclopedia','planets')">
+      <span class="nav-icon">📖</span>
+      <span class="nav-title">Encyclopedia</span>
+      <span class="nav-desc">Planets, moons &amp; sites</span>
+    </button>
     <button class="side-nav-item" type="button" onclick="UI.openModal('discovery')">
       <span class="nav-icon">🔭</span>
       <span class="nav-title">Discovery Lab</span>
       <span class="nav-desc">Screen any Earth coordinate</span>
     </button>
-    <button class="side-nav-item" type="button" onclick="UI.openModal('selector')">
-      <span class="nav-icon">🎮</span>
-      <span class="nav-title">Base Site Selector</span>
-      <span class="nav-desc">Play mission architect</span>
+    <button class="side-nav-item" type="button" onclick="UI.openModal('realtime')">
+      <span class="nav-icon">📡</span>
+      <span class="nav-title">Realtime Dashboard</span>
+      <span class="nav-desc">ISS, space weather &amp; live data</span>
     </button>
     <button class="side-nav-item" type="button" onclick="UI.openModal('calculator')">
       <span class="nav-icon">🧮</span>
-      <span class="nav-title">Analogy Calculator</span>
-      <span class="nav-desc">Tune thresholds, re-rank</span>
+      <span class="nav-title">Terrain Comparison</span>
+      <span class="nav-desc">Compare terrain metrics</span>
     </button>
     <button class="side-nav-item" type="button" onclick="UI.openModal('planner')">
       <span class="nav-icon">🧭</span>
-      <span class="nav-title">Plan Mission</span>
-      <span class="nav-desc">Design a field campaign</span>
+      <span class="nav-title">Explore Mission</span>
+      <span class="nav-desc">Design a campaign</span>
     </button>
     <button class="side-nav-item" type="button" onclick="UI.openModal('compare')">
       <span class="nav-icon">📊</span>
       <span class="nav-title">Comparison</span>
-      <span class="nav-desc">The numbers, verified</span>
+      <span class="nav-desc">Terrain numbers</span>
     </button>
     <button class="side-nav-item" type="button" onclick="UI.openModal('terrain')">
       <span class="nav-icon">⛰️</span>
@@ -95,12 +100,12 @@
     <button class="side-nav-item" type="button" onclick="UI.openModal('patches')">
       <span class="nav-icon">🧩</span>
       <span class="nav-title">Patch Explorer</span>
-      <span class="nav-desc">Inspect every classified patch</span>
+      <span class="nav-desc">Inspect classified patches</span>
     </button>
     <button class="side-nav-item" type="button" onclick="UI.openModal('scale')">
       <span class="nav-icon">📏</span>
       <span class="nav-title">Scale Sensitivity</span>
-      <span class="nav-desc">See why window size matters</span>
+      <span class="nav-desc">Window size matters</span>
     </button>
   </nav>
 
@@ -128,38 +133,44 @@
 
   <header class="hero">
     <div class="hero-badge">Project-Base</div>
-    <h1 class="hero-title">Planetary <span class="highlight">Analog</span> Explorer</h1>
+    <h1 class="hero-title">Planetary <span class="highlight">Explorer</span></h1>
     <p class="hero-sub">
-      Explore terrain across <strong>Earth, the Moon, and Mars</strong>.
-      Compare polar analog candidates, the lunar South Pole reference, and Jezero Crater
-      through an interactive, data-grounded atlas.
+      Explore planets, moons, and terrain across the Solar System. Browse the
+      encyclopedia of celestial bodies, track live space data, and discover
+      candidate terrain sites for exploration — not tied to any single landing base.
     </p>
 
     <div class="hero-stats" id="hero-stats">
-      <div class="stat"><div class="stat-num" id="stat-sites">5</div><div class="stat-label">Sites Compared</div></div>
       <div class="stat"><div class="stat-num" id="stat-bodies">3</div><div class="stat-label">Planetary Bodies</div></div>
-      <div class="stat"><div class="stat-num" id="stat-window">90&nbsp;m</div><div class="stat-label">Nominal Roughness Window</div></div>
+      <div class="stat"><div class="stat-num" id="stat-sites">15</div><div class="stat-label">Terrain Sites</div></div>
+      <div class="stat"><div class="stat-num" id="stat-moons">2</div><div class="stat-label">Mars Moons</div></div>
       <div class="stat"><div class="stat-num" id="stat-cache">0</div><div class="stat-label">Cached Lookups</div></div>
     </div>
 
     <section class="planetary-focus" aria-label="Explore by planetary body">
       <article class="body-card earth-card">
-        <div class="body-card-heading"><span class="body-symbol" aria-hidden="true">🌍</span><div><h2>Earth</h2><p>Analog candidates</p></div></div>
-        <p>McMurdo, Axel Heiberg, and Kerguelen. Compare polar and volcanic terrain against the lunar reference.</p>
-        <div class="body-card-metric"><strong>3</strong><span>candidate regions</span><strong>93%</strong><span>top lunar similarity</span></div>
-        <button class="body-card-action" type="button" onclick="UI.openModal('map','earth')">Explore Earth sites <span aria-hidden="true">→</span></button>
+        <div class="body-card-heading"><span class="body-symbol" aria-hidden="true">🌍</span><div><h2>Earth</h2><p>Home planet &amp; terrain candidates</p></div></div>
+        <p>McMurdo Dry Valleys, Axel Heiberg Island, Kerguelen Islands, Atacama Desert, Iceland Highlands, Death Valley. Diverse Earth terrains for exploration reference.</p>
+        <div class="body-card-metric"><strong>6</strong><span>Earth sites</span><strong>Live weather</strong><span>via Open-Meteo</span></div>
+        <button class="body-card-action" type="button" onclick="UI.openModal('encyclopedia','sites')">Explore Earth sites <span aria-hidden="true">→</span></button>
       </article>
       <article class="body-card moon-card">
-        <div class="body-card-heading"><span class="body-symbol" aria-hidden="true">🌙</span><div><h2>Moon</h2><p>Lunar South Pole reference</p></div></div>
-        <p>Shackleton-region terrain provides the primary reference for Earth analog screening.</p>
-        <div class="body-card-metric"><strong id="moon-area">3.875</strong><span>km² flat area</span><strong id="moon-rough">2.462</strong><span>mean roughness · m</span></div>
-        <button class="body-card-action" type="button" onclick="UI.openModal('map','moon')">Explore lunar reference <span aria-hidden="true">→</span></button>
+        <div class="body-card-heading"><span class="body-symbol" aria-hidden="true">🌙</span><div><h2>Moon</h2><p>Lunar terrain reference</p></div></div>
+        <p>Shackleton Crater, Tycho Crater, Mare Serenitatis, Montes Apenninus. Explore the Moon's diverse regions.</p>
+        <div class="body-card-metric"><strong>4</strong><span>lunar sites</span><strong>No atmosphere</strong><span>vacuum surface</span></div>
+        <button class="body-card-action" type="button" onclick="UI.openModal('encyclopedia','sites')">Explore Moon sites <span aria-hidden="true">→</span></button>
       </article>
       <article class="body-card mars-card">
-        <div class="body-card-heading"><span class="body-symbol" aria-hidden="true">🔴</span><div><h2>Mars</h2><p>Jezero Crater reference</p></div></div>
-        <p>Perseverance's landing region adds a Martian terrain reference to the cross-world comparison.</p>
-        <div class="body-card-metric"><strong id="mars-area">506.277</strong><span>km² flat area</span><strong id="mars-rough">2.110</strong><span>mean roughness · m</span></div>
-        <button class="body-card-action" type="button" onclick="UI.openModal('map','mars')">Explore Jezero <span aria-hidden="true">→</span></button>
+        <div class="body-card-heading"><span class="body-symbol" aria-hidden="true">🔴</span><div><h2>Mars</h2><p>Martian terrain &amp; moons</p></div></div>
+        <p>Jezero Crater, Gusev Crater, Gale Crater, Eos Chasma, Hellas Planitia. Plus Phobos and Deimos moons.</p>
+        <div class="body-card-metric"><strong>5</strong><span>Martian sites</span><strong>2</strong><span>moons (Phobos, Deimos)</span></div>
+        <button class="body-card-action" type="button" onclick="UI.openModal('encyclopedia','sites')">Explore Mars sites <span aria-hidden="true">→</span></button>
+      </article>
+      <article class="body-card planet-card">
+        <div class="body-card-heading"><span class="body-symbol" aria-hidden="true">🪐</span><div><h2>Planets</h2><p>Solar System overview</p></div></div>
+        <p>Earth, Moon, Mars, Jupiter, Saturn. Physical data, orbital metrics, and atmospheric composition for each body.</p>
+        <div class="body-card-metric"><strong>5</strong><span>planets</span><strong>Encyclopedia</strong><span>browse all bodies</span></div>
+        <button class="body-card-action" type="button" onclick="UI.openModal('encyclopedia','planets')">Browse planets <span aria-hidden="true">→</span></button>
       </article>
     </section>
   </header>
@@ -199,7 +210,7 @@
   <div class="modal-overlay" id="modal-scale" onclick="UI.overlayClose(event,'scale')">
     <div class="modal-panel modal-wide">
       <div class="modal-head"><h2>📏 Scale Sensitivity</h2><button class="x" type="button" onclick="UI.closeModal('scale')" aria-label="Close scale sensitivity">&times;</button></div>
-      <p class="modal-intro">The lunar fingerprint samples use a nominal 12 m roughness window; the main comparison uses a nominal 90 m window. The points below show the scale difference explicitly and must not be read as a direct analog ranking.</p>
+      <p class="modal-intro">The lunar fingerprint samples use a nominal 12 m roughness window; the main comparison uses a nominal 90 m window. The points below show the scale difference explicitly and must not be read as a direct terrain ranking.</p>
       <div class="scale-callout" id="scale-summary" aria-live="polite">Loading recorded fingerprints…</div>
       <div class="chart-wrap"><canvas id="scale-chart"></canvas></div>
       <div id="scale-status" class="calc-notes" aria-live="polite"></div>
@@ -208,7 +219,7 @@
 
   <div class="modal-overlay" id="modal-map" onclick="UI.overlayClose(event,'map')">
     <div class="modal-panel modal-wide">
-      <div class="modal-head"><h2>🗺️ Map View of Analogs</h2><button class="x" type="button" onclick="UI.closeModal('map')" aria-label="Close atlas">&times;</button></div>
+      <div class="modal-head"><h2>🗺️ Map View</h2><button class="x" type="button" onclick="UI.closeModal('map')" aria-label="Close map">&times;</button></div>
 
       <div class="map-toolbar">
         <div class="layer-switch" id="layer-switch">
@@ -261,7 +272,7 @@
       <p class="modal-intro">
         Enter any <strong>Earth</strong> coordinate. We sample a 3×3 elevation grid from the
         <a href="https://open-meteo.com/en/docs/elevation-api" target="_blank" rel="noopener">Open-Meteo elevation API</a>
-        and estimate local slope and relief <em>in your browser</em>. These coarse API-based indicators are not a matched-scale analog score.
+        and estimate local slope and relief <em>in your browser</em>. These coarse API-based indicators are not a matched-scale terrain score.
         Results are cached in this browser to avoid repeat requests.
       </p>
       <div class="disc-controls">
@@ -306,7 +317,7 @@
 
   <div class="modal-overlay" id="modal-calculator" onclick="UI.overlayClose(event,'calculator')">
     <div class="modal-panel modal-wide">
-      <div class="modal-head"><h2>🧮 Analogy Calculator</h2><button class="x" type="button" onclick="UI.closeModal('calculator')" aria-label="Close calculator">&times;</button></div>
+      <div class="modal-head"><h2>🧮 Terrain Comparison</h2><button class="x" type="button" onclick="UI.closeModal('calculator')" aria-label="Close calculator">&times;</button></div>
       <p class="modal-intro">Adjusted Euclidean distance in terrain-metric space (mean roughness, p95 roughness, slope discipline) → similarity %.</p>
       <div class="sliders two-col">
         <label>Mean roughness target (m)
@@ -325,7 +336,10 @@
 
   <div class="modal-overlay" id="modal-planner" onclick="UI.overlayClose(event,'planner')">
     <div class="modal-panel">
-      <div class="modal-head"><h2>🧭 Mission Planner</h2><button class="x" type="button" onclick="UI.closeModal('planner')" aria-label="Close planner">&times;</button></div>
+      <div class="modal-head">
+      <h2>🧭 Explore Mission</h2>
+      <button class="x" type="button" onclick="UI.closeModal('planner')" aria-label="Close planner">&times;</button>
+    </div>
       <div id="planner-steps"></div>
       <div class="planner-actions">
         <button class="btn-ghost" id="planner-back" type="button">← Back</button>
@@ -370,6 +384,33 @@
         </div>
       </section>
       <div class="chart-wrap"><canvas id="cmp-chart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ================= ENCYCLOPEDIA MODAL ================= -->
+  <div class="modal-overlay" id="modal-encyclopedia" onclick="UI.overlayClose(event,'encyclopedia')">
+    <div class="modal-panel modal-wide">
+      <div class="modal-head"><h2>📖 Planetary Encyclopedia</h2><button class="x" type="button" onclick="UI.closeModal('encyclopedia')" aria-label="Close encyclopedia">&times;</button></div>
+      <p class="modal-intro">Browse planets, moons, and diverse terrain candidate sites across the Solar System. Not tied to any single landing base — every body lists multiple regions for exploration.</p>
+      <div id="encyclopedia-content">
+        <div class="encyclopedia-loading">Loading encyclopedia data…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= REALTIME DASHBOARD MODAL ================= -->
+  <div class="modal-overlay" id="modal-realtime" onclick="UI.overlayClose(event,'realtime')">
+    <div class="modal-panel modal-wide">
+      <div class="modal-head">
+        <h2>📡 Realtime Dashboard</h2>
+        <div class="realtime-controls">
+          <button class="btn-ghost btn-small" type="button" onclick="Realtime.refresh()" title="Refresh live data">↻ Refresh</button>
+        </div>
+      </div>
+      <p class="modal-intro">Live data from free public APIs: Open Notify (ISS, astronauts), NASA (APOD, EONET, InSight Mars weather, DONKI space weather), and USGS (earthquakes). No API keys required.</p>
+      <div id="realtime-content">
+        <div class="encyclopedia-loading">Loading realtime data…</div>
+      </div>
     </div>
   </div>
 
@@ -489,7 +530,7 @@
     <a href="https://www.python.org/" target="_blank" rel="noopener">Python</a> 3.13 + NumPy/SciPy.
   </div>
   <div class="credit-line">
-    <strong>Project.</strong> Planetary Research 2026 · "Identifying Terrestrial Analogs for Lunar and Martian Bases." ·
+    <strong>Project.</strong> Planetary Explorer · Solar System exploration tool · Encyclopedic data on planets, moons, and terrain sites · Live data from free public APIs ·
     <a href="#privacy" style="margin-left:8px" onclick="UI.openModal('legal')">Privacy Policy</a> ·
     <a href="#terms" onclick="UI.openModal('legal')">Terms of Service</a> ·
     <a href="#credits" onclick="UI.openModal('credits')">Full credits &amp; provenance</a>
@@ -524,6 +565,9 @@
 <script src="js/modules/patches/patch-explorer.js"></script>
 <script src="js/modules/scale/scale-sensitivity.js"></script>
 <script src="js/modules/api/site-metrics.js"></script>
+
+<script src="js/modules/encyclopedia/encyclopedia.js"></script>
+<script src="js/modules/realtime/realtime.js"></script>
 
 <script src="js/app.js"></script>
 </body>

@@ -27,7 +27,7 @@ ROOT = Path(__file__).resolve().parents[2]
 # Absolute path to the SQLite cache.  ``backend`` is a namespace package, so
 # every module that needs the root imports it from here rather than trying to
 # walk up from an unknown package location.
-CACHE_PATH = Path(os.environ.get("PLANETARY_CACHE_DB", ROOT / ".cache" / "planetary-analog" / "cache.sqlite3"))
+CACHE_PATH = Path(os.environ.get("PLANETARY_CACHE_DB", ROOT / ".cache" / "planetary-explorer" / "cache.sqlite3"))
 
 # --------------------------------------------------------------------------- #
 # TTL policy (seconds).  One definition, shared by every endpoint.
@@ -45,7 +45,7 @@ WEATHER_STALE_TTL = 30 * DAY     # ...serve stale for up to 30 days on error
 MAX_CACHE_BYTES = 128 * 1024 * 1024   # 128 MiB of response bodies
 MAX_ENTRY_BYTES = 5 * 1024 * 1024     # 5 MiB per single response
 UPSTREAM_TIMEOUT = 15                 # seconds
-USER_AGENT = "PlanetaryAnalogExplorer/1.0 (public research project)"
+USER_AGENT = "PlanetaryExplorer/1.0 (public research project)"
 
 
 @dataclass(frozen=True)

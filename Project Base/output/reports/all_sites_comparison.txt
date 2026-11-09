@@ -27,11 +27,11 @@ Jezero Crater (Mars)           0.86x (smoother)
 
 All five sites have best non-filled patches with mean roughness within 14% of
 each other, indicating that suitable landing/base sites on the Moon have
-terrestrial analogs and can be characterized using identical methods.
+terrestrial sites and can be characterized using identical methods.
 
 Mars Jezero Crater offers the LARGEST contiguous safe zone at 506 km².
 This exceeds the lunar South Pole's 3.9 km² by over 100x.
 
-Conclusion: At matched measurement scales, Earth and Mars analogs demonstrate
+Conclusion: At matched measurement scales, Earth and Mars sites demonstrate
 comparable terrain roughness to potential lunar base locations.
 ================================================================================

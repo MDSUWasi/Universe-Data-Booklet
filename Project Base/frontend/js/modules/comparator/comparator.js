@@ -4,7 +4,7 @@
 
 (function () {
     const C = {
-        sortCol: 'sim',
+        sortCol: 'class',
         sortDir: 'desc',
         filterBody: 'all'
     };
@@ -66,7 +66,7 @@
             '<td class="num">' + window.fmt(s.area) + '</td>' +
             '<td class="num">' + window.fmt(s.meanRough) + '</td>' +
             '<td class="num">' + window.fmt(s.p95Rough) + '</td>' +
-            '<td class="num"><b>' + s.vsMoon + '%</b></td>' +
+            '<td class="num"><b>' + s.siteClass + '</b></td>' +
             '</tr>'
         ).join('');
     };
@@ -96,13 +96,13 @@
         const ctx = document.getElementById('cmp-chart');
         if (!ctx || !window.Chart) return;
         if (window.CmpChart) window.CmpChart.destroy();
-        const data = this.getData().map(s => ({ site: s.name, body: s.body, sim: s.vsMoon }));
+        const data = this.getData().map(s => ({ site: s.name, body: s.body, sim: s.siteClass }));
         window.CmpChart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: data.map(d => d.site),
                 datasets: [{
-                    label: 'Moon Similarity %',
+                    label: 'Site class',
                     data: data.map(d => d.sim),
                     backgroundColor: data.map(d => window.PLANET_COLORS[d.body])
                 }]

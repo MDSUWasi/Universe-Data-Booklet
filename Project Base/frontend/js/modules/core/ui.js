@@ -23,6 +23,10 @@
             if (id === 'terrain' && window.TerrainLab) window.TerrainLab.open();
             if (id === 'patches' && window.PatchExplorer) window.PatchExplorer.open();
             if (id === 'scale' && window.ScaleSensitivity) window.ScaleSensitivity.open();
+            if (id === 'encyclopedia' && window.Encyclopedia) {
+                window.Encyclopedia.load(mapLayer).then(() => window.Encyclopedia.render());
+            }
+            if (id === 'realtime' && window.Realtime) window.Realtime.loadAll();
 
             requestAnimationFrame(() => {
                 const map = window.MapViewer && window.MapViewer.map;

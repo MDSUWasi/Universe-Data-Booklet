@@ -226,11 +226,11 @@ SITES: dict[str, dict[str, Any]] = {
         "mean_rough_m": 2.294,
         "p95_rough_m": 3.865,
         "max_rough_m": 6.256,
-        "vs_moon_pct": 93,
-        "analogy": "strong polar analog",
+        "similarity_pct": 93,
+        "siteClass": "strong polar site",
         "description": (
             "Extreme polar desert with minimal biology and permafrost soils. The "
-            "most studied Mars analog on Earth; cold, dry, and wind-scoured."
+            "most studied Mars site on Earth; cold, dry, and wind-scoured."
         ),
         "color": "#4E8C6E",
         "has_weather": True,
@@ -246,11 +246,11 @@ SITES: dict[str, dict[str, Any]] = {
         "mean_rough_m": 2.232,
         "p95_rough_m": 3.611,
         "max_rough_m": 5.371,
-        "vs_moon_pct": 91,
-        "analogy": "strong polar analog",
+        "similarity_pct": 91,
+        "siteClass": "strong polar site",
         "description": (
             "Canadian High Arctic island with freeze-thaw cycles, exposed bedrock, "
-            "and fossil forests. An accessible northern polar analog for icy moon "
+            "and fossil forests. An accessible northern polar site for icy moon "
             "and polar crater exploration."
         ),
         "color": "#2E7D9A",
@@ -267,11 +267,11 @@ SITES: dict[str, dict[str, Any]] = {
         "mean_rough_m": 1.352,
         "p95_rough_m": 3.946,
         "max_rough_m": 6.782,
-        "vs_moon_pct": 55,
-        "analogy": "weak analog",
+        "similarity_pct": 55,
+        "siteClass": "weak site",
         "description": (
             "Volcanic basalt highlands in the isolated southern Indian Ocean. "
-            "Tests the 'unexpected analog' hypothesis — rough volcanic terrain "
+            "Tests the 'unexpected site' hypothesis — rough volcanic terrain "
             "contrasts with the polar sites."
         ),
         "color": "#E07A5F",
@@ -288,11 +288,11 @@ SITES: dict[str, dict[str, Any]] = {
         "mean_rough_m": 1.875,
         "p95_rough_m": 3.410,
         "max_rough_m": 5.920,
-        "vs_moon_pct": 82,
-        "analogy": "arid analog",
+        "similarity_pct": 82,
+        "siteClass": "arid site",
         "description": (
             "One of the driest non-polar deserts on Earth, with high UV flux and "
-            "saline soils. A leading analog for hyper-arid Martian surface "
+            "saline soils. A leading site for hyper-arid Martian surface "
             "conditions and astrobiology drilling campaigns."
         ),
         "color": "#D4A017",
@@ -309,11 +309,11 @@ SITES: dict[str, dict[str, Any]] = {
         "mean_rough_m": 2.650,
         "p95_rough_m": 4.080,
         "max_rough_m": 6.940,
-        "vs_moon_pct": 78,
-        "analogy": "volcanic analog",
+        "similarity_pct": 78,
+        "siteClass": "volcanic site",
         "description": (
             "Young basaltic lava fields, hydrothermal areas, and glacial outwash "
-            "plains. An active volcanic analog for Mars and lunar mare terrain."
+            "plains. An active volcanic site for Mars and lunar mare terrain."
         ),
         "color": "#34495E",
         "has_weather": True,
@@ -329,11 +329,11 @@ SITES: dict[str, dict[str, Any]] = {
         "mean_rough_m": 1.540,
         "p95_rough_m": 2.890,
         "max_rough_m": 4.320,
-        "vs_moon_pct": 68,
-        "analogy": "arid analog",
+        "similarity_pct": 68,
+        "siteClass": "arid site",
         "description": (
             "Hot, arid basin-and-range terrain with salt pans and alluvial fans. "
-            "A Mars-analog testbed for rover mobility and thermal extremes."
+            "A Mars-site testbed for rover mobility and thermal extremes."
         ),
         "color": "#B7950B",
         "has_weather": True,
@@ -350,8 +350,8 @@ SITES: dict[str, dict[str, Any]] = {
         "mean_rough_m": 2.462,
         "p95_rough_m": 4.138,
         "max_rough_m": 7.775,
-        "vs_moon_pct": 100,
-        "analogy": "lunar baseline",
+        "similarity_pct": 100,
+        "siteClass": "lunar baseline",
         "description": (
             "Permanently shadowed crater floor with nearby peaks of eternal light. "
             "Prime candidate for water-ice harvesting and sustained lunar presence."
@@ -370,8 +370,8 @@ SITES: dict[str, dict[str, Any]] = {
         "mean_rough_m": 3.120,
         "p95_rough_m": 5.480,
         "max_rough_m": 9.210,
-        "vs_moon_pct": 72,
-        "analogy": "young impact analog",
+        "similarity_pct": 72,
+        "siteClass": "young impact site",
         "description": (
             "A young, prominent impact crater with bright rays and a steep central "
             "peak. Rough ejecta blanket makes it a hazard-rich landing reference."
@@ -390,8 +390,8 @@ SITES: dict[str, dict[str, Any]] = {
         "mean_rough_m": 1.890,
         "p95_rough_m": 3.210,
         "max_rough_m": 5.430,
-        "vs_moon_pct": 85,
-        "analogy": "mare analog",
+        "similarity_pct": 85,
+        "siteClass": "mare site",
         "description": (
             "A broad, dark basaltic mare (lunar 'sea') formed by ancient lava "
             "flows. Relatively smooth, relatively young mare terrain suitable for "
@@ -411,11 +411,11 @@ SITES: dict[str, dict[str, Any]] = {
         "mean_rough_m": 4.340,
         "p95_rough_m": 7.120,
         "max_rough_m": 11.800,
-        "vs_moon_pct": 58,
-        "analogy": "highland analog",
+        "similarity_pct": 58,
+        "siteClass": "highland site",
         "description": (
             "Rugged lunar mountain range forming the southeastern rim of Mare "
-            "Imbrium. Steep slopes and shadowed valleys — a highland analog for "
+            "Imbrium. Steep slopes and shadowed valleys — a highland site for "
             "challenging terrain."
         ),
         "color": "#7F8C8D",
@@ -433,8 +433,8 @@ SITES: dict[str, dict[str, Any]] = {
         "mean_rough_m": 2.110,
         "p95_rough_m": 3.744,
         "max_rough_m": 7.600,
-        "vs_moon_pct": 86,
-        "analogy": "martian reference",
+        "similarity_pct": 86,
+        "siteClass": "martian reference",
         "description": (
             "Perseverance's landing region — an ancient delta fan and lakebed. A "
             "benchmark for Martian terrain and the search for past microbial life."
@@ -453,12 +453,12 @@ SITES: dict[str, dict[str, Any]] = {
         "mean_rough_m": 2.780,
         "p95_rough_m": 4.520,
         "max_rough_m": 7.310,
-        "vs_moon_pct": 81,
-        "analogy": "lakebed analog",
+        "similarity_pct": 81,
+        "siteClass": "lakebed site",
         "description": (
             "Spirit rover's landing site — a crater that may once have held a "
             "lake. Sedimentary deposits and volcanic plains make it a diverse "
-            "geological analog."
+            "geological site."
         ),
         "color": "#C0392B",
         "has_weather": False,
@@ -474,8 +474,8 @@ SITES: dict[str, dict[str, Any]] = {
         "mean_rough_m": 2.450,
         "p95_rough_m": 3.980,
         "max_rough_m": 6.890,
-        "vs_moon_pct": 84,
-        "analogy": "mound analog",
+        "similarity_pct": 84,
+        "siteClass": "mound site",
         "description": (
             "Curiosity rover's landing site, dominated by Mount Sharp (Aeolis "
             "Mons), a layered sedimentary mound preserving a record of Mars' "
@@ -495,11 +495,11 @@ SITES: dict[str, dict[str, Any]] = {
         "mean_rough_m": 3.910,
         "p95_rough_m": 6.230,
         "max_rough_m": 10.450,
-        "vs_moon_pct": 62,
-        "analogy": "canyon analog",
+        "similarity_pct": 62,
+        "siteClass": "canyon site",
         "description": (
             "A large canyon in the Valles Marineris system. Steep walls, landslide "
-            "deposits, and layered strata — a challenging, deep-canyon analog."
+            "deposits, and layered strata — a challenging, deep-canyon site."
         ),
         "color": "#7D3C98",
         "has_weather": False,
@@ -515,8 +515,8 @@ SITES: dict[str, dict[str, Any]] = {
         "mean_rough_m": 1.760,
         "p95_rough_m": 2.940,
         "max_rough_m": 4.820,
-        "vs_moon_pct": 89,
-        "analogy": "impact basin analog",
+        "similarity_pct": 89,
+        "siteClass": "impact basin site",
         "description": (
             "One of the largest impact basins in the Solar System. Its floor is "
             "the lowest elevation on Mars and may host seasonal frost and dust "

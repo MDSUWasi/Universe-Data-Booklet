@@ -15,5 +15,5 @@
   BEST NON-FILLED PATCH
     area 506.277 km2 | rough mean 2.110  p95 3.744  max 7.600
 
-  Compare against the 30 m table in output/reports/analog_comparison.txt
+  Compare against the 30 m table in output/reports/site_comparison.txt
   Only valid if this raster is also on a 30 m grid.

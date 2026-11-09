@@ -43,7 +43,7 @@
                 this.activeMarker = null;
                 this.setActiveMarker(null);
             });
-            marker.bindPopup(`<b>${site.name}</b><br><span style="color:${window.PLANET_COLORS[site.body]}">\u25cf</span> ${site.body}<br><b>${window.fmt(site.meanRough)} m</b> mean roughness<br><b>${site.vsMoon}%</b> vs Moon reference`);
+            marker.bindPopup(`<b>${site.name}</b><br><span style="color:${window.PLANET_COLORS[site.body]}">\u25cf</span> ${site.body}<br><b>${window.fmt(site.meanRough)} m</b> mean roughness<br><b>${site.siteClass}</b>`);
             this.markers.push(marker);
         });
     };
@@ -130,7 +130,7 @@
             if (this.hoverTooltip) { this.map.removeLayer(this.hoverTooltip); this.hoverTooltip = null; }
             return;
         }
-        const content = `<b>${nearest.name}</b><br>${window.fmt(nearest.meanRough)} m rough \u00b7 ${nearest.vsMoon}% vs Moon`;
+        const content = `<b>${nearest.name}</b><br>${window.fmt(nearest.meanRough)} m rough \u00b7 ${nearest.siteClass}`;
         if (!this.hoverTooltip) {
             this.hoverTooltip = L.tooltip({ permanent: false, direction: 'top', offset: [0, -14], className: 'map-hover-tooltip' });
         }

@@ -38,7 +38,7 @@
             '<div class="rank-pos">#' + (i + 1) + '</div>' +
             '<div>' +
             '<div class="rank-name">' + s.name + '</div>' +
-            '<div class="rank-sub">' + s.body + ' \u2022 ' + s.analogy + '</div>' +
+            '<div class="rank-sub">' + s.body + ' \u2022 ' + s.siteClass + '</div>' +
             '</div>' +
             '<div class="rank-score">' + Math.round(s.score) + '</div>' +
             '</div>'

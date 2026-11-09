@@ -4,7 +4,7 @@
 'use strict';
 
 (function () {
-    const STORAGE_KEY = 'planet-analog-theme';
+    const STORAGE_KEY = 'planet-explorer-theme';
     const THEMES = ['light', 'dark', 'planetary'];
     const DEFAULT = 'light';
 

@@ -12,7 +12,8 @@
         _sites: [],
         _activeTab: 'planets',
 
-        async load() {
+        async load(initialTab) {
+            if (initialTab) this._activeTab = initialTab;
             try {
                 const res = await fetch('/api/encyclopedia');
                 if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -161,8 +162,8 @@
                   <tr><td>Flat area</td><td>${s.area_km2 !== undefined ? s.area_km2.toFixed(3) + ' km²' : '—'}</td></tr>
                   <tr><td>Mean roughness</td><td>${s.mean_rough_m !== undefined ? s.mean_rough_m.toFixed(3) + ' m' : '—'}</td></tr>
                   <tr><td>p95 roughness</td><td>${s.p95_rough_m !== undefined ? s.p95_rough_m.toFixed(3) + ' m' : '—'}</td></tr>
-                  <tr><td>Similarity to Moon</td><td>${s.vs_moon_pct !== undefined ? s.vs_moon_pct + '%' : '—'}</td></tr>
-                  <tr><td>Analogy class</td><td>${s.analogy}</td></tr>
+                  <tr><td>Similarity</td><td>${s.similarity_pct !== undefined ? s.similarity_pct + '%' : '—'}</td></tr>
+                  <tr><td>Site class</td><td>${s.siteClass}</td></tr>
                   ${s.has_weather !== false ? '<tr><td>Live weather</td><td>Available via Open-Meteo</td></tr>' : ''}
                 </table>
                 <div class="ency-footer">Terrain data: Copernicus / LRO / MRO CTX (NASA / USGS / ESA)</div>

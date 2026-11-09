@@ -51,7 +51,7 @@ PORT = 8000
 
 
 class AppHandler(SimpleHTTPRequestHandler):
-    server_version = "PlanetaryAnalogExplorer/1.0"
+    server_version = "PlanetaryExplorer/1.0"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(FRONTEND), **kwargs)
@@ -69,6 +69,42 @@ class AppHandler(SimpleHTTPRequestHandler):
             self._serve_payload(routes.patches_payload())
         elif parsed.path == "/api/scale-sensitivity":
             self._serve_payload(routes.scale_sensitivity_payload())
+        # ---- Encyclopedia endpoints ----
+        elif parsed.path == "/api/encyclopedia":
+            self._serve_payload(routes.encyclopedia_payload())
+        elif parsed.path == "/api/encyclopedia/planets":
+            self._serve_payload(routes.planets_payload())
+        elif parsed.path == "/api/encyclopedia/moons":
+            self._serve_payload(routes.moons_payload())
+        elif parsed.path == "/api/encyclopedia/sites":
+            self._serve_payload(routes.sites_payload_v2())
+        elif parsed.path.startswith("/api/encyclopedia/sites/"):
+            body = parsed.path.rsplit("/", 1)[-1]
+            self._serve_payload(routes.sites_by_body_payload(body))
+        elif parsed.path.startswith("/api/encyclopedia/planet/"):
+            body_id = parsed.path.rsplit("/", 1)[-1]
+            self._serve_payload(routes.planet_payload(body_id))
+        elif parsed.path.startswith("/api/encyclopedia/moon/"):
+            moon_id = parsed.path.rsplit("/", 1)[-1]
+            self._serve_payload(routes.moon_payload(moon_id))
+        elif parsed.path.startswith("/api/encyclopedia/site/"):
+            site_id = parsed.path.rsplit("/", 1)[-1]
+            self._serve_payload(routes.site_payload(site_id))
+        # ---- Real-time / public API endpoints ----
+        elif parsed.path == "/api/nasa/apod":
+            self._serve_payload(routes.apod_payload())
+        elif parsed.path == "/api/nasa/earth-events":
+            self._serve_payload(routes.earth_events_payload())
+        elif parsed.path == "/api/nasa/mars-weather":
+            self._serve_payload(routes.mars_weather_payload())
+        elif parsed.path == "/api/nasa/space-weather":
+            self._serve_payload(routes.space_weather_payload())
+        elif parsed.path == "/api/space/iss":
+            self._serve_payload(routes.iss_position_payload())
+        elif parsed.path == "/api/space/astronauts":
+            self._serve_payload(routes.astronauts_payload())
+        elif parsed.path == "/api/earth/earthquakes":
+            self._serve_payload(routes.earthquakes_payload())
         elif parsed.path == "/api/elevation":
             self._elevation(parse_qs(parsed.query))
         elif parsed.path == "/api/weather":
@@ -197,7 +233,7 @@ class AppHandler(SimpleHTTPRequestHandler):
 
 def main() -> None:
     server = ThreadingHTTPServer((HOST, PORT), AppHandler)
-    print(f"Planetary Analog Explorer: http://{HOST}:{PORT}/")
+    print(f"Planetary Explorer: http://{HOST}:{PORT}/")
     print(f"SQLite cache: {STORE.path} (versioned NASA tiles immutable; elevation 30 days; weather 15 minutes)")
     try:
         server.serve_forever()
