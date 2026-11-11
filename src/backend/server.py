@@ -15,6 +15,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from client import fetch_asteroids, fetch_exoplanets
 from cache_manager import cleanup_old_cache
 from local_chat import answer_question
+from pb_gateway import PB_AVAILABLE, PB_FRONTEND_DIR, PB_PREFIX, pb_handler_factory
 
 PORT = int(os.getenv("SERVER_PORT", 8081))
 DEBUG_MODE = os.getenv("DEBUG_MODE", "false").lower() == "true"
@@ -195,6 +196,18 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
         # Block encoded traversals
         if '..' in path or '%2e' in path.lower():
             self.send_error_json(400, "Invalid path")
+            return
+
+        # ---- Project Base (Planetary Explorer) feature ----
+        # Forward any /pb/* request to the merged-in Project Base backend so the
+        # two codebases stay independent while serving one unified app.
+        if path.startswith(PB_PREFIX):
+            if PB_AVAILABLE:
+                _PBHandler = pb_handler_factory(self)
+                if _PBHandler is not None:
+                    _PBHandler.do_GET()
+                    return
+            self.send_error_json(404, "Project Base feature unavailable")
             return
 
         if path == '/api/asteroids':

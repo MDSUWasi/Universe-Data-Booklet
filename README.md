@@ -1,4 +1,4 @@
-<h5 align="right"><i>Last README Update: 28 September 2026</i></h4>
+<h5 align="right"><i>Last README Update: 11 November 2026</i></h4>
 <h1 align="center"> 🌌 Universe Data Booklet</h1>
 
 > **An interactive data explorer for Near-Earth Asteroids and Exoplanets.**  
@@ -18,6 +18,16 @@ Universe Data Booklet, as it's name suggest, it is a website (It's name is booke
 ---
 
 <h2 align="center">✨ Key Features</h2>
+
+### 🪐 **Planetary Explorer (Project Base)**
+Integrated as a first-class feature of Universe Data Booklet. A browser-first research web app for exploring, comparing, and planning across planetary terrain sites on Earth, the Moon, and Mars. Served from the same server under the **`/pb/`** prefix (opens in a new tab via the **🪐 Planetary Explorer** button). Features include:
+- **Encyclopedia** of planets, moons, and candidate terrain sites.
+- **Map View** with Leaflet atlas + NASA Trek WMTS basemaps (Moon / Mars).
+- **3D Terrain Lab** (Three.js) rendering real DEM windows.
+- **Discovery Lab** screening any Earth coordinate for slope/relief.
+- **Mission Planner** wizard ranking sites by science, cost, and risk.
+- **Terrain Comparison, Patch Explorer, Scale Sensitivity, Realtime Dashboard**.
+- **SQLite-backed cache proxy** for upstream APIs (Open-Meteo, NASA, USGS, Open Notify).
 
 ### 📊 **Dual-Dataset Analysis**
 Seamlessly switch between two massive datasets:
@@ -62,6 +72,7 @@ One of the biggest challenges in public API projects is hitting rate limits when
 - **Backend:** Python 3.13 (Standard Library `http.server`, `urllib`, `json`)
 - **Frontend:** HTML5, CSS3 (Custom Animations), Vanilla JavaScript (ES6+)
 - **Visualization:** Chart.js (Analytics), jsPDF (Reporting), annimation.js(It's name already told it's work by default.)
+- **Integrated Feature:** **Project Base — Planetary Explorer** (Leaflet, Three.js, GSAP, Chart.js, jsPDF; SQLite upstream cache) served from the same server at `/pb/`.
 - **Data:** NASA NEO Web API & JPL Small-Body Database (CSV)
 - **Deployment:** Run anywhere with Python 3.6+ (Linux, macOS, Windows/WSL)
 - **Screen:** Use screen wider than 10 inch. If using mobile phone, then set the browser to desktop site. Currently this site have no capabilities to be run on Phone (I mean the deployed site, not the source code). The mobile version may be available in the future updates (But I can't tell on which version)

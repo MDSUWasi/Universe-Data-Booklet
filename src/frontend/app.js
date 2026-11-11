@@ -1172,3 +1172,14 @@ window.closeChartModal = closeChartModal;
 window.closeThreeModal = closeThreeModal;
 window.closeMapModal = closeMapModal;
 
+/**
+ * Open the merged-in Project Base (Planetary Explorer) feature in a new tab.
+ * Project Base is served by the same Universe Data Booklet server under the
+ * /pb prefix, so it is a first-class feature of this app rather than a
+ * separate site.
+ */
+function openPlanetaryExplorer() {
+    window.open('/pb/', '_blank', 'noopener');
+}
+window.openPlanetaryExplorer = openPlanetaryExplorer;
+
