@@ -1,0 +1,97 @@
+# ============================================================
+# Planetary Research 2026 — .gitignore
+# Strategy: track CODE + DOCS, ignore DATA + GENERATED OUTPUT
+# ============================================================
+
+# ---- Heavy geodata: raw DEMs (retrievable from open sources) ----
+# See docs/data_source.md — everything is regenerable via commands
+data/earth/*.tif
+data/earth/*.xml
+data/moon/*.tif
+data/mars/*.tif
+data/thermal/*
+data/raw/*
+!data/raw/lunar_fingerprints.csv
+
+# ---- Derived rasters: regenerable by scripts/ ----
+output/**/*.tif
+
+# ---- Vector/shapefile outputs (binary, regenerable) ----
+output/shapes/
+*.shp
+*.shx
+*.dbf
+*.prj
+
+# Keep the small text reports — they ARE results
+!output/reports/*.csv
+!output/reports/*.txt
+
+# ---- Nested helper files shipped with Copernicus tiles ----
+AUXFILES/
+INFO/
+PREVIEW/
+*.kml
+*.pdf.bak
+
+# ---- Broken literal-brace dirs from cleanup script ----
+**/\{*/
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.python-version
+
+# ---- Node / frontend ----
+node_modules/
+dist/
+.parcel-cache/
+.vite/
+
+# ---- Git LFS leftovers (if we enable later) ----
+.lfs/
+
+# ---- Editors & IDE ----
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.cursorrules
+
+# ---- OS junk ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Logs & temp ----
+*.log
+logs/
+*.tmp
+*.bak
+
+# ---- Local server response cache (never commit downloaded tiles/API data) ----
+.cache/planetary-explorer/
+*.sqlite3
+*.sqlite3-shm
+*.sqlite3-wal
+
+# ---- Local secrets (Earthdata credentials etc.) ----
+.netrc
+.env
+.env.*
+credentials*
+secrets*
+
+# ---- Large archives ----
+*.tar.gz
+*.zip
+*.7z
+
+# ---- QGIS project files (local editing state) ----
+*.qgz
+qgis/
