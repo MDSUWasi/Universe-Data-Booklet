@@ -1903,6 +1903,39 @@ h1, h2, h3 { color: var(--ink); line-height: 1.25; }
     border-radius: 8px;
 }
 
+/* ---- Encyclopedia images & warnings ---- */
+.ency-card-image {
+    width: 100%;
+    overflow: hidden;
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+}
+.ency-card-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+    transition: transform var(--ease);
+}
+.ency-card:hover .ency-card-image img {
+    transform: scale(1.03);
+}
+.ency-card-warning {
+    margin: 10px 0;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    background: rgba(231, 76, 60, 0.12);
+    border: 1px solid var(--coral, #e74c3c);
+    color: var(--coral, #c0392b);
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.35;
+}
+[data-theme="dark"] .ency-card-warning {
+    background: rgba(231, 76, 60, 0.18);
+    color: #ff9b8e;
+}
+
 /* ---- Print ---- */
 @media print {
     .hamburger,

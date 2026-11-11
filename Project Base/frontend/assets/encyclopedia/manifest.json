@@ -1,0 +1,116 @@
+{
+  "sun": {
+    "file": "sun.jpg",
+    "bytes": 2884858,
+    "source": "Wikimedia Commons",
+    "cached": true
+  },
+  "mercury": {
+    "file": "mercury.jpg",
+    "bytes": 17851,
+    "source": "Wikimedia Commons",
+    "cached": true
+  },
+  "venus": {
+    "file": "venus.jpg",
+    "bytes": 10045,
+    "source": "Wikimedia Commons",
+    "cached": true
+  },
+  "earth": {
+    "file": "earth.jpg",
+    "bytes": 17549,
+    "source": "Wikimedia Commons",
+    "cached": true
+  },
+  "moon": {
+    "file": "moon.jpg",
+    "bytes": 38372,
+    "source": "Wikimedia Commons",
+    "cached": true
+  },
+  "mars": {
+    "file": "mars.jpg",
+    "bytes": 14706,
+    "source": "Wikimedia Commons",
+    "cached": true
+  },
+  "jupiter": {
+    "file": "jupiter.jpg",
+    "bytes": 17423,
+    "source": "Wikimedia Commons",
+    "cached": true
+  },
+  "saturn": {
+    "file": "saturn.jpg",
+    "bytes": 25249,
+    "source": "Wikimedia Commons",
+    "cached": true
+  },
+  "uranus": {
+    "file": "uranus.jpg",
+    "bytes": 318903,
+    "source": "Wikimedia Commons",
+    "cached": true
+  },
+  "neptune": {
+    "file": "neptune.jpg",
+    "bytes": 68375,
+    "source": "Wikimedia Commons",
+    "cached": true
+  },
+  "pluto": {
+    "file": "pluto.jpg",
+    "bytes": 16771,
+    "source": "Wikimedia Commons",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/26/Pluto_in_3-D.jpg/330px-Pluto_in_3-D.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail"
+  },
+  "ceres": {
+    "file": "ceres.jpg",
+    "bytes": 22006,
+    "source": "Wikimedia Commons",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/76/Ceres_-_RC3_-_Haulani_Crater_%2822381131691%29_%28cropped%29.jpg/330px-Ceres_-_RC3_-_Haulani_Crater_%2822381131691%29_%28cropped%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail"
+  },
+  "io": {
+    "file": "io.jpg",
+    "bytes": 91002,
+    "source": "Wikimedia Commons",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a0/Io_comparison_with_Earth_and_Moon.png/330px-Io_comparison_with_Earth_and_Moon.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail"
+  },
+  "europa": {
+    "file": "europa.jpg",
+    "bytes": 19708,
+    "source": "Wikimedia Commons",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6c/PIA19048_realistic_color_Europa_mosaic_edited.jpg/330px-PIA19048_realistic_color_Europa_mosaic_edited.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail"
+  },
+  "ganymede": {
+    "file": "ganymede.jpg",
+    "bytes": 23727,
+    "source": "Wikimedia Commons",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f0/Ganymede_-_Perijove_34_Composite.jpg/330px-Ganymede_-_Perijove_34_Composite.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail"
+  },
+  "callisto": {
+    "file": "callisto.jpg",
+    "bytes": 25292,
+    "source": "Wikimedia Commons",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/58/Callisto-scarp.jpg/330px-Callisto-scarp.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail"
+  },
+  "titan": {
+    "file": "titan.jpg",
+    "bytes": 9734,
+    "source": "Wikimedia Commons",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/06/Titan_in_front_of_the_ring_and_Saturn.jpg/330px-Titan_in_front_of_the_ring_and_Saturn.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail"
+  },
+  "enceladus": {
+    "file": "enceladus.jpg",
+    "bytes": 9168,
+    "source": "Wikimedia Commons",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bf/Enceladus_with_Saturn_%2820901575102%29.jpg/330px-Enceladus_with_Saturn_%2820901575102%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail"
+  },
+  "triton": {
+    "file": "triton.jpg",
+    "bytes": 33812,
+    "source": "Wikimedia Commons",
+    "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/57/PIA00340_Montage_of_Neptune_and_Triton.jpg/330px-PIA00340_Montage_of_Neptune_and_Triton.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail"
+  }
+}

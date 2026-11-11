@@ -75,12 +75,20 @@
 
         _planetCard(p) {
             const phys = p.physical || {};
+            const imgHtml = p.image
+                ? `<div class="ency-card-image"><img src="../assets/encyclopedia/${p.image}" alt="${p.name}" loading="lazy" onerror="this.parentElement.style.display='none'"></div>`
+                : '';
+            const warnHtml = p.image_warning
+                ? `<div class="ency-card-warning" role="alert">⚠️ ${p.image_warning}</div>`
+                : '';
             return `
               <article class="ency-card planet-card" style="border-color:${p.color}">
                 <div class="ency-card-head">
                   <span class="ency-symbol" style="font-size:2rem">${p.symbol}</span>
                   <span class="ency-name">${p.name}</span>
                 </div>
+                ${imgHtml}
+                ${warnHtml}
                 <div class="ency-type">${p.type}</div>
                 <p class="ency-desc">${p.description}</p>
                 <table class="ency-table">
@@ -93,7 +101,7 @@
                   <tr><td>Atmosphere</td><td>${phys.atmosphere !== undefined ? phys.atmosphere : '—'}</td></tr>
                   <tr><td>Natural satellites</td><td>${phys.natural_satellites !== undefined ? phys.natural_satellites : '—'}</td></tr>
                 </table>
-                <div class="ency-footer">Encyclopedia entry · Data: NASA / USGS / ESA (public domain & open data)</div>
+                <div class="ency-footer">Encyclopedia entry · Data: NASA / USGS / ESA (public domain & open data) · Image: ${p.image_attribution || 'Wikimedia Commons'}</div>
               </article>
             `;
         },
@@ -107,12 +115,16 @@
 
         _moonCard(m) {
             const phys = m.physical || {};
+            const imgHtml = m.image
+                ? `<div class="ency-card-image"><img src="../assets/encyclopedia/${m.image}" alt="${m.name}" loading="lazy" onerror="this.parentElement.style.display='none'"></div>`
+                : '';
             return `
               <article class="ency-card moon-card" style="border-color:${m.color}">
                 <div class="ency-card-head">
                   <span class="ency-symbol" style="font-size:2rem">${m.symbol}</span>
                   <span class="ency-name">${m.name} <span style="font-size:0.85rem;opacity:0.7">of ${m.parent}</span></span>
                 </div>
+                ${imgHtml}
                 <div class="ency-type">${m.type}</div>
                 <p class="ency-desc">${m.description}</p>
                 <table class="ency-table">
@@ -124,7 +136,7 @@
                   <tr><td>Albedo</td><td>${phys.albedo !== undefined ? phys.albedo : '—'}</td></tr>
                   <tr><td>Shape</td><td>${phys.shape !== undefined ? phys.shape : '—'}</td></tr>
                 </table>
-                <div class="ency-footer">Encyclopedia entry · Data: NASA / USGS (public domain)</div>
+                <div class="ency-footer">Encyclopedia entry · Data: NASA / USGS (public domain) · Image: ${m.image_attribution || 'Wikimedia Commons'}</div>
               </article>
             `;
         },
