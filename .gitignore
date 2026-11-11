@@ -1,2 +1,7 @@
 TODO.md
 __pycache__/
+
+# Runtime caches regenerated from NASA / Exoplanet Archive at startup.
+# Only seed data (exoplanets.csv, exoplanets.json) is tracked.
+src/data/asteroids.json
+src/data/cached_asteroids.json
