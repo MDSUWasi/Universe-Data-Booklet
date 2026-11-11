@@ -408,6 +408,9 @@ MOONS: dict[str, dict[str, Any]] = {
             "orbital_period_hours": "≈ 7.66",
         },
         "color": "#7F8C8D",
+        "image": "phobos.jpg",
+        "image_source": "Wikimedia Commons: Phobos PIA10369 (NASA/JPL-Caltech)",
+        "image_attribution": "NASA/JPL-Caltech",
     },
     "deimos": {
         "id": "deimos",
@@ -433,6 +436,9 @@ MOONS: dict[str, dict[str, Any]] = {
             "orbital_period_hours": "≈ 30.3",
         },
         "color": "#95A5A6",
+        "image": "deimos.jpg",
+        "image_source": "Wikimedia Commons: Deimos NASA Mars Moon (NASA/JPL-Caltech)",
+        "image_attribution": "NASA/JPL-Caltech",
     },
     "io": {
         "id": "io",
