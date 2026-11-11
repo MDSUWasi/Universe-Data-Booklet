@@ -52,6 +52,54 @@ paid accounts are required.
 | **Open-Meteo** | Elevation & current weather | **CC BY 4.0** — cite as "Open-Meteo (https://open-meteo.com)" |
 | **Encyclopedia figures** | Compiled from NASA/USGS & ESA public sources | Public-domain / open data |
 
+### Encyclopedia Reference Images (bundled offline)
+
+The Planetary Explorer encyclopedia renders a reference photo for every body
+(21 images, cached offline under
+`Project Base/frontend/assets/encyclopedia/`, sourced from Wikimedia Commons).
+Each entry below carries the **source file**, **license**, and **author/credit**
+as required by that license — even when the app runs fully offline.
+
+| Body | Wikimedia Commons source file | License | Author / Credit |
+|---|---|---|---|
+| Sun | `Sun_Releases_X1_5_Flare_on_August_7,_2023_(SVS14417_-_Aug_7_X1pt5_Flare_171-131_SDO).gif` | NASA image (public domain) | NASA/SDO |
+| Mercury | `Mercury_in_color_-_Prockter07_centered.jpg` | Public domain | NASA (MESSENGER / Prockter) |
+| Venus | `Venus_from_Mariner_10.jpg` | Public domain | NASA/JPL-Caltech (Mariner 10) |
+| Earth | `The_Earth_seen_from_Apollo_17.jpg` | Public domain | NASA/Apollo 17 crew |
+| Moon | `LRO_WAC_Nearside_Mosaic.jpg` | Public domain | NASA/GSFC/Arizona State University (LRO) |
+| Mars | `OSIRIS_Mars_true_color.jpg` | **CC BY-SA 3.0 IGO** | ESA & MPS for OSIRIS Team (Rosetta) |
+| Jupiter | `Portrait_of_Jupiter_from_Cassini.jpg` | Public domain | NASA/JPL/Space Science Institute (Cassini) |
+| Saturn | `Saturn_global_view_from_Cassini,_rings_open_Better_Colour.png` | Public domain | NASA / JPL-Caltech / SSI / color composite by Gordan Ugarkov (Cassini) |
+| Uranus | `Uranus_Voyager2_color_calibrated.png` | **CC0** (public domain dedication) | Ardenau4 (Voyager 2 / PDS / OPUS) |
+| Neptune | `Neptune_Voyager2_color_calibrated.png` | **CC0** (public domain dedication) | NASA / Voyager 2 / PDS / OPUS / Ardenau4 |
+| Pluto | `Pluto_in_3-D.jpg` | Public domain | NASA/Johns Hopkins University Applied Physics Laboratory (Hubble) |
+| Ceres | `Ceres_-_RC3_-_Haulani_Crater_(22381131691)_(cropped).jpg` | Public domain | NASA/JPL-Caltech/UCLA/MPS/DLR/PSI (Dawn) |
+| Io | `Io_comparison_with_Earth_and_Moon.png` | Public domain | NASA / SwRI / MSSS / Jason Perry (Galileo) |
+| Europa | `PIA19048_realistic_color_Europa_mosaic_edited.jpg` | Public domain | NASA / JPL-Caltech / SETI Institute (Galileo) |
+| Ganymede | `Ganymede_-_Perijove_34_Composite.jpg` | **CC BY 2.0** | NASA/JPL-Caltech/SwRI/MSSS/Kevin M. Gill (Juno) |
+| Callisto | `Callisto-scarp.jpg` | Public domain | NASA (Galileo) |
+| Titan | `Titan_in_front_of_the_ring_and_Saturn.jpg` | Public domain | Cassini Imaging Team, NASA/JPL-Caltech/Space Science Institute |
+| Enceladus | `Enceladus_with_Saturn_(20901575102).jpg` | **CC BY-SA 2.0** | NASA/JPL-Caltech/Space Science Institute (Cassini) |
+| Triton | `PIA00340_Montage_of_Neptune_and_Triton.jpg` | Public domain | NASA, JPL (Voyager 2) |
+| Phobos | `Phobos_PIA10369.jpg` | Public domain | NASA/JPL-Caltech/University of Arizona (MGS) |
+| Deimos | `NASA-Deimos-MarsMoon-20090221.jpg` | Public domain | NASA/JPL/University of Arizona (MGS) |
+
+#### License obligations for the bundled images
+- **CC BY 2.0 (Ganymede)** and **CC BY-SA 2.0 (Enceladus)** and
+  **CC BY-SA 3.0 IGO (Mars)** require **attribution** to the named author and a
+  link to the license.  Attribution is printed on each encyclopedia card and in
+  this file.  CC BY-SA also requires that derivative works be shared under the
+  same license — this project does not modify those images.
+- **CC0 (Uranus, Neptune)** is a public-domain dedication; no further
+  obligations, though attribution is still given.
+- **Public-domain / NASA images** may be used freely; NASA/JPL-Caltech
+  attribution is given as a courtesy.
+- All images are **retrieved from Wikimedia Commons under CC BY / CC BY-SA /
+  CC0 / public-domain licenses**; see each file's
+  [Commons page](https://commons.wikimedia.org) for the full terms.
+
+---
+
 ### Cached / committed datasets
 - `src/data/exoplanets.csv`, `src/data/asteroids.json`, `src/data/cached_asteroids.json`
   (Universe Data Booklet, regenerable from the sources above)
