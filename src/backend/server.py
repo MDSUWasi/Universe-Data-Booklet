@@ -4,11 +4,13 @@ import socketserver
 import json
 import os
 import sys
+import gzip
+import zlib
 from urllib.parse import urlparse, parse_qs
 import re
 import time
 import threading
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -37,6 +39,55 @@ RATE_LIMIT_WINDOW_SECONDS = int(os.getenv("RATE_LIMIT_WINDOW_SECONDS", "60"))
 RATE_LIMIT_MAX_REQUESTS = int(os.getenv("RATE_LIMIT_MAX_REQUESTS", "120"))
 _rate_limit_lock = threading.Lock()
 _rate_limit_counters = {}
+
+# ---- Performance: gzip compression + HTTP caching -------------------------
+# Compress text responses (HTML/JS/CSS/JSON/MD) so payloads shrink 5-10x on
+# the wire.  Cache-Control headers tell browsers to cache static assets so
+# repeat visitors load almost instantly.
+GZIP_MIN_BYTES = int(os.getenv("GZIP_MIN_BYTES", "512"))     # skip tiny responses
+STATIC_CACHE_SECONDS = int(os.getenv("STATIC_CACHE_SECONDS", "86400"))  # 1 day
+API_CACHE_SECONDS = int(os.getenv("API_CACHE_SECONDS", "60"))            # 1 minute
+STATIC_EXT = {
+    '.js': 'text/javascript; charset=utf-8',
+    '.css': 'text/css; charset=utf-8',
+    '.html': 'text/html; charset=utf-8',
+    '.json': 'application/json; charset=utf-8',
+    '.md': 'text/markdown; charset=utf-8',
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.gif': 'image/gif',
+    '.svg': 'image/svg+xml',
+    '.ico': 'image/x-icon',
+    '.woff2': 'font/woff2',
+    '.woff': 'font/woff',
+    '.txt': 'text/plain; charset=utf-8',
+}
+
+
+def _compress_body(body: bytes, accept_encoding: str) -> tuple[bytes, str, str]:
+    """Return (body, content_encoding, vary) best supported by the client."""
+    if not accept_encoding:
+        return body, '', ''
+    ae = accept_encoding.lower()
+    if 'gzip' in ae:
+        try:
+            return gzip.compress(body, compresslevel=6), 'gzip', 'Accept-Encoding'
+        except Exception:
+            pass
+    if 'deflate' in ae:
+        try:
+            return zlib.compress(body), 'deflate', 'Accept-Encoding'
+        except Exception:
+            pass
+    return body, '', ''
+
+
+def _http_date(ts: float) -> str:
+    try:
+        return datetime.fromtimestamp(ts, tz=timezone.utc).strftime('%a, %d %b %Y %H:%M:%S GMT')
+    except Exception:
+        return ''
 
 # Cache refresh
 _refresh_lock = threading.Lock()
@@ -84,6 +135,12 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
             super().__init__(*args, directory=directory, **kwargs)
 
     def end_headers(self):
+        # When serving Project Base static assets for iframe embedding,
+        # skip the blocking X-Frame-Options / CSP headers.
+        if getattr(self, '_pb_embed', False):
+            super().end_headers()
+            return
+
         self.send_header('X-Frame-Options', 'DENY')
         self.send_header('X-XSS-Protection', '1; mode=block')
         self.send_header('X-Content-Type-Options', 'nosniff')
@@ -204,7 +261,16 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
         # ---- Project Base (Planetary Explorer) feature ----
         # Forward any /pb/* request to the merged-in Project Base backend so the
         # two codebases stay independent while serving one unified app.
+        # Static assets under /pb/lib|css|js|assets are served by UDB directly
+        # so they get gzip + HTTP caching instead of the sub-handler's plain
+        # SimpleHTTPRequestHandler behaviour.
         if path.startswith(PB_PREFIX):
+            rel = path[len(PB_PREFIX):]
+            if rel.startswith(('/lib/', '/css/', '/js/', '/assets/')):
+                self._pb_embed = True
+                self._serve_static(path)
+                self._pb_embed = False
+                return
             if PB_AVAILABLE:
                 _PBHandler = pb_handler_factory(self)
                 if _PBHandler is not None:
@@ -367,10 +433,72 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
             self._serve_doc(DOC_ROUTES[path][0], DOC_ROUTES[path][1])
             return
 
+        # ---- Static assets: cache + gzip before delegating to SimpleHTTPRequestHandler
+        if path == '/' or path.startswith('/static/') or path.startswith('/pb/') or path.startswith('/assets/'):
+            self._serve_static(path)
+            return
+
         return super().do_GET()
 
+    def _serve_static(self, path):
+        """Serve a static asset with HTTP caching and gzip compression."""
+        # Root path serves index.html — infer the html content type explicitly.
+        if path == '/' or path == '':
+            path = '/index.html'
+        ext = os.path.splitext(path)[1].lower()
+        content_type = STATIC_EXT.get(ext, 'application/octet-stream')
+        # Map /pb/... and /assets/... onto the Project Base frontend dir.
+        if path.startswith('/pb/'):
+            rel = path[len('/pb/'):]
+            file_path = os.path.join(PB_FRONTEND_DIR, rel.lstrip('/'))
+        elif path.startswith('/assets/'):
+            rel = path[len('/assets/'):]
+            file_path = os.path.join(PB_FRONTEND_DIR, 'assets', rel.lstrip('/'))
+        elif path.startswith('/static/'):
+            rel = path[len('/static/'):]
+            file_path = os.path.join(FRONTEND_DIR, rel.lstrip('/'))
+        else:
+            file_path = os.path.join(FRONTEND_DIR, 'index.html')
+
+        safe_path = os.path.normpath(file_path)
+        if not os.path.isfile(safe_path):
+            self.send_error(404, "Not Found")
+            return
+        try:
+            with open(safe_path, 'rb') as f:
+                body = f.read()
+            mtime = os.path.getmtime(safe_path)
+            # Conditional GET: honour If-Modified-Since to save bandwidth.
+            ims = self.headers.get('If-Modified-Since')
+            if ims:
+                try:
+                    ims_dt = datetime.strptime(ims.split(';')[0].strip(),
+                                               '%a, %d %b %Y %H:%M:%S GMT')
+                    ims_ts = ims_dt.replace(tzinfo=timezone.utc).timestamp()
+                    if ims_ts >= int(mtime):
+                        self.send_response(304)
+                        self.end_headers()
+                        return
+                except Exception:
+                    pass
+            accept = self.headers.get('Accept-Encoding', '')
+            comp, enc, vary = _compress_body(body, accept)
+            self.send_response(200)
+            self.send_header('Content-Type', content_type)
+            self.send_header('Content-Length', len(comp))
+            self.send_header('Last-Modified', _http_date(mtime))
+            self.send_header('Cache-Control', 'public, max-age=' + str(STATIC_CACHE_SECONDS) + ', must-revalidate')
+            if enc:
+                self.send_header('Content-Encoding', enc)
+            if vary:
+                self.send_header('Vary', vary)
+            self.end_headers()
+            self.wfile.write(comp)
+        except Exception:
+            self.send_error(500, "Internal Server Error")
+
     def _serve_doc(self, file_path, content_type):
-        """Serve a markdown/plain-text legal/info page."""
+        """Serve a markdown/plain-text legal/info page, gzip-compressed."""
         safe_name = os.path.basename(file_path)
         file_path = os.path.join(os.path.dirname(file_path), safe_name)
         if not os.path.isfile(file_path):
@@ -380,23 +508,37 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
             body = content.encode('utf-8')
+            accept = self.headers.get('Accept-Encoding', '')
+            comp, enc, vary = _compress_body(body, accept)
             self.send_response(200)
             self.send_header('Content-Type', content_type)
-            self.send_header('Content-Length', len(body))
+            self.send_header('Content-Length', len(comp))
             self.send_header('X-Content-Type-Options', 'nosniff')
+            self.send_header('Cache-Control', 'public, max-age=3600, must-revalidate')
+            if enc:
+                self.send_header('Content-Encoding', enc)
+            if vary:
+                self.send_header('Vary', vary)
             self.end_headers()
-            self.wfile.write(body)
+            self.wfile.write(comp)
         except Exception:
             self.send_error(500, "Internal Server Error")
 
     def send_json_response(self, code, data):
         try:
             body = json.dumps(data, default=str).encode('utf-8')
+            accept = self.headers.get('Accept-Encoding', '')
+            comp, enc, vary = _compress_body(body, accept)
             self.send_response(code)
             self.send_header('Content-Type', 'application/json')
-            self.send_header('Content-Length', len(body))
+            self.send_header('Content-Length', len(comp))
+            self.send_header('Cache-Control', 'public, max-age=' + str(API_CACHE_SECONDS) + ', must-revalidate')
+            if enc:
+                self.send_header('Content-Encoding', enc)
+            if vary:
+                self.send_header('Vary', vary)
             self.end_headers()
-            self.wfile.write(body)
+            self.wfile.write(comp)
         except Exception:
             pass
 
@@ -407,11 +549,18 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
             safe_msg = "Internal Server Error"
 
         body = json.dumps({"error": safe_msg}).encode('utf-8')
+        accept = self.headers.get('Accept-Encoding', '')
+        comp, enc, vary = _compress_body(body, accept)
         self.send_response(code)
         self.send_header('Content-Type', 'application/json')
-        self.send_header('Content-Length', len(body))
+        self.send_header('Content-Length', len(comp))
+        self.send_header('Cache-Control', 'no-store')
+        if enc:
+            self.send_header('Content-Encoding', enc)
+        if vary:
+            self.send_header('Vary', vary)
         self.end_headers()
-        self.wfile.write(body)
+        self.wfile.write(comp)
 
     def log_message(self, format, *args):
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

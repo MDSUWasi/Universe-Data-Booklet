@@ -139,6 +139,17 @@ def pb_handler_factory(parent_handler):
             # here so static file resolution points at its own frontend dir.
             self.directory = str(PB_FRONTEND_DIR)
 
+        # The parent's AppHandler.end_headers() injects X-Frame-Options: DENY and
+        # a CSP with frame-ancestors 'none' that would block the Planetary
+        # Explorer from being embedded in an iframe.  Filter those out so the
+        # /pb/ feature can be embedded by the Universe Data Booklet site.
+        _BLOCKED_HEADERS = ('X-Frame-Options', 'Content-Security-Policy')
+
+        def send_header(self, keyword, value):
+            if keyword in PBHandler._BLOCKED_HEADERS:
+                return
+            super().send_header(keyword, value)
+
     return PBHandler(parent_handler)
 
 

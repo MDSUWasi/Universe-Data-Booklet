@@ -621,9 +621,9 @@ h1, h2, h3 { color: var(--ink); line-height: 1.25; }
     color: var(--ink-mute);
 }
 .body-card > p {
-    min-height: 74px;
     font-size: 0.87rem;
     color: var(--ink-soft);
+    line-height: 1.5;
 }
 .body-card-metric {
     display: grid;
