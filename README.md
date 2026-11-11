@@ -111,6 +111,12 @@ Push to the Branch (git push origin feature/AmazingFeature)
 Open a Pull Request
 
 
+### 📜 Legal & Privacy
+- **[Terms & Conditions](/terms)** — educational-use disclaimer, acceptable use, third-party data licences, limitation of liability.
+- **[Privacy Policy](/privacy)** — no accounts, no cookies, no analytics, no trackers; only `localStorage` preferences on your device.
+- **[Dependencies](/dependencies)** — every bundled library, data source, and encyclopedia image with licence and author.
+- **[Thank You](/thank-you)** — citations for NASA, USGS, Open-Meteo, Open Notify, ESA/Copernicus, and the open-source library authors.
+
 ### 📜 License
 Distributed under the MIT License (Because I want to give the others the many possible permissions. It is am educational project. So, please those who use the site and source please use it for good purpose. And also if anyone use my source please let me know how this helped you.).
 
@@ -118,11 +124,8 @@ Distributed under the MIT License (Because I want to give the others the many po
 - Full citations for every data source and library: see **[THANK_YOU.md](THANK_YOU.md)**.
 - Bundled dependencies, licenses, and data-source attributions: see **[DEPENDENCIES.md](DEPENDENCIES.md)** (renamed from `THIRD_PARTY_LICENSES.md`). See LICENSE for more information.
 
-### 🙏 Acknowledgments & Thank You
-
-NASA: For providing free, open-access space data APIs.
-
-Three.js, Chart.js, jsPDF: For powerful, open-source visualization libraries.
+- NASA: For providing free, open-access space data APIs.
+- Three.js, Chart.js, jsPDF: For powerful, open-source visualization libraries.
 
 
 

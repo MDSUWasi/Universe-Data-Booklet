@@ -431,10 +431,11 @@
       not create an account, store a username, or track you across devices.
     </p>
     <ul style="font-size:0.82rem;color:var(--ink-soft);margin:6px 0 14px 18px">
-      <li><b>Local storage.</b> A small discovery cache (≈300 entries) is kept in your browser so repeated lookups are instant. It contains only coordinates and terrain metrics — no personal data.</li>
+      <li><b>Local storage.</b> A small discovery cache (≈300 entries) is kept in your browser so repeated lookups are instant. It contains only coordinates and terrain metrics — no personal data. Theme and study-progress preferences are also saved locally (keys: <code>pb-theme</code>, <code>udb-theme</code>, <code>udb-density</code>, <code>udb-progress</code>).</li>
       <li><b>Upstream calls.</b> Elevation and weather queries are sent to Open-Meteo (public, no API key). Tile requests go to NASA/JPL Solar System Treks and open basemap providers.</li>
-      <li><b>No analytics.</b> No third-party analytics, advertising, or tracking scripts are loaded.</li>
+      <li><b>No analytics.</b> No third-party analytics, advertising, or tracking scripts are loaded. No cookies are set.</li>
       <li><b>Data you provide.</b> Any text you type into the planner or authoring notes stays in your browser and is never uploaded.</li>
+      <li><b>Encyclopedia images.</b> The encyclopedia renders reference photos for every body (Sun, Mercury, Venus, Earth, Moon, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto, Ceres, Io, Europa, Ganymede, Callisto, Titan, Enceladus, Triton, Phobos, Deimos). All 21 are bundled offline under <code>assets/encyclopedia/</code>, sourced from Wikimedia Commons under CC BY / CC BY-SA / CC BY-SA 3.0 IGO / CC0 / public-domain licences. Attribution is printed on each card; see the full citation table in the app's DEPENDENCIES.md.</li>
     </ul>
 
     <h3 style="margin:14px 0 6px;font-size:1.05rem">Terms of Service</h3>
@@ -531,8 +532,10 @@
   </div>
   <div class="credit-line">
     <strong>Project.</strong> Planetary Explorer · Solar System exploration tool · Encyclopedic data on planets, moons, and terrain sites · Live data from free public APIs ·
-    <a href="#privacy" style="margin-left:8px" onclick="UI.openModal('legal')">Privacy Policy</a> ·
-    <a href="#terms" onclick="UI.openModal('legal')">Terms of Service</a> ·
+    <a href="/terms" target="_blank" rel="noopener">Terms &amp; Conditions</a> ·
+    <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a> ·
+    <a href="/dependencies" target="_blank" rel="noopener">Dependencies</a> ·
+    <a href="/thank-you" target="_blank" rel="noopener">Thank You</a> ·
     <a href="#credits" onclick="UI.openModal('credits')">Full credits &amp; provenance</a>
   </div>
 </footer>

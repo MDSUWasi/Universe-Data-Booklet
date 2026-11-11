@@ -352,7 +352,42 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
             self.send_error_json(404, "Endpoint not found")
             return
 
+        # ---- Legal / info pages ----
+        # /terms and /privacy live in docs/; /dependencies, /thank-you and
+        # /license live at the repo root.
+        DOC_ROOT = os.path.join(SRC_DIR, '..', 'docs')
+        DOC_ROUTES = {
+            '/terms': (os.path.join(DOC_ROOT, 'terms.md'), 'text/markdown; charset=utf-8'),
+            '/privacy': (os.path.join(DOC_ROOT, 'privacy.md'), 'text/markdown; charset=utf-8'),
+            '/dependencies': (os.path.join(SRC_DIR, '..', 'DEPENDENCIES.md'), 'text/markdown; charset=utf-8'),
+            '/thank-you': (os.path.join(SRC_DIR, '..', 'THANK_YOU.md'), 'text/markdown; charset=utf-8'),
+            '/license': (os.path.join(SRC_DIR, '..', 'LICENSE'), 'text/plain; charset=utf-8'),
+        }
+        if path in DOC_ROUTES:
+            self._serve_doc(DOC_ROUTES[path][0], DOC_ROUTES[path][1])
+            return
+
         return super().do_GET()
+
+    def _serve_doc(self, file_path, content_type):
+        """Serve a markdown/plain-text legal/info page."""
+        safe_name = os.path.basename(file_path)
+        file_path = os.path.join(os.path.dirname(file_path), safe_name)
+        if not os.path.isfile(file_path):
+            self.send_error(404, "Page not found")
+            return
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            body = content.encode('utf-8')
+            self.send_response(200)
+            self.send_header('Content-Type', content_type)
+            self.send_header('Content-Length', len(body))
+            self.send_header('X-Content-Type-Options', 'nosniff')
+            self.end_headers()
+            self.wfile.write(body)
+        except Exception:
+            self.send_error(500, "Internal Server Error")
 
     def send_json_response(self, code, data):
         try:
