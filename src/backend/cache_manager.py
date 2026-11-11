@@ -9,8 +9,8 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SRC_DIR = os.path.join(BASE_DIR, '..')
 CACHE_DIR = os.path.join(SRC_DIR, 'data')   # -> <root>/src/data
 
-# Align with server.py REFRESH_THRESHOLD_DAYS = 30 and MAX_CACHE_AGE_DAYS = 90
-CACHE_DURATION_SECONDS = 30 * 24 * 60 * 60     # 30 Days (matches server refresh threshold)
+# Align with server.py REFRESH_THRESHOLD_DAYS = 7 and MAX_CACHE_AGE_DAYS = 90
+CACHE_DURATION_SECONDS = 7 * 24 * 60 * 60      # 7 Days (matches server refresh threshold)
 CLEANUP_THRESHOLD = 90 * 24 * 60 * 60          # 90 Days (matches server.py retention)
 
 # Thread lock for coordinating with server.py cache refresh operations

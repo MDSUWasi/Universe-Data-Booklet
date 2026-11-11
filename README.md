@@ -22,7 +22,7 @@ Universe Data Booklet is an interactive astronomy and planetary-science website 
 ### 📊 **Multi-Dataset Analysis**
 Universe Data Booklet covers three domains, not just two:
 - **🪐 Planetary Explorer (Project Base):** A browser-first research app for exploring, comparing, and planning across planetary terrain sites on Earth, the Moon, and Mars. Embedded as a **native in-page tab** (select the **🪐 Planetary Explorer** tab, or open `/pb/` standalone). Features an encyclopedia of planets/moons/sites, a Leaflet map atlas with NASA Trek WMTS basemaps, a 3D Terrain Lab (Three.js), a Discovery Lab that screens any Earth coordinate for slope/relief, a Mission Planner wizard, terrain comparison, patch explorer, scale sensitivity, and a realtime dashboard -- all backed by a SQLite upstream-cache proxy (Open-Meteo, NASA, USGS, Open Notify).
-- **Near-Earth Asteroids (NEO):** Tracking of objects within Earth's orbit. (It fetches new data only once in 30 days and keeps cached data for 90 days.)
+- **Near-Earth Asteroids (NEO):** Tracking of objects within Earth's orbit. (It fetches new data every **7 days** and keeps cached data for 90 days.)
 - **Confirmed Exoplanets:** A catalog of thousands (around 6,000 exoplanets) of discovered worlds with calculated Earth Similarity Index (ESI). (Currently, this data is not updated in realtime; the site uses a CSV dataset for this.)
 
 ### 🎨 **Immersive Visualization & Features**
@@ -51,8 +51,8 @@ One of the biggest challenges in public API projects is hitting rate limits when
 ### How It Works
 1.  **Single Fetch, Infinite Users:** When the first user requests data, the Python backend fetches it from the **NASA Public API**.
 2.  **Intelligent Caching:** The data is stored locally on the server (`src/data/`) with a timestamp.
-3.  **Automatic Refresh:** The cache remains valid for **30 days** (configurable). All subsequent users receive this cached data instantly.
-4.  **Zero API Burden:** Even if 10,000+ users visits the site, the site hit the NASA API **once every 30 days**, completely solving the standard rate limits.
+3.  **Automatic Refresh:** The cache remains valid for **7 days** (configurable). All subsequent users receive this cached data instantly.
+4.  **Zero API Burden:** Even if 10,000+ users visits the site, the site hit the NASA API **once every 7 days**, completely solving the standard rate limits.
 
 <h6>And, do not worry about storage. The site will automatically delete cache data which are older than 90 days. (This is because, I want to have the old data saved for some times before it is gone. This is because if we need the old data then this site have the saved version, But I can't gurrantee that it will be saved for 90 days.)</h6>
 ---

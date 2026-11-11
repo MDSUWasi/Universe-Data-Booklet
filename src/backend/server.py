@@ -26,7 +26,10 @@ SRC_DIR = os.path.dirname(SERVER_SCRIPT_DIR)
 FRONTEND_DIR = os.path.join(SRC_DIR, 'frontend')
 DATA_DIR = os.path.join(SRC_DIR, 'data')
 
-REFRESH_THRESHOLD_DAYS = 30
+# Cache refresh policy: asteroids are re-fetched from NASA every 7 days and
+# cached data older than 90 days is deleted.  (client.py's CACHE_DAYS mirrors
+# this 7-day threshold.)
+REFRESH_THRESHOLD_DAYS = 7
 MAX_CACHE_AGE_DAYS = 90
 CACHE_FILE = os.path.join(DATA_DIR, 'cached_asteroids.json')
 

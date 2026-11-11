@@ -538,8 +538,12 @@
 </footer>
 
 <script src="lib/leaflet.js"></script>
+<!-- iframe bootstrap MUST load before any feature module (and before the
+     core modules that issue fetch/XHR) so the fetch/XHR/Leaflet patches are
+     in place before any runtime request. -->
+<script src="js/modules/core/pb-bootstrap.js"></script>
 <!-- Modular app: each independent module is a classic script that registers
-     itself on window.  Order matters -- core first, then features, then wiring. -->
+      itself on window.  Order matters -- core first, then features, then wiring. -->
 <script src="js/modules/core/data.js"></script>
 <script src="js/modules/core/toast.js"></script>
 <script src="js/modules/core/starfield.js"></script>

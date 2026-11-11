@@ -22,8 +22,9 @@ else:
     print("✅ Production API key configured.")
 
 BASE_URL = "https://api.nasa.gov"
-# Unified cache
-CACHE_DAYS = 30  
+# Unified cache: asteroids are re-fetched every 7 days (mirrors
+# server.py REFRESH_THRESHOLD_DAYS / cache_manager CACHE_DURATION_SECONDS).
+CACHE_DAYS = 7  
 
 # Paths
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))       
