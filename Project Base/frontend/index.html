@@ -7,16 +7,16 @@
 <title>Planetary Explorer — Solar System Exploration</title>
 <meta name="description" content="Explore terrain data and reference sites across Earth, the Moon, and Mars with an interactive planetary comparison atlas.">
 
-<!-- Leaflet (map) -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<!-- Charts -->
-<script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-<!-- GSAP (animations) -->
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<!-- Three.js (3D Terrain Lab) -->
-<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
-<!-- jsPDF (Mission Planner PDF export) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- Leaflet (map) - bundled offline -->
+<link rel="stylesheet" href="lib/leaflet.css">
+<!-- Charts - bundled offline -->
+<script defer src="lib/chart.min.js"></script>
+<!-- GSAP (animations) - bundled offline -->
+<script defer src="lib/gsap.min.js"></script>
+<!-- Three.js (3D Terrain Lab) - bundled offline -->
+<script src="lib/three.min.js"></script>
+<!-- jsPDF (Mission Planner PDF export) - bundled offline -->
+<script src="lib/jspdf.min.js"></script>
 
 <link rel="stylesheet" href="css/style.css">
 <!-- Three independent themes. Light is the default; the Theme module
@@ -537,7 +537,7 @@
   </div>
 </footer>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="lib/leaflet.js"></script>
 <!-- Modular app: each independent module is a classic script that registers
      itself on window.  Order matters -- core first, then features, then wiring. -->
 <script src="js/modules/core/data.js"></script>

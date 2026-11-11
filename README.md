@@ -62,8 +62,9 @@ One of the biggest challenges in public API projects is hitting rate limits when
 
 - **Backend:** Python 3.13 (Standard Library `http.server`, `urllib`, `json`)
 - **Frontend:** HTML5, CSS3 (Custom Animations), Vanilla JavaScript (ES6+)
-- **Visualization:** Chart.js (Analytics), jsPDF (Reporting), annimation.js(It's name already told it's work by default.)
+- **Visualization:** Chart.js, jsPDF (Analytics & Reporting), annimation.js(It's name already told it's work by default.)
 - **Integrated Feature:** **Project Base — Planetary Explorer** (Leaflet, Three.js, GSAP, Chart.js, jsPDF; SQLite upstream cache) served from the same server at `/pb/` and embedded as a native in-page tab.
+- **All JS/CSS dependencies are bundled offline** under `src/frontend/lib/` and `Project Base/frontend/lib/` -- no CDN required after first load.
 - **Data:** NASA NEO Web API & JPL Small-Body Database (CSV); Planetary terrain from LRO, Copernicus DEM, MRO CTX (via the Planetary Explorer feature)
 - **Deployment:** Run anywhere with Python 3.6+ (Linux, macOS, Windows/WSL)
 - **Screen:** Use screen wider than 10 inch. If using mobile phone, then set the browser to desktop site. Currently this site have no capabilities to be run on Phone (I mean the deployed site, not the source code). The mobile version may be available in the future updates (But I can't tell on which version)
@@ -111,7 +112,11 @@ Open a Pull Request
 
 
 ### 📜 License
-Distributed under the MIT License (Because I want to give the others the many possible permissions. It is am educational project. So, please those who use the site and source please use it for good purpose. And also if anyone use my source please let me know how this helped you.). See LICENSE for more information.
+Distributed under the MIT License (Because I want to give the others the many possible permissions. It is am educational project. So, please those who use the site and source please use it for good purpose. And also if anyone use my source please let me know how this helped you.).
+
+### 🙏 Acknowledgments & Thank You
+- Full citations for every data source and library: see **[THANK_YOU.md](THANK_YOU.md)**.
+- Bundled dependencies, licenses, and data-source attributions: see **[DEPENDENCIES.md](DEPENDENCIES.md)** (renamed from `THIRD_PARTY_LICENSES.md`). See LICENSE for more information.
 
 ### 🙏 Acknowledgments & Thank You
 
