@@ -20,7 +20,7 @@ Universe Data Booklet, as it's name suggest, it is a website (It's name is booke
 <h2 align="center">✨ Key Features</h2>
 
 ### 🪐 **Planetary Explorer (Project Base)**
-Integrated as a first-class feature of Universe Data Booklet. A browser-first research web app for exploring, comparing, and planning across planetary terrain sites on Earth, the Moon, and Mars. Served from the same server under the **`/pb/`** prefix (opens in a new tab via the **🪐 Planetary Explorer** button). Features include:
+Integrated as a **native in-page tab** of Universe Data Booklet (select the **🪐 Planetary Explorer** tab in the data-panel tab group, or click the **🪐 Planetary Explorer** button). A browser-first research web app for exploring, comparing, and planning across planetary terrain sites on Earth, the Moon, and Mars. Served by the same server under the **`/pb/`** prefix and embedded inline via an iframe, so it is a first-class feature of this app, not a separate site. Features include:
 - **Encyclopedia** of planets, moons, and candidate terrain sites.
 - **Map View** with Leaflet atlas + NASA Trek WMTS basemaps (Moon / Mars).
 - **3D Terrain Lab** (Three.js) rendering real DEM windows.

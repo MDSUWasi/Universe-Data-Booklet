@@ -25,7 +25,11 @@ served by a single server.
 ### Running
 
 - Universe Data Booklet: `http://localhost:8081/` (default)
-- Project Base (integrated): `http://localhost:8081/pb/`
+- Project Base (integrated as a **native in-page tab**): select the **🪐 Planetary
+  Explorer** tab in the data-panel tab group. It is embedded inline via an
+  iframe pointing at `/pb/`, so it is a first-class feature of this app rather
+  than a separate page. (The same `/pb/` URL also opens standalone in a new tab
+  via the **🪐 Planetary Explorer** button in the action group.)
 
 Both are served by the same `python src/backend/server.py` process.
 

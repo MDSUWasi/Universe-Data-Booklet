@@ -135,10 +135,35 @@ function switchTab(tab) {
     closeMapModal();
 
     document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.textContent.includes(tab === 'asteroids' ? 'Asteroid' : 'Exoplanet'));
+        const label = btn.textContent.toLowerCase();
+        const active = (tab === 'asteroids' && label.includes('asteroid'))
+            || (tab === 'exoplanets' && label.includes('exoplanet'))
+            || (tab === 'planetary' && label.includes('planetary explorer'));
+        btn.classList.toggle('active', active);
     });
 
     if (elements.searchInput) elements.searchInput.value = '';
+
+    // Planetary Explorer is served as an embedded iframe of the merged-in
+    // Project Base app (/pb).  No data fetch is needed for this tab.
+    if (tab === 'planetary') {
+        const dataContainer = document.getElementById('data-container');
+        const planetaryContainer = document.getElementById('planetary-container');
+        if (dataContainer) dataContainer.style.display = 'none';
+        if (planetaryContainer) {
+            planetaryContainer.style.display = 'block';
+            const iframe = document.getElementById('planetary-iframe');
+            if (iframe) iframe.src = '/pb/';
+        }
+        return;
+    }
+
+    // Leaving the embedded tab: hide it and show the data table again.
+    const dataContainer = document.getElementById('data-container');
+    const planetaryContainer = document.getElementById('planetary-container');
+    if (dataContainer) dataContainer.style.display = '';
+    if (planetaryContainer) planetaryContainer.style.display = 'none';
+
     fetchData(true);
 }
 
@@ -1174,9 +1199,9 @@ window.closeMapModal = closeMapModal;
 
 /**
  * Open the merged-in Project Base (Planetary Explorer) feature in a new tab.
- * Project Base is served by the same Universe Data Booklet server under the
- * /pb prefix, so it is a first-class feature of this app rather than a
- * separate site.
+ * Kept for backwards compatibility with any external callers; the in-app
+ * "🪐 Planetary Explorer" tab (switchTab('planetary')) is the primary entry
+ * point and embeds the same app inline.
  */
 function openPlanetaryExplorer() {
     window.open('/pb/', '_blank', 'noopener');

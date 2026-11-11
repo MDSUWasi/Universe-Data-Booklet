@@ -34,6 +34,7 @@
                 <div class="tab-group">
                     <button class="tab-btn active" onclick="switchTab('asteroids')">Asteroids Data (Near Earth for last 30 days)</button>
                     <button class="tab-btn" onclick="switchTab('exoplanets')">Exoplanets Data</button>
+                    <button class="tab-btn" onclick="switchTab('planetary')">🪐 Planetary Explorer</button>
                 </div>
                 <div class="action-group">
                     <input type="text" id="search-input" class="search-input" placeholder="🔍 Search..." oninput="handleSearch(this.value)">
@@ -42,7 +43,7 @@
                     <button class="action-btn" onclick="showMap()">🗺️ Map View</button>
 <button class="action-btn" onclick="openExplorerGame()">🚀 Free Exploration</button>
                 <button class="action-btn" onclick="openStudyModal()">🎓 Study & Research Mode</button>
-                <button class="action-btn" onclick="openPlanetaryExplorer()">🪐 Planetary Explorer</button>
+                <button class="action-btn" onclick="switchTab('planetary')">🪐 Planetary Explorer</button>
                 <button class="action-btn" onclick="exportPDF()">📄 PDF Download</button>
                 </div>
             </section>
@@ -54,6 +55,9 @@
 
             <section class="glass-panel data-panel">
                 <div id="data-container"><div class="skeleton"></div></div>
+                <div id="planetary-container" class="planetary-container" style="display:none;">
+                    <iframe id="planetary-iframe" class="planetary-iframe" src="/pb/" title="Planetary Explorer (Project Base)" loading="lazy"></iframe>
+                </div>
             </section>
 
             <section class="glass-panel habitability-panel">

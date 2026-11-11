@@ -456,6 +456,26 @@ body {
   min-height: 150px;
 }
 
+/* Planetary Explorer (Project Base) embedded as a native in-page tab. */
+.planetary-container {
+  width: 100%;
+}
+.planetary-iframe {
+  width: 100%;
+  height: calc(100vh - 260px);
+  min-height: 720px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-panel-solid);
+  box-shadow: var(--shadow-md);
+}
+@media (max-width: 900px) {
+  .planetary-iframe {
+    height: calc(100vh - 320px);
+    min-height: 560px;
+  }
+}
+
 .data-item {
   background: var(--bg-panel-solid);
   border: 1px solid var(--border-color);
