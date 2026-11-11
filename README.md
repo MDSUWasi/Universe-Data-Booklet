@@ -1,7 +1,7 @@
 <h5 align="right"><i>Last README Update: 11 November 2026</i></h4>
 <h1 align="center"> 🌌 Universe Data Booklet</h1>
 
-> **An interactive data explorer for Near-Earth Asteroids and Exoplanets.**  
+> **An interactive data explorer for Near-Earth Asteroids, Exoplanets, and planetary terrain.**  
 > *Built for students, educators and for study purpose* 
 
 <h3>
@@ -13,33 +13,24 @@
 ![Hackatime](https://hackatime.hackclub.com/api/v1/badge/U0B5XFH01GQ/MDSUWasi/Universe-Data-Booklet)
 
 
-Universe Data Booklet, as it's name suggest, it is a website (It's name is bookelt but it is a website) which contains data on exoplanets and near Earth asteroids. Universe Data Booklet transforms raw astronomical data into an intuitive and graphical experience. Whether you are tracking potentially hazardous asteroids or analyzing the habitability of distant exoplanets, this tool provides insights with **zero latency** thanks to its intelligent local caching architecture.
+Universe Data Booklet is an interactive astronomy and planetary-science website (its name says "booklet" but it is a web app) that transforms raw space data into an intuitive, graphical experience. It is **not limited to exoplanets and asteroids** -- it also embeds the **Planetary Explorer** research tool for terrain across Earth, the Moon, and Mars. Whether you are tracking potentially hazardous asteroids, analyzing the habitability of distant exoplanets, or screening candidate landing sites for slope and roughness, this tool provides insights with **zero latency** thanks to its intelligent local caching architecture.
 
 ---
 
 <h2 align="center">✨ Key Features</h2>
 
-### 🪐 **Planetary Explorer (Project Base)**
-Integrated as a **native in-page tab** of Universe Data Booklet (select the **🪐 Planetary Explorer** tab in the data-panel tab group, or click the **🪐 Planetary Explorer** button). A browser-first research web app for exploring, comparing, and planning across planetary terrain sites on Earth, the Moon, and Mars. Served by the same server under the **`/pb/`** prefix and embedded inline via an iframe, so it is a first-class feature of this app, not a separate site. Features include:
-- **Encyclopedia** of planets, moons, and candidate terrain sites.
-- **Map View** with Leaflet atlas + NASA Trek WMTS basemaps (Moon / Mars).
-- **3D Terrain Lab** (Three.js) rendering real DEM windows.
-- **Discovery Lab** screening any Earth coordinate for slope/relief.
-- **Mission Planner** wizard ranking sites by science, cost, and risk.
-- **Terrain Comparison, Patch Explorer, Scale Sensitivity, Realtime Dashboard**.
-- **SQLite-backed cache proxy** for upstream APIs (Open-Meteo, NASA, USGS, Open Notify).
-
-### 📊 **Dual-Dataset Analysis**
-Seamlessly switch between two massive datasets:
-- **Near-Earth Asteroids (NEO):** Tracking of objects within Earth's orbit. (It fetches bew data only once in 30 Days and keep old cache data for 90 days)
-- **Confirmed Exoplanets:** A catalog of thousands (around 6,000 exoplanets) of discovered worlds with calculated Earth Similarity Index (ESI). (Currently, this data is not updated in realtime, The site uses csv dataset for this)
+### 📊 **Multi-Dataset Analysis**
+Universe Data Booklet covers three domains, not just two:
+- **🪐 Planetary Explorer (Project Base):** A browser-first research app for exploring, comparing, and planning across planetary terrain sites on Earth, the Moon, and Mars. Embedded as a **native in-page tab** (select the **🪐 Planetary Explorer** tab, or open `/pb/` standalone). Features an encyclopedia of planets/moons/sites, a Leaflet map atlas with NASA Trek WMTS basemaps, a 3D Terrain Lab (Three.js), a Discovery Lab that screens any Earth coordinate for slope/relief, a Mission Planner wizard, terrain comparison, patch explorer, scale sensitivity, and a realtime dashboard -- all backed by a SQLite upstream-cache proxy (Open-Meteo, NASA, USGS, Open Notify).
+- **Near-Earth Asteroids (NEO):** Tracking of objects within Earth's orbit. (It fetches new data only once in 30 days and keeps cached data for 90 days.)
+- **Confirmed Exoplanets:** A catalog of thousands (around 6,000 exoplanets) of discovered worlds with calculated Earth Similarity Index (ESI). (Currently, this data is not updated in realtime; the site uses a CSV dataset for this.)
 
 ### 🎨 **Immersive Visualization & Features**
 - **Dynamic Charts:** Real-time bar charts pop up powered by Chart.js to visualize size and velocity distributions.
 - **3D Interactive View:** Explore objects as 3D spheres (Three.js) (pop up) with orbit rings and drag-to-rotate camera. Exoplanets and Asteroids have 2 different 3D view. Asteroids have a solar system simulation type 3D view.
 - **Theme Switcher:** Toggle between **Cream**,**Neon**, **Solar**, and **Lab** themes (persisted in localStorage).
 - **Detail Modal:** Click any row for a deep-dive into the object's data.
-- **Search & Stats:** Client-side search across both datasets plus live stat cards.
+- **Search & Stats:** Client-side search across the NEO and exoplanet datasets plus live stat cards.
 - **Map View:** A visual map for locating both data. (Make sure to press the "more" button before viewing the map for exoplanets. because there are approximately 6,000 exoplanets and all of those data are not shown at once untill the more button is clicked and the Map view works on how many data is present on the interface.)
 - **Study & Research Mode:** A tab for study section. There user can practice flashcards, quiz, challenge etc. This section also comes with other features like:- *Discover:* This mode gives user the ability to work on data which are present in the data set but not specifically indicated. *Compare:* Here users can compare at leat 2 expolanets/ asteroids in a diagram.
 
@@ -72,8 +63,8 @@ One of the biggest challenges in public API projects is hitting rate limits when
 - **Backend:** Python 3.13 (Standard Library `http.server`, `urllib`, `json`)
 - **Frontend:** HTML5, CSS3 (Custom Animations), Vanilla JavaScript (ES6+)
 - **Visualization:** Chart.js (Analytics), jsPDF (Reporting), annimation.js(It's name already told it's work by default.)
-- **Integrated Feature:** **Project Base — Planetary Explorer** (Leaflet, Three.js, GSAP, Chart.js, jsPDF; SQLite upstream cache) served from the same server at `/pb/`.
-- **Data:** NASA NEO Web API & JPL Small-Body Database (CSV)
+- **Integrated Feature:** **Project Base — Planetary Explorer** (Leaflet, Three.js, GSAP, Chart.js, jsPDF; SQLite upstream cache) served from the same server at `/pb/` and embedded as a native in-page tab.
+- **Data:** NASA NEO Web API & JPL Small-Body Database (CSV); Planetary terrain from LRO, Copernicus DEM, MRO CTX (via the Planetary Explorer feature)
 - **Deployment:** Run anywhere with Python 3.6+ (Linux, macOS, Windows/WSL)
 - **Screen:** Use screen wider than 10 inch. If using mobile phone, then set the browser to desktop site. Currently this site have no capabilities to be run on Phone (I mean the deployed site, not the source code). The mobile version may be available in the future updates (But I can't tell on which version)
 
