@@ -184,7 +184,7 @@ All free, public, no paid account required:
 3. **All-sites summary:** `scripts/merge_all_sites.py` combines Moon/Earth/Mars results into `output/reports/all_sites_comparison.csv` (5 sites).
 4. **Terrain window assets:** `backend/build_terrain_assets.py` samples 3 km windows from DEMs at 128×128 grid, quantizes elevation/slope/roughness to uint8, and writes JSON assets to `frontend/assets/terrain/`.
 5. **Frontend bundled data:** `frontend/js/modules/core/data.js` hardcodes `SITE_DATA` mirroring `all_sites_comparison.csv` so the app works offline without the server.
-6. **Encyclopedia data:** `backend/api/encyclopedia.py` hardcodes `PLANETS`, `MOONS`, `SITES` dictionaries served via `/api/encyclopedia/*`.
+6. **Encyclopedia data:** `backend/api/encyclopedia.py` hardcodes `PLANETS`, `MOONS`, `SITES` dictionaries served via `/api/encyclopedia/*`. The encyclopedia now covers the **full Solar System**: the **Sun** (with a direct-viewing eye-safety warning), Mercury, Venus, Earth, the Moon, Mars, Jupiter, Saturn, Uranus, Neptune, **Pluto**, **Ceres**, and 9 moons (Phobos, Deimos, Io, Europa, Ganymede, Callisto, Titan, Enceladus, Triton). Each entry carries a bundled reference image (Wikimedia Commons, cached offline under `frontend/assets/encyclopedia/`).
 
 ---
 
