@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#FBF6FF">
+<title>Planetary Explorer — Solar System Exploration</title>
+<meta name="description" content="Explore terrain data and reference sites across Earth, the Moon, and Mars with an interactive planetary comparison atlas.">
+
+<!-- Leaflet (map) - bundled offline -->
+<link rel="stylesheet" href="lib/leaflet.css">
+<!-- Charts - bundled offline -->
+<script defer src="lib/chart.min.js"></script>
+<!-- GSAP (animations) - bundled offline -->
+<script defer src="lib/gsap.min.js"></script>
+<!-- Three.js (3D Terrain Lab) - bundled offline -->
+<script src="lib/three.min.js"></script>
+<!-- jsPDF (Mission Planner PDF export) - bundled offline -->
+<script src="lib/jspdf.min.js"></script>
+
+<link rel="stylesheet" href="css/style.css">
+<!-- Three independent themes. Light is the default; the Theme module
+     toggles data-theme on <html> and persists the choice. -->
+<link rel="stylesheet" href="css/themes/theme-light.css">
+<link rel="stylesheet" href="css/themes/theme-dark.css">
+<link rel="stylesheet" href="css/themes/theme-planetary.css">
+</head>
+<body class="sidebar-open">
+
+<!-- ================= MOVING STARFIELD (full-screen, behind everything) ================= -->
+<canvas id="starfield" aria-hidden="true"></canvas>
+
+<!-- ================= HAMBURGER ================= -->
+<button class="hamburger" id="hamburger" type="button"
+        onclick="Sidebar.toggle()"
+        aria-label="Toggle navigation" aria-expanded="true" aria-controls="sidebar">
+  <span class="bar"></span>
+  <span class="bar"></span>
+  <span class="bar"></span>
+</button>
+
+<!-- ================= SIDEBAR (open by default) ================= -->
+<aside class="sidebar open" id="sidebar" aria-label="Feature navigation">
+  <div class="sidebar-header">
+    <span class="sidebar-kicker">Navigate</span>
+    <button class="sidebar-close" type="button" onclick="Sidebar.close()" aria-label="Close navigation">&times;</button>
+  </div>
+
+  <!-- ================= THEME SWITCHER (independent module) ================= -->
+  <div class="theme-switcher" id="theme-switcher" role="group" aria-label="Choose a theme">
+    <span class="theme-label">Theme</span>
+    <div class="theme-buttons">
+      <button class="theme-btn" data-theme="light" type="button" aria-pressed="true" title="Light">● Light</button>
+      <button class="theme-btn" data-theme="dark" type="button" aria-pressed="false" title="Dark">○ Dark</button>
+      <button class="theme-btn" data-theme="planetary" type="button" aria-pressed="false" title="Planetary">◆ Planetary</button>
+    </div>
+  </div>
+
+  <nav class="side-nav" aria-label="Main features">
+    <button class="side-nav-item" type="button" onclick="UI.openModal('map')">
+      <span class="nav-icon">◇</span>
+      <span class="nav-title">Map View</span>
+      <span class="nav-desc">Earth · Moon · Mars</span>
+    </button>
+    <button class="side-nav-item" type="button" onclick="UI.openModal('encyclopedia','planets')">
+      <span class="nav-icon">◆</span>
+      <span class="nav-title">Encyclopedia</span>
+      <span class="nav-desc">Planets, moons &amp; sites</span>
+    </button>
+    <button class="side-nav-item" type="button" onclick="UI.openModal('discovery')">
+      <span class="nav-icon">◇</span>
+      <span class="nav-title">Discovery Lab</span>
+      <span class="nav-desc">Screen any Earth coordinate</span>
+    </button>
+    <button class="side-nav-item" type="button" onclick="UI.openModal('realtime')">
+      <span class="nav-icon">◎</span>
+      <span class="nav-title">Realtime Dashboard</span>
+      <span class="nav-desc">ISS, space weather &amp; live data</span>
+    </button>
+    <button class="side-nav-item" type="button" onclick="UI.openModal('calculator')">
+      <span class="nav-icon">◈</span>
+      <span class="nav-title">Terrain Comparison</span>
+      <span class="nav-desc">Compare terrain metrics</span>
+    </button>
+    <button class="side-nav-item" type="button" onclick="UI.openModal('planner')">
+      <span class="nav-icon">▲</span>
+      <span class="nav-title">Explore Mission</span>
+      <span class="nav-desc">Design a campaign</span>
+    </button>
+    <button class="side-nav-item" type="button" onclick="UI.openModal('compare')">
+      <span class="nav-icon">◆</span>
+      <span class="nav-title">Comparison</span>
+      <span class="nav-desc">Terrain numbers</span>
+    </button>
+    <button class="side-nav-item" type="button" onclick="UI.openModal('terrain')">
+      <span class="nav-icon">▲</span>
+      <span class="nav-title">3D View</span>
+      <span class="nav-desc">Explore real DEM windows</span>
+    </button>
+    <button class="side-nav-item" type="button" onclick="UI.openModal('patches')">
+      <span class="nav-icon">◆</span>
+      <span class="nav-title">Patch Explorer</span>
+      <span class="nav-desc">Inspect classified patches</span>
+    </button>
+    <button class="side-nav-item" type="button" onclick="UI.openModal('scale')">
+      <span class="nav-icon">●</span>
+      <span class="nav-title">Scale Sensitivity</span>
+      <span class="nav-desc">Window size matters</span>
+    </button>
+  </nav>
+
+  <!-- ================= SIDEBAR FOOTER: legal + authoring notes ================= -->
+  <div class="sidebar-footer">
+    <div class="sidebar-legal">
+      <a href="#privacy" class="legal-link" onclick="UI.openModal('legal')">Privacy Policy</a>
+      <span class="legal-dot" aria-hidden="true">·</span>
+      <a href="#terms" class="legal-link" onclick="UI.openModal('legal')">Terms of Service</a>
+      <span class="legal-dot" aria-hidden="true">·</span>
+      <a href="#credits" class="legal-link" onclick="UI.openModal('credits')">Credits</a>
+    </div>
+    <p class="sidebar-author">Author notes &amp; writing space — edit me.</p>
+    <div class="sidebar-credits">
+      Data: NASA/USGS · ESA/Copernicus · OpenStreetMap · Open-Meteo ·
+      <a href="#credits" onclick="UI.openModal('credits')">Full provenance</a>
+    </div>
+  </div>
+</aside>
+
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="Sidebar.close()"></div>
+
+<!-- ================= MAIN CONTENT ================= -->
+<main class="main-content" id="main-content">
+
+  <header class="hero">
+    <div class="hero-badge">Project-Base</div>
+    <h1 class="hero-title">Planetary <span class="highlight">Explorer</span></h1>
+    <p class="hero-sub">
+      Explore planets, moons, and terrain across the Solar System. Browse the
+      encyclopedia of celestial bodies, track live space data, and discover
+      candidate terrain sites for exploration — not tied to any single landing base.
+    </p>
+
+    <div class="hero-stats" id="hero-stats">
+      <div class="stat"><div class="stat-num" id="stat-bodies">3</div><div class="stat-label">Planetary Bodies</div></div>
+      <div class="stat"><div class="stat-num" id="stat-sites">15</div><div class="stat-label">Terrain Sites</div></div>
+      <div class="stat"><div class="stat-num" id="stat-moons">2</div><div class="stat-label">Mars Moons</div></div>
+      <div class="stat"><div class="stat-num" id="stat-cache">0</div><div class="stat-label">Cached Lookups</div></div>
+    </div>
+
+    <section class="planetary-focus" aria-label="Explore by planetary body">
+      <article class="body-card earth-card">
+        <div class="body-card-heading"><span class="body-symbol" aria-hidden="true">●</span><div><h2>Earth</h2><p>Home planet &amp; terrain candidates</p></div></div>
+        <p>McMurdo Dry Valleys, Axel Heiberg Island, Kerguelen Islands, Atacama Desert, Iceland Highlands, Death Valley. Diverse Earth terrains for exploration reference.</p>
+        <div class="body-card-metric"><strong>6</strong><span>Earth sites</span><strong>Live weather</strong><span>via Open-Meteo</span></div>
+        <button class="body-card-action" type="button" onclick="UI.openModal('encyclopedia','sites')">Explore Earth sites <span aria-hidden="true"></span></button>
+      </article>
+      <article class="body-card moon-card">
+        <div class="body-card-heading"><span class="body-symbol" aria-hidden="true">○</span><div><h2>Moon</h2><p>Lunar terrain reference</p></div></div>
+        <p>Shackleton Crater, Tycho Crater, Mare Serenitatis, Montes Apenninus. Explore the Moon's diverse regions.</p>
+        <div class="body-card-metric"><strong>4</strong><span>lunar sites</span><strong>No atmosphere</strong><span>vacuum surface</span></div>
+        <button class="body-card-action" type="button" onclick="UI.openModal('encyclopedia','sites')">Explore Moon sites <span aria-hidden="true"></span></button>
+      </article>
+      <article class="body-card mars-card">
+        <div class="body-card-heading"><span class="body-symbol" aria-hidden="true">▲</span><div><h2>Mars</h2><p>Martian terrain &amp; moons</p></div></div>
+        <p>Jezero Crater, Gusev Crater, Gale Crater, Eos Chasma, Hellas Planitia. Plus Phobos and Deimos moons.</p>
+        <div class="body-card-metric"><strong>5</strong><span>Martian sites</span><strong>2</strong><span>moons (Phobos, Deimos)</span></div>
+        <button class="body-card-action" type="button" onclick="UI.openModal('encyclopedia','sites')">Explore Mars sites <span aria-hidden="true"></span></button>
+      </article>
+      <article class="body-card planet-card">
+        <div class="body-card-heading"><span class="body-symbol" aria-hidden="true">◆</span><div><h2>Planets</h2><p>Solar System overview</p></div></div>
+        <p>Earth, Moon, Mars, Jupiter, Saturn. Physical data, orbital metrics, and atmospheric composition for each body.</p>
+        <div class="body-card-metric"><strong>5</strong><span>planets</span><strong>Encyclopedia</strong><span>browse all bodies</span></div>
+        <button class="body-card-action" type="button" onclick="UI.openModal('encyclopedia','planets')">Browse planets <span aria-hidden="true"></span></button>
+      </article>
+    </section>
+  </header>
+
+  <!-- ================= MODALS ================= -->
+
+  <div class="modal-overlay" id="modal-terrain" onclick="UI.overlayClose(event,'terrain')">
+    <div class="modal-panel modal-wide">
+      <div class="modal-head"><h2>▲ 3D Terrain Lab</h2><button class="x" type="button" onclick="UI.closeModal('terrain')" aria-label="Close terrain lab">&times;</button></div>
+      <p class="modal-intro">A 3 km window sampled from the local DEM and matching slope/roughness rasters. The vertical scale is exaggerated for visibility; colors show the selected metric, not suitability.</p>
+      <div class="terrain-controls">
+        <label>Body<select id="terrain-body"><option value="Earth">Earth</option><option value="Moon">Moon</option><option value="Mars">Mars</option></select></label>
+        <label>Site<select id="terrain-site"></select></label>
+        <label>Surface<select id="terrain-mode"><option value="elevation">Elevation</option><option value="slope">Slope</option><option value="roughness">Roughness</option><option value="safe">≤3° slope screen</option></select></label>
+        <label>Vertical exaggeration <output id="terrain-exaggeration-value">4</output><input id="terrain-exaggeration" type="range" min="1" max="10" step="0.5" value="4"></label>
+      </div>
+      <div class="terrain-stage"><canvas id="terrain-canvas" aria-label="Interactive three-dimensional terrain surface"></canvas><div id="terrain-status" class="terrain-status" aria-live="polite">Select a site to load its terrain.</div></div>
+      <div class="terrain-meta" id="terrain-meta"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-patches" onclick="UI.overlayClose(event,'patches')">
+    <div class="modal-panel modal-wide">
+      <div class="modal-head"><h2>◆ Patch Explorer</h2><button class="x" type="button" onclick="UI.closeModal('patches')" aria-label="Close patch explorer">&times;</button></div>
+      <p class="modal-intro">Rows come from the committed patch-comparison report. Filled-surface flags are shown as recorded so water, ice, and other zero-filled regions can be inspected rather than hidden.</p>
+      <div class="patch-controls">
+        <label>Planetary body<select id="patch-body"><option value="all">All bodies</option><option value="Moon">Moon</option><option value="Earth">Earth</option><option value="Mars">Mars</option></select></label>
+        <label>Classification<select id="patch-kind"><option value="all">All patches</option><option value="valid">Non-filled</option><option value="filled">Filled / flagged</option></select></label>
+        <p id="patch-formulas"><strong>Formulas:</strong> area = patch cells  pixel area; slope (Horn); roughness = max − min in 33 window; filled if zero fraction > 0.5.</p>
+      <span id="patch-count" aria-live="polite">Loading patch report…</span>
+      </div>
+      <div class="cmp-table-wrap"><table class="cmp-table patch-table"><thead><tr><th>Site</th><th>Body</th><th>Area km²</th><th>Slope mean °</th><th>Centre X</th><th>Centre Y</th><th>Mean rough m</th><th>p95 rough m</th><th>Max rough m</th><th>Zero fraction</th><th>Flag</th></tr></thead><tbody id="patch-rows"></tbody></table></div>
+      <div id="patch-status" class="calc-notes" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-scale" onclick="UI.overlayClose(event,'scale')">
+    <div class="modal-panel modal-wide">
+      <div class="modal-head"><h2>● Scale Sensitivity</h2><button class="x" type="button" onclick="UI.closeModal('scale')" aria-label="Close scale sensitivity">&times;</button></div>
+      <p class="modal-intro">The lunar fingerprint samples use a nominal 12 m roughness window; the main comparison uses a nominal 90 m window. The points below show the scale difference explicitly and must not be read as a direct terrain ranking.</p>
+      <div class="scale-callout" id="scale-summary" aria-live="polite">Loading recorded fingerprints…</div>
+      <div class="chart-wrap"><canvas id="scale-chart"></canvas></div>
+      <div id="scale-status" class="calc-notes" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-map" onclick="UI.overlayClose(event,'map')">
+    <div class="modal-panel modal-wide">
+      <div class="modal-head"><h2>◇ Map View</h2><button class="x" type="button" onclick="UI.closeModal('map')" aria-label="Close map">&times;</button></div>
+
+      <div class="map-toolbar">
+        <div class="layer-switch" id="layer-switch">
+          <button class="layer-btn active" type="button" data-layer="earth" aria-pressed="true">● Earth <span class="layer-count">3</span></button>
+          <button class="layer-btn" type="button" data-layer="moon" aria-pressed="false">○ Moon <span class="layer-count">1</span></button>
+          <button class="layer-btn" type="button" data-layer="mars" aria-pressed="false">▲ Mars <span class="layer-count">1</span></button>
+        </div>
+        <div class="map-tools">
+          <button class="btn-ghost btn-small" id="map-fit" type="button" title="Zoom to show all sites">⤢ Fit all</button>
+          <button class="btn-ghost btn-small" id="map-tiles" type="button" title="Cycle basemap layers">◇ Basemap</button>
+          <button class="btn-ghost btn-small" id="map-retry" type="button" hidden title="Reload tiles">↻ Retry</button>
+        </div>
+      </div>
+
+      <div class="map-stage">
+        <div id="map"></div>
+        <div class="map-legend" id="map-legend">
+          <div class="legend-item"><span class="legend-dot" style="background:#4E8C6E"></span> Earth</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#C9821A"></span> Moon</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#F08080"></span> Mars</div>
+        </div>
+        <div class="map-scale" id="map-scale"></div>
+      </div>
+
+      <div class="map-status" aria-live="polite">
+        <span id="map-status">Map tiles will load when the atlas opens.</span>
+      </div>
+
+      <div class="map-detail" id="map-detail">
+        <div class="map-detail-empty">Select a site or map marker to view its terrain metrics.</div>
+      </div>
+
+      <section class="map-explorer" aria-labelledby="map-sites-title">
+        <div class="map-explorer-head">
+          <h3 id="map-sites-title">All five catalogued sites</h3>
+          <div class="map-explorer-tools">
+            <input type="search" id="map-search" placeholder="🔍 Search sites…" aria-label="Search sites">
+            <span id="map-site-count" aria-live="polite">Showing 3 Earth sites</span>
+          </div>
+        </div>
+        <div class="map-sites" id="map-sites"></div>
+      </section>
+      <div class="map-footnote" id="map-footnote">Select any site or map marker to zoom in and view its terrain metrics.</div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-discovery" onclick="UI.overlayClose(event,'discovery')">
+    <div class="modal-panel modal-wide">
+      <div class="modal-head"><h2>◇ Discovery Lab</h2><button class="x" type="button" onclick="UI.closeModal('discovery')" aria-label="Close discovery lab">&times;</button></div>
+      <p class="modal-intro">
+        Enter any <strong>Earth</strong> coordinate. We sample a 33 elevation grid from the
+        <a href="https://open-meteo.com/en/docs/elevation-api" target="_blank" rel="noopener">Open-Meteo elevation API</a>
+        and estimate local slope and relief <em>in your browser</em>. These coarse API-based indicators are not a matched-scale terrain score.
+        Results are cached in this browser to avoid repeat requests.
+      </p>
+      <div class="disc-controls">
+        <label>Latitude<input type="number" id="disc-lat" step="0.0001" placeholder="-77.6" min="-90" max="90"></label>
+        <label>Longitude<input type="number" id="disc-lng" step="0.0001" placeholder="162.2" min="-180" max="180"></label>
+        <button class="btn-primary" id="disc-run" type="button">Analyze Terrain</button>
+        <button class="btn-ghost" id="disc-random" type="button">Surprise Me</button>
+      </div>
+      <div class="disc-result" id="disc-result" aria-live="polite">
+        <div class="disc-placeholder">Awaiting coordinates… discoveries are screened, not guessed — we only claim what open data can support.</div>
+      </div>
+      <details class="disc-cache">
+        <summary>⚙️ Smart-cache internals <span id="cache-summary"></span></summary>
+        <div class="cache-grid">
+          <div>Hits: <strong id="cache-hits">0</strong></div>
+          <div>Misses: <strong id="cache-misses">0</strong></div>
+          <div>Entries: <strong id="cache-entries">0</strong></div>
+          <div>In-flight dedup: <strong id="cache-live">0</strong></div>
+        </div>
+        <button class="btn-ghost btn-small" type="button" onclick="Cache.clear(); Discovery.renderCacheStats(); Toast.show('Cache cleared')">Clear cache</button>
+      </details>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-selector" onclick="UI.overlayClose(event,'selector')">
+    <div class="modal-panel">
+      <div class="modal-head"><h2>◆ Base Site Selector</h2><button class="x" type="button" onclick="UI.closeModal('selector')" aria-label="Close selector">&times;</button></div>
+      <p class="modal-intro">You are the mission architect. Weight what matters — the ranker re-scores every site instantly.</p>
+      <div class="sliders">
+        <label>Smoothness (low roughness)
+          <input type="range" id="w-smooth" min="0" max="10" value="7"><span class="w-val" id="wv-smooth">7</span></label>
+        <label>Hazard tolerance (p95 roughness)
+          <input type="range" id="w-hazard" min="0" max="10" value="5"><span class="w-val" id="wv-hazard">5</span></label>
+        <label>Area demand (km² available)
+          <input type="range" id="w-area" min="0" max="10" value="6"><span class="w-val" id="wv-area">6</span></label>
+        <label>Slope strictness (&le;3&deg; discipline)
+          <input type="range" id="w-slope" min="0" max="10" value="8"><span class="w-val" id="wv-slope">8</span></label>
+      </div>
+      <div id="selector-results" class="rank-list"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-calculator" onclick="UI.overlayClose(event,'calculator')">
+    <div class="modal-panel modal-wide">
+      <div class="modal-head"><h2>◈ Terrain Comparison</h2><button class="x" type="button" onclick="UI.closeModal('calculator')" aria-label="Close calculator">&times;</button></div>
+      <p class="modal-intro">Adjusted Euclidean distance in terrain-metric space (mean roughness, p95 roughness, slope discipline)  similarity %.</p>
+      <div class="sliders two-col">
+        <label>Mean roughness target (m)
+          <input type="range" id="c-rough" min="1.0" max="4.0" step="0.05" value="2.462"><span class="w-val mono" id="cv-rough">2.462</span></label>
+        <label>p95 hazard ceiling (m)
+          <input type="range" id="c-p95" min="2.0" max="6.0" step="0.05" value="4.138"><span class="w-val mono" id="cv-p95">4.138</span></label>
+        <label>Minimum area passing 3° slope (%)
+          <input type="range" id="c-slope" min="0" max="100" step="5" value="0"><span class="w-val mono" id="cv-slope">0%</span></label>
+        <label>Area gate (km²)
+          <input type="range" id="c-area" min="0" max="500" step="1" value="1"><span class="w-val mono" id="cv-area">1</span></label>
+      </div>
+      <div class="chart-wrap"><canvas id="calc-chart"></canvas></div>
+      <div id="calc-notes" class="calc-notes"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-planner" onclick="UI.overlayClose(event,'planner')">
+    <div class="modal-panel">
+      <div class="modal-head">
+      <h2>▲ Explore Mission</h2>
+      <button class="x" type="button" onclick="UI.closeModal('planner')" aria-label="Close planner">&times;</button>
+    </div>
+      <div id="planner-steps"></div>
+      <div class="planner-actions">
+        <button class="btn-ghost" id="planner-back" type="button">← Back</button>
+        <button class="btn-primary" id="planner-next" type="button">Next </button>
+        <button class="btn-ghost" id="planner-pdf" type="button" disabled>⬇ Save PDF</button>
+      </div>
+      <div id="planner-output"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-compare" onclick="UI.overlayClose(event,'compare')">
+    <div class="modal-panel modal-wide">
+      <div class="modal-head"><h2>◆ Full Comparison</h2><button class="x" type="button" onclick="UI.closeModal('compare')" aria-label="Close comparison">&times;</button></div>
+      <p class="modal-intro">Comparison metrics are derived offline from LRO, CTX, and Copernicus DEMs. The processing records describe a common 30 m grid and nominal 90 m roughness window. Similarity percentages are relative to the lunar reference, not a universal cross-body score.</p>
+      <div class="comparison-filters" role="group" aria-label="Filter sites by planetary body">
+        <button class="cmp-filter active" type="button" data-body="all" aria-pressed="true">All bodies</button>
+        <button class="cmp-filter" type="button" data-body="earth" aria-pressed="false">● Earth</button>
+        <button class="cmp-filter" type="button" data-body="moon" aria-pressed="false">○ Moon</button>
+        <button class="cmp-filter" type="button" data-body="mars" aria-pressed="false">▲ Mars</button>
+      </div>
+      <div class="cmp-table-wrap">
+        <table class="cmp-table" id="cmp-table">
+          <thead><tr>
+            <th scope="col" data-sort="name" tabindex="0" aria-sort="none">Site</th>
+            <th scope="col" data-sort="body" tabindex="0" aria-sort="none">Body</th>
+            <th scope="col" data-sort="area" tabindex="0" aria-sort="none">Flat area km²</th>
+            <th scope="col" data-sort="rough" tabindex="0" aria-sort="none">Mean rough m</th>
+            <th scope="col" data-sort="p95" tabindex="0" aria-sort="none">p95 rough m</th>
+            <th scope="col" data-sort="sim" tabindex="0" aria-sort="none">Moon similarity %</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <section class="cross-body-section" aria-labelledby="cross-body-title">
+        <h3 id="cross-body-title">Cross-body terrain matches</h3>
+        <p class="modal-intro">Pairwise, symmetric heuristic based on mean and p95 roughness for the five catalogued sites. This ranks available data; it does not search for new regions or establish mission suitability.</p>
+        <div class="cmp-table-wrap">
+          <table class="cmp-table cross-cmp-table" id="cross-cmp-table">
+            <thead><tr><th scope="col">Site A</th><th scope="col">Body</th><th scope="col">Site B</th><th scope="col">Body</th><th scope="col">Roughness similarity</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+      <div class="chart-wrap"><canvas id="cmp-chart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ================= ENCYCLOPEDIA MODAL ================= -->
+  <div class="modal-overlay" id="modal-encyclopedia" onclick="UI.overlayClose(event,'encyclopedia')">
+    <div class="modal-panel modal-wide">
+      <div class="modal-head"><h2>◆ Planetary Encyclopedia</h2><button class="x" type="button" onclick="UI.closeModal('encyclopedia')" aria-label="Close encyclopedia">&times;</button></div>
+      <p class="modal-intro">Browse planets, moons, and diverse terrain candidate sites across the Solar System. Not tied to any single landing base — every body lists multiple regions for exploration.</p>
+      <div id="encyclopedia-content">
+        <div class="encyclopedia-loading">Loading encyclopedia data…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= REALTIME DASHBOARD MODAL ================= -->
+  <div class="modal-overlay" id="modal-realtime" onclick="UI.overlayClose(event,'realtime')">
+    <div class="modal-panel modal-wide">
+      <div class="modal-head">
+        <h2>◎ Realtime Dashboard</h2>
+        <div class="realtime-controls">
+          <button class="btn-ghost btn-small" type="button" onclick="Realtime.refresh()" title="Refresh live data">↻ Refresh</button>
+        </div>
+      </div>
+      <p class="modal-intro">Live data from free public APIs: Open Notify (ISS, astronauts), NASA (APOD, EONET, InSight Mars weather, DONKI space weather), and USGS (earthquakes). No API keys required.</p>
+      <div id="realtime-content">
+        <div class="encyclopedia-loading">Loading realtime data…</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-root"></div>
+</main>
+
+<!-- ================= LEGAL MODAL (Privacy Policy + Terms of Service) ================= -->
+<div class="modal-overlay" id="modal-legal" onclick="UI.overlayClose(event,'legal')">
+  <div class="modal-panel modal-wide">
+    <div class="modal-head">
+      <h2>📋 Legal</h2>
+      <button class="x" type="button" onclick="UI.closeModal('legal')" aria-label="Close legal">&times;</button>
+    </div>
+
+    <h3 style="margin:14px 0 6px;font-size:1.05rem">Privacy Policy</h3>
+    <p style="font-size:0.82rem;color:var(--ink-soft)">
+      Project-Base is a client-side research tool. It runs entirely in your browser and does
+      not create an account, store a username, or track you across devices.
+    </p>
+    <ul style="font-size:0.82rem;color:var(--ink-soft);margin:6px 0 14px 18px">
+      <li><b>Local storage.</b> A small discovery cache (≈300 entries) is kept in your browser so repeated lookups are instant. It contains only coordinates and terrain metrics — no personal data. Theme and study-progress preferences are also saved locally (keys: <code>pb-theme</code>, <code>udb-theme</code>, <code>udb-density</code>, <code>udb-progress</code>).</li>
+      <li><b>Upstream calls.</b> Elevation and weather queries are sent to Open-Meteo (public, no API key). Tile requests go to NASA/JPL Solar System Treks and open basemap providers.</li>
+      <li><b>No analytics.</b> No third-party analytics, advertising, or tracking scripts are loaded. No cookies are set.</li>
+      <li><b>Data you provide.</b> Any text you type into the planner or authoring notes stays in your browser and is never uploaded.</li>
+      <li><b>Encyclopedia images.</b> The encyclopedia renders reference photos for every body (Sun, Mercury, Venus, Earth, Moon, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto, Ceres, Io, Europa, Ganymede, Callisto, Titan, Enceladus, Triton, Phobos, Deimos). All 21 are bundled offline under <code>assets/encyclopedia/</code>, sourced from Wikimedia Commons under CC BY / CC BY-SA / CC BY-SA 3.0 IGO / CC0 / public-domain licences. Attribution is printed on each card; see the full citation table in the app's DEPENDENCIES.md.</li>
+    </ul>
+
+    <h3 style="margin:14px 0 6px;font-size:1.05rem">Terms of Service</h3>
+    <p style="font-size:0.82rem;color:var(--ink-soft)">
+      By using this tool you accept the following:
+    </p>
+    <ul style="font-size:0.82rem;color:var(--ink-soft);margin:6px 0 14px 18px">
+      <li><b>Informational only.</b> Terrain metrics, rankings, and mission scores are research estimates, not engineering or safety advice. Do not use them for life-critical decisions.</li>
+      <li><b>Third-party data.</b> All underlying data is provided by NASA, USGS, ESA/Airbus, OpenStreetMap contributors, and Open-Meteo under their respective open licences. Attribution is given in the footer.</li>
+      <li><b>No warranty.</b> The tool is provided "as is". Availability, accuracy, and timeliness of upstream services are not guaranteed.</li>
+      <li><b>Acceptable use.</b> Do not abuse the upstream services with automated scraping. Rate-limit your requests.</li>
+    </ul>
+    <p style="font-size:0.74rem;color:var(--ink-mute);margin-top:10px">
+      These notes are a starting point — review them against your own legal requirements before publishing.
+    </p>
+  </div>
+</div>
+
+<!-- ================= CREDITS MODAL (full provenance) ================= -->
+<div class="modal-overlay" id="modal-credits" onclick="UI.overlayClose(event,'credits')">
+  <div class="modal-panel modal-wide">
+    <div class="modal-head">
+      <h2>📋 Credits &amp; Provenance</h2>
+      <button class="x" type="button" onclick="UI.closeModal('credits')" aria-label="Close credits">&times;</button>
+    </div>
+    <p class="modal-intro">Every dataset, service, and library used by Project-Base, with its provider, licence, and the guidance each requires.</p>
+
+    <h3 style="margin:14px 0 6px;font-size:1.05rem">1. Datasets</h3>
+    <table class="cmp-table">
+      <thead><tr><th>Dataset</th><th>Provider</th><th>Licence</th><th>Guidance</th></tr></thead>
+      <tbody>
+        <tr><td><b>LRO South Pole DEM</b></td><td>USGS Astrogeology / NASA</td><td>Public domain</td><td>Citation good practice</td></tr>
+        <tr><td><b>Copernicus DEM GLO-30</b></td><td>ESA / Airbus (AWS Open Data)</td><td>Free, attribution required</td><td>Attribute "ESA, Copernicus"</td></tr>
+        <tr><td><b>MRO CTX Controlled DTM</b></td><td>USGS Astrogeology / NASA</td><td>Public domain</td><td>"Data provided by USGS Astrogeology Science Center"</td></tr>
+        <tr><td><b>Derived slope / roughness rasters</b></td><td>Computed locally with GDAL</td><td>Inherit source terms</td><td>—</td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="margin:14px 0 6px;font-size:1.05rem">2. Live services</h3>
+    <table class="cmp-table">
+      <thead><tr><th>Service</th><th>Used for</th><th>Licence</th></tr></thead>
+      <tbody>
+        <tr><td><b>Open-Meteo Elevation API</b></td><td>Discovery Lab 33 elevation grid</td><td>CC BY 4.0</td></tr>
+        <tr><td><b>Open-Meteo Forecast API</b></td><td>Current temperature &amp; wind</td><td>CC BY 4.0</td></tr>
+        <tr><td><b>NASA Solar System Treks (WMTS)</b></td><td>Moon LRO WAC Mosaic, Mars Viking MDIM21</td><td>Public domain</td></tr>
+        <tr><td><b>Esri World Imagery</b></td><td>Earth satellite basemap</td><td>Esri terms</td></tr>
+        <tr><td><b>USGS The National Map</b></td><td>Earth imagery basemap</td><td>Public domain</td></tr>
+        <tr><td><b>OpenStreetMap</b></td><td>Earth street basemap</td><td>ODbL</td></tr>
+        <tr><td><b>CARTO</b></td><td>Earth dark basemap</td><td>CARTO terms</td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="margin:14px 0 6px;font-size:1.05rem">3. Libraries (CDN)</h3>
+    <table class="cmp-table">
+      <thead><tr><th>Library</th><th>Version</th><th>Used for</th></tr></thead>
+      <tbody>
+        <tr><td><b>Leaflet</b></td><td>1.9.4</td><td>Interactive map atlas</td></tr>
+        <tr><td><b>Chart.js</b></td><td>4.4.3</td><td>Every chart</td></tr>
+        <tr><td><b>GSAP</b></td><td>3.12.5</td><td>Modal animations</td></tr>
+        <tr><td><b>Three.js</b></td><td>0.160.0</td><td>3D Terrain Lab</td></tr>
+        <tr><td><b>jsPDF</b></td><td>2.5.1</td><td>Mission Planner PDF export</td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="margin:14px 0 6px;font-size:1.05rem">4. Offline tooling</h3>
+    <p style="font-size:0.82rem;color:var(--ink-soft)">GDAL 3.10.3 (<code>gdalwarp</code>, <code>gdaldem</code>), Python 3.13, NumPy, SciPy — used to prepare the DEMs, slope/roughness rasters, and comparison reports.</p>
+
+    <p style="font-size:0.76rem;color:var(--ink-mute);margin-top:14px">Full provenance is also recorded in <code>docs/data_source.md</code> and <code>docs/how_to_description.md</code>. No commercial, restricted, or paid dataset was used.</p>
+  </div>
+</div>
+
+<footer class="credits">
+  <div class="credit-line">
+    <strong>Datasets.</strong> Lunar terrain: <a href="https://astrogeology.usgs.gov/search/map/moon_lro_south_pole_dem" target="_blank" rel="noopener">LRO South Pole DEM</a> — USGS Astrogeology, NASA (public domain). ·
+    Earth terrain: <a href="https://registry.opendata.aws/copernicus-dem/" target="_blank" rel="noopener">Copernicus DEM GLO-30</a> — ESA / Airbus via AWS Open Data (free, attribution required). ·
+    Mars terrain: <a href="https://stac.astrogeology.usgs.gov/docs/data/mars/ctxdtms" target="_blank" rel="noopener">MRO CTX Controlled DTM</a> — USGS Astrogeology, NASA (public domain; attribution recommended).
+  </div>
+  <div class="credit-line">
+    <strong>Live services.</strong> Elevation &amp; weather: <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a> (CC BY 4.0). ·
+    Planetary basemaps: <a href="https://trek.nasa.gov" target="_blank" rel="noopener">NASA/JPL Solar System Treks</a> (LRO WAC Mosaic · Viking MDIM21). ·
+    Earth basemaps: <a href="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer" target="_blank" rel="noopener">Esri World Imagery</a> (Esri, Maxar, Earthstar Geographics) ·
+    <a href="https://basemap.nationalmap.gov/" target="_blank" rel="noopener">USGS The National Map</a> ·
+    <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors (ODbL) ·
+    <a href="https://carto.com/" target="_blank" rel="noopener">CARTO</a>.
+  </div>
+  <div class="credit-line">
+    <strong>Libraries.</strong> <a href="https://leafletjs.com/" target="_blank" rel="noopener">Leaflet</a> 1.9.4 ·
+    <a href="https://www.chartjs.org/" target="_blank" rel="noopener">Chart.js</a> 4.4.3 ·
+    <a href="https://greensock.com/gsap/" target="_blank" rel="noopener">GSAP</a> 3.12.5 ·
+    <a href="https://threejs.org/" target="_blank" rel="noopener">Three.js</a> 0.160.0 ·
+    <a href="https://github.com/parallax/jsPDF" target="_blank" rel="noopener">jsPDF</a> 2.5.1 ·
+    <a href="https://gdal.org/" target="_blank" rel="noopener">GDAL</a> 3.10.3 (offline processing). ·
+    <a href="https://www.python.org/" target="_blank" rel="noopener">Python</a> 3.13 + NumPy/SciPy.
+  </div>
+  <div class="credit-line">
+    <strong>Project.</strong> Planetary Explorer · Solar System exploration tool · Encyclopedic data on planets, moons, and terrain sites · Live data from free public APIs ·
+    <a href="/terms" target="_blank" rel="noopener">Terms &amp; Conditions</a> ·
+    <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a> ·
+    <a href="/dependencies" target="_blank" rel="noopener">Dependencies</a> ·
+    <a href="/thank-you" target="_blank" rel="noopener">Thank You</a> ·
+    <a href="#credits" onclick="UI.openModal('credits')">Full credits &amp; provenance</a>
+  </div>
+</footer>
+
+<script src="lib/leaflet.js"></script>
+<!-- iframe bootstrap MUST load before any feature module (and before the
+     core modules that issue fetch/XHR) so the fetch/XHR/Leaflet patches are
+     in place before any runtime request. -->
+<script src="js/modules/core/pb-bootstrap.js"></script>
+<!-- Modular app: each independent module is a classic script that registers
+      itself on window.  Order matters -- core first, then features, then wiring. -->
+<script src="js/modules/core/data.js"></script>
+<script src="js/modules/core/toast.js"></script>
+<script src="js/modules/core/starfield.js"></script>
+<script src="js/modules/core/sidebar.js"></script>
+<script src="js/modules/core/ui.js"></script>
+<script src="js/modules/core/cache.js"></script>
+<script src="js/modules/core/theme.js"></script>
+
+<script src="js/modules/discovery/discovery.js"></script>
+<script src="js/modules/map/basemaps.js"></script>
+<script src="js/modules/map/map-viewer.js"></script>
+<script src="js/modules/map/map-viewer-2.js"></script>
+<script src="js/modules/map/map-viewer-3.js"></script>
+<script src="js/modules/selector/selector.js"></script>
+<script src="js/modules/calculator/calculator.js"></script>
+<script src="js/modules/planner/planner.js"></script>
+<script src="js/modules/planner/planner-math.js"></script>
+<script src="js/modules/planner/planner-pdf.js"></script>
+<script src="js/modules/comparator/comparator.js"></script>
+<script src="js/modules/terrain/terrain-lab-1.js"></script>
+<script src="js/modules/terrain/terrain-lab-2.js"></script>
+<script src="js/modules/terrain/terrain-lab-3.js"></script>
+<script src="js/modules/patches/patch-explorer.js"></script>
+<script src="js/modules/scale/scale-sensitivity.js"></script>
+<script src="js/modules/api/site-metrics.js"></script>
+
+<script src="js/modules/encyclopedia/encyclopedia.js"></script>
+<script src="js/modules/realtime/realtime.js"></script>
+
+<script src="js/app.js"></script>
+</body>
+</html>

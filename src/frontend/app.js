@@ -1,1210 +1,227 @@
-let currentTab = 'asteroids';
-let currentData = [];
-let currentPage = 1;
-const PAGE_SIZE = 50;
-let isLoading = false;
-let totalPages = 1;
+// Main Application Entry Point
+import { State, Config, showToast, escapeHtml, openModal, closeModal } from './js/modules/core/state.js';
+import { initTheme, initSidebar, initNavigation, initStarfield, initNavbar, initRefreshButton } from './js/modules/core/ui.js';
+import { loadData, initSearch, initFilters, setCurrentView, getCurrentView, getCurrentData, showDetail } from './js/modules/core/data.js';
 
-window.currentTab = currentTab;
-window.globalData = currentData;
-window.totalPages = totalPages;
+// Load OrbitControls and make it globally available for Three.js modules
+import { OrbitControls } from './lib/OrbitControls.js';
+if (typeof THREE !== 'undefined') {
+  THREE.OrbitControls = OrbitControls;
+}
 
-const elements = {
-    dataContainer: document.getElementById('data-container'),
-    statsDisplay: document.getElementById('stats-display'),
-    habitabilityResult: document.getElementById('habitability-result'),
-    planetInput: document.getElementById('planet-input'),
-    chartContainer: document.getElementById('chart-canvas'),
-    threeContainer: document.getElementById('three-view-container'),
-    chartModal: document.getElementById('chart-modal'),
-    threeModal: document.getElementById('three-modal'),
-    mapModal: document.getElementById('map-modal'),
-    mapContainer: document.getElementById('map-container'),
-    loadMoreBtn: null,
-    searchInput: document.getElementById('search-input')
+// Feature modules
+import { initMap } from './js/modules/map/map.js';
+import { initEncyclopedia } from './js/modules/encyclopedia/encyclopedia.js';
+import { initDiscovery } from './js/modules/discovery/discovery.js';
+import { initRealtime } from './js/modules/realtime/realtime.js';
+import { initTerrain } from './js/modules/terrain/terrain.js';
+import { initPatches } from './js/modules/patches/patches.js';
+import { initScale } from './js/modules/scale/scale.js';
+import { initCalculator } from './js/modules/calculator/calculator.js';
+import { initPlanner } from './js/modules/planner/planner.js';
+import { initCompare } from './js/modules/compare/compare.js';
+import { initStudy } from './js/modules/study/study.js';
+import { initExplorer } from './js/modules/explorer/explorer.js';
+
+// Modal management
+const MODAL_MAP = {
+  map: 'modal-map',
+  encyclopedia: 'modal-encyclopedia',
+  discovery: 'modal-discovery',
+  realtime: 'modal-realtime',
+  terrain: 'modal-terrain',
+  patches: 'modal-patches',
+  scale: 'modal-scale',
+  calculator: 'modal-calculator',
+  planner: 'modal-planner',
+  compare: 'modal-compare',
+  study: 'modal-study',
+  explorer: 'modal-explorer',
 };
 
-const THEMES = ['cream', 'neon', 'solar', 'lab'];
-function setTheme(themeName) {
-    if (!document.documentElement) return;
-    const cssTheme = THEMES.includes(themeName) ? themeName : 'cream';
-    document.documentElement.setAttribute('data-theme', cssTheme);
-    localStorage.setItem('udb-theme', cssTheme);
+const MODAL_INIT = {
+  'modal-map': initMap,
+  'modal-encyclopedia': initEncyclopedia,
+  'modal-discovery': initDiscovery,
+  'modal-realtime': initRealtime,
+  'modal-terrain': initTerrain,
+  'modal-patches': initPatches,
+  'modal-scale': initScale,
+  'modal-calculator': initCalculator,
+  'modal-planner': initPlanner,
+  'modal-compare': initCompare,
+  'modal-study': initStudy,
+  'modal-explorer': initExplorer,
+};
 
-    document.querySelectorAll('.theme-btn, .theme-dot').forEach(btn => {
-        const btnTheme = btn.dataset.theme;
-        btn.classList.toggle('active', btnTheme === cssTheme);
-    });
-}
+const modalInitialized = new Set();
 
-function setDensity(mode) {
-    document.body.dataset.density = mode;
-    document.querySelectorAll('.density-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.textContent.toLowerCase().includes(mode));
-    });
-    localStorage.setItem('udb-density', mode);
-}
-
-async function fetchData(reset = false) {
-    if (isLoading) return;
-    isLoading = true;
-
-    if (reset) {
-        currentPage = 1;
-        currentData = [];
-        if (elements.dataContainer) {
-            elements.dataContainer.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>';
-        }
-    }
-
+function openModalById(modalId) {
+  const modal = document.getElementById(modalId);
+  if (!modal) return;
+  
+  closeAllModals();
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  
+  // Initialize modal content if not already done
+  if (!modalInitialized.has(modalId) && MODAL_INIT[modalId]) {
     try {
-        const resource = currentTab === 'asteroids' ? 'asteroids' : 'exoplanets';
-        const endpoint = `/api/${resource}?page=${currentPage}&limit=${PAGE_SIZE}`;
-
-        const response = await fetch(endpoint);
-        if (!response.ok) throw new Error(`Server Error (${response.status})`);
-
-        const result = await response.json();
-        if (result.error) throw new Error(result.error);
-
-        totalPages = result.total_pages || 1;
-        const totalCount = result.total_count || 0;
-        const newChunk = result.data || [];
-
-        currentData = [...currentData, ...newChunk];
-        window.currentTab = currentTab;
-        window.globalData = currentData;
-        window.totalPages = totalPages;
-
-renderStats(result, totalCount);
-        renderTable(newChunk, reset);
-
-        if (typeof window.renderChart === 'function' && elements.chartModal && elements.chartModal.classList.contains('open')) {
-            window.renderChart(currentData);
-        }
+      MODAL_INIT[modalId]();
+      modalInitialized.add(modalId);
     } catch (error) {
-        console.error("Fetch Error:", error);
-        if (elements.dataContainer) {
-            elements.dataContainer.innerHTML = `
-                <div class="glass-panel" style="border-color: var(--warning); text-align:center; padding:20px;">
-                    <h3 style="color:var(--warning)">⚠️ Connection Error</h3>
-                    <p>${escapeHtml(error.message)}</p>
-                    <button class="theme-btn" onclick="fetchData(true)" style="margin-top:15px;">🔄 Retry Sync</button>
-                </div>`;
-        }
-        currentData = [];
-        window.globalData = [];
-    } finally {
-        isLoading = false;
+      console.error(`Failed to initialize ${modalId}:`, error);
+      showToast(`Failed to load ${modalId.replace('modal-', '')}`, 'error');
     }
+  }
+  
+  // Focus close button for accessibility
+  setTimeout(() => {
+    modal.querySelector('.modal-close')?.focus();
+  }, 100);
 }
 
-function renderStats(result, totalCount) {
-    if (!elements.statsDisplay) return;
-    const source = result.source || 'Unknown';
-    const hazardous = (currentData || []).filter(i => i.hazardous).length;
-    const habitable = (currentData || []).filter(i => i.esi && parseFloat(i.esi) > 0.6).length;
-
-    elements.statsDisplay.innerHTML = `
-        <div class="stat-card">
-            <div class="label">Total Records</div>
-            <div class="value">${totalCount.toLocaleString()}</div>
-        </div>
-        <div class="stat-card">
-            <div class="label">Loaded</div>
-            <div class="value">${currentData.length.toLocaleString()}</div>
-        </div>
-        <div class="stat-card">
-            <div class="label">${currentTab === 'asteroids' ? 'Hazardous' : 'Habitable(ESI>0.6)'}</div>
-            <div class="value">${currentTab === 'asteroids' ? hazardous : habitable}</div>
-        </div>
-        <div class="stat-card">
-            <div class="label">Page</div>
-            <div class="value" style="font-size:1.1rem;">${currentPage} / ${totalPages}</div>
-            <div class="change positive">${source}</div>
-        </div>`;
-}
-
-function switchTab(tab) {
-    if (currentTab === tab) return;
-    currentTab = tab;
-    window.currentTab = tab;
-
-    closeChartModal();
-    closeThreeModal();
-    closeMapModal();
-
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        const label = btn.textContent.toLowerCase();
-        const active = (tab === 'asteroids' && label.includes('asteroid'))
-            || (tab === 'exoplanets' && label.includes('exoplanet'))
-            || (tab === 'planetary' && label.includes('planetary explorer'));
-        btn.classList.toggle('active', active);
-    });
-
-    if (elements.searchInput) elements.searchInput.value = '';
-
-    // Planetary Explorer is served as an embedded iframe of the merged-in
-    // Project Base app (/pb).  No data fetch is needed for this tab.
-    if (tab === 'planetary') {
-        const dataContainer = document.getElementById('data-container');
-        const planetaryContainer = document.getElementById('planetary-container');
-        if (dataContainer) dataContainer.style.display = 'none';
-        if (planetaryContainer) {
-            planetaryContainer.style.display = 'block';
-            const iframe = document.getElementById('planetary-iframe');
-            if (iframe) iframe.src = '/pb/';
-        }
-        return;
-    }
-
-    // Leaving the embedded tab: hide it and show the data table again.
-    const dataContainer = document.getElementById('data-container');
-    const planetaryContainer = document.getElementById('planetary-container');
-    if (dataContainer) dataContainer.style.display = '';
-    if (planetaryContainer) planetaryContainer.style.display = 'none';
-
-    fetchData(true);
-}
-
-function renderTable(chunk, reset) {
-    if (!elements.dataContainer || !chunk.length) return;
-
-    let headers = [], rowsHtml = '';
-
-    if (currentTab === 'asteroids') {
-        headers = ['Name', 'Date', 'Diameter (km)', 'Velocity (km/h)', 'Hazardous'];
-        rowsHtml = chunk.map((item, idx) => `
-            <tr onclick="showDetail(${currentData.length - chunk.length + idx})">
-                <td>${escapeHtml(item.name)}</td>
-                <td>${escapeHtml(item.date)}</td>
-                <td>${(item.diameter_km ?? 0).toFixed(2)}</td>
-                <td>${(item.velocity_kmh ?? 0).toFixed(2)}</td>
-                <td>${item.hazardous ? '<span class="badge danger">Yes</span>' : '<span class="badge success">No</span>'}</td>
-            </tr>`).join('');
-    } else {
-        headers = ['Name', 'Host Star', 'Radius', 'Mass', 'ESI', 'Water', 'Status'];
-        rowsHtml = chunk.map((item, idx) => `
-            <tr onclick="showDetail(${currentData.length - chunk.length + idx})">
-                <td>${escapeHtml(item.pl_name)}</td>
-                <td>${escapeHtml(item.hostname)}</td>
-                <td>${(parseFloat(item.pl_rade) || 0).toFixed(2)}</td>
-                <td>${(parseFloat(item.pl_bmasse) || 0).toFixed(2)}</td>
-                <td>${item.esi ? parseFloat(item.esi).toFixed(3) : 'N/A'}</td>
-                <td>${escapeHtml(item.water_status || '?')}</td>
-                <td>${escapeHtml(item.status || '?')}</td>
-            </tr>`).join('');
-    }
-
-    const rowHtml = `<tbody>${rowsHtml}</tbody>`;
-
-    if (reset) {
-        const tableHtml = `
-            <table>
-                <thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
-                ${rowHtml}
-            </table>
-        `;
-        elements.dataContainer.innerHTML = tableHtml;
-        manageLoadMoreButton(true);
-    } else {
-        const tbody = elements.dataContainer.querySelector('tbody');
-        if (tbody) tbody.insertAdjacentHTML('beforeend', rowsHtml);
-        manageLoadMoreButton(false);
-    }
-}
-
-function manageLoadMoreButton(forceUpdate = false) {
-    const hasMore = currentPage < totalPages;
-    if (hasMore) {
-        let btn = elements.loadMoreBtn;
-        if (!btn) {
-            const container = document.createElement('div');
-            container.className = 'load-more-container';
-            container.style.cssText = 'text-align:center; margin:20px 0;';
-            btn = document.createElement('button');
-            btn.className = 'theme-btn';
-            btn.id = 'loadMoreBtn';
-            btn.innerText = 'Load More';
-            btn.onclick = handleLoadMore;
-            container.appendChild(btn);
-            elements.dataContainer.appendChild(container);
-            elements.loadMoreBtn = btn;
-        } else {
-            btn.disabled = false;
-            btn.innerText = 'Load More';
-            btn.style.display = 'block';
-        }
-    } else if (elements.loadMoreBtn) {
-        elements.loadMoreBtn.parentElement.remove();
-        elements.loadMoreBtn = null;
-    }
-}
-
-function handleLoadMore() {
-    if (isLoading) return;
-    elements.loadMoreBtn.disabled = true;
-    elements.loadMoreBtn.innerText = 'Loading...';
-    currentPage++;
-    fetchData(false);
-}
-
-let searchDebounce = null;
-function handleSearch(val) {
-    clearTimeout(searchDebounce);
-    searchDebounce = setTimeout(() => {
-        const term = (val || '').toLowerCase().trim();
-        const container = elements.dataContainer;
-        if (!container || !window.globalData) return;
-
-        if (!term) { fetchData(true); return; }
-
-        const filtered = window.globalData.filter(item => {
-            const str = `${item.name || ''} ${item.pl_name || ''} ${item.hostname || ''}`.toLowerCase();
-            return str.includes(term);
-        });
-
-        if (!filtered.length) {
-            container.innerHTML = '<p style="text-align:center;padding:30px;">🔍 No results found for "' + escapeHtml(term) + '"</p>';
-            return;
-        }
-        renderTable(filtered, true);
-    }, 300);
-}
-
-function showDetail(index) {
-    const item = currentData[index];
-    if (!item) return;
-
-    const modalBody = document.getElementById('modal-body');
-    const modal = document.getElementById('detail-modal');
-    if (!modalBody || !modal) return;
-
-    let html;
-    if (currentTab === 'asteroids') {
-        html = `
-            <h2>🪨 ${escapeHtml(item.name)}</h2>
-            <div class="detail-grid">
-                <div><span class="detail-label">Date</span><span>${escapeHtml(item.date)}</span></div>
-                <div><span class="detail-label">Diameter</span><span>${(item.diameter_km ?? 0).toFixed(2)} km</span></div>
-                <div><span class="detail-label">Velocity</span><span>${(item.velocity_kmh ?? 0).toFixed(2)} km/h</span></div>
-                <div><span class="detail-label">Hazardous</span><span>${item.hazardous ? '<span class="badge danger">Yes</span>' : '<span class="badge success">No</span>'}</span></div>
-            </div>`;
-    } else {
-        html = `
-            <h2>🪐 ${escapeHtml(item.pl_name)}</h2>
-            <div class="detail-grid">
-                <div><span class="detail-label">Host Star</span><span>${escapeHtml(item.hostname)}</span></div>
-                <div><span class="detail-label">Radius</span><span>${(parseFloat(item.pl_rade) || 0).toFixed(2)} R⊕</span></div>
-                <div><span class="detail-label">Mass</span><span>${(parseFloat(item.pl_bmasse) || 0).toFixed(2)} M⊕</span></div>
-                <div><span class="detail-label">ESI</span><span>${item.esi ? parseFloat(item.esi).toFixed(3) : 'N/A'}</span></div>
-                <div><span class="detail-label">Water</span><span>${escapeHtml(item.water_status || '?')}</span></div>
-                <div><span class="detail-label">Discovery</span><span>${escapeHtml(item.pl_discmethod || '?')}</span></div>
-            </div>`;
-    }
-    modalBody.innerHTML = html;
-    modal.classList.add('open');
-}
-
-function closeModal() {
-    const modal = document.getElementById('detail-modal');
-    if (modal) modal.classList.remove('open');
-}
-
-function openModal(modal) {
-    if (!modal) return;
-    modal.classList.add('open');
-}
-
-function closeModalById(id) {
-    const modal = document.getElementById(id);
-    if (modal) modal.classList.remove('open');
-}
-
-function showChart() {
-    if (!elements.chartModal) return;
-    closeThreeModal();
-    closeMapModal();
-    openModal(elements.chartModal);
-    if (typeof window.renderChart === 'function') {
-        setTimeout(() => window.renderChart(currentData), 120);
-    }
-}
-
-function closeChartModal() {
-    closeModalById('chart-modal');
-}
-
-function toggle3DView() {
-    if (!elements.threeModal) return;
-    closeChartModal();
-    closeMapModal();
-    openModal(elements.threeModal);
-    if (typeof window.load3DView === 'function') {
-        setTimeout(() => window.load3DView(currentData, 'three-view-container'), 120);
-    }
-}
-
-function closeThreeModal() {
-    closeModalById('three-modal');
-    if (typeof window.stop3DView === 'function') window.stop3DView();
-}
-
-function showMap() {
-    if (!elements.mapModal) return;
-    closeChartModal();
-    closeThreeModal();
-    openModal(elements.mapModal);
-    setTimeout(() => renderMap(), 120);
-}
-
-function closeMapModal() {
-    closeModalById('map-modal');
-}
-
-function renderMap() {
-    const container = elements.mapContainer;
-    if (!container) return;
-
-    container.innerHTML = '';
-
-    const canvas = document.createElement('canvas');
-    canvas.width = container.clientWidth || 720;
-    canvas.height = container.clientHeight || 400;
-    container.appendChild(canvas);
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const w = canvas.width;
-    const h = canvas.height;
-    const theme = getComputedStyle(document.documentElement);
-
-    ctx.fillStyle = theme.getPropertyValue('--bg-panel-solid').trim() || '#fff';
-    ctx.fillRect(0, 0, w, h);
-
-    ctx.strokeStyle = theme.getPropertyValue('--border-color').trim() || '#ddd';
-    ctx.lineWidth = 0.5;
-    for (let i = 1; i < 5; i++) {
-        ctx.beginPath();
-        ctx.moveTo(0, (h / 5) * i);
-        ctx.lineTo(w, (h / 5) * i);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo((w / 7) * i, 0);
-        ctx.lineTo((w / 7) * i, h);
-        ctx.stroke();
-    }
-
-    const maxX = currentData.length || 1;
-    const textColor = theme.getPropertyValue('--text-primary').trim() || '#333';
-    const accent = theme.getPropertyValue('--accent').trim() || '#c97b3c';
-
-    ctx.fillStyle = textColor;
-    ctx.font = 'bold 15px system-ui, sans-serif';
-    ctx.fillText(`🗺️ ${currentTab === 'asteroids' ? 'Asteroid' : 'Exoplanet'} Distribution`, 14, 24);
-    ctx.font = '12px system-ui, sans-serif';
-    ctx.fillStyle = theme.getPropertyValue('--text-muted').trim() || '#999';
-    ctx.fillText(`Showing top ${currentData.length} of ${window.totalPages * currentData.length}`, 14, 44);
-
-    const step = Math.max(1, Math.floor(currentData.length / 120));
-    for (let i = 0; i < currentData.length; i += step) {
-        const item = currentData[i];
-        const x = 30 + Math.random() * (w - 60);
-        const y = 60 + Math.random() * (h - 100);
-
-        let radius = 3;
-        let color = accent;
-
-        if (currentTab === 'asteroids') {
-            if (item.diameter_km) {
-                radius = Math.max(3, Math.min(10, parseFloat(item.diameter_km) / 200));
-            }
-            if (item.hazardous) color = theme.getPropertyValue('--danger').trim() || '#c6605a';
-            else color = theme.getPropertyValue('--success').trim() || '#5a9e6f';
-        } else {
-            if (item.esi) {
-                const esi = parseFloat(item.esi);
-                radius = Math.max(3, Math.min(10, esi * 10));
-                if (esi > 0.7) color = theme.getPropertyValue('--success').trim() || '#5a9e6f';
-                else if (esi > 0.4) color = theme.getPropertyValue('--warning').trim() || '#d4a04a';
-                else color = theme.getPropertyValue('--danger').trim() || '#c6605a';
-            }
-        }
-
-        ctx.beginPath();
-        ctx.arc(x, y, radius, 0, Math.PI * 2);
-        ctx.fillStyle = color;
-        ctx.globalAlpha = 0.7;
-        ctx.fill();
-        ctx.globalAlpha = 1;
-    }
-
-    const legendY = h - 20;
-    ctx.font = '11px system-ui, sans-serif';
-    if (currentTab === 'asteroids') {
-        ctx.fillStyle = theme.getPropertyValue('--success').trim() || '#5a9e6f';
-        ctx.fillText('● Safe', 14, legendY);
-        ctx.fillStyle = theme.getPropertyValue('--danger').trim() || '#c6605a';
-        ctx.fillText('● Hazardous', 60, legendY);
-    } else {
-        ctx.fillStyle = theme.getPropertyValue('--success').trim() || '#5a9e6f';
-        ctx.fillText('● High ESI', 14, legendY);
-        ctx.fillStyle = theme.getPropertyValue('--warning').trim() || '#d4a04a';
-        ctx.fillText('● Medium ESI', 90, legendY);
-        ctx.fillStyle = theme.getPropertyValue('--danger').trim() || '#c6605a';
-        ctx.fillText('● Low ESI', 180, legendY);
-    }
-}
-
-async function checkHabitability() {
-    const inputVal = elements.planetInput?.value.trim();
-    if (!inputVal) { alert("Please enter a planet name."); return; }
-
-    if (elements.habitabilityResult) {
-        elements.habitabilityResult.innerHTML = "<span class='loading'>Scanning System...</span>";
-    }
-
-    try {
-        const res = await fetch(`/api/habitability?name=${encodeURIComponent(inputVal)}`);
-        const data = await res.json();
-
-        if (data.error) {
-            if (elements.habitabilityResult) {
-                elements.habitabilityResult.innerHTML = `<span class="badge danger">${escapeHtml(data.error)}</span>`;
-            }
-            return;
-        }
-
-        let statusColor = '#aaa';
-        let resultClass = '';
-        if (data.status.toLowerCase().includes("high")) { statusColor = 'var(--success)'; resultClass = 'result-success'; }
-        else if (data.status.toLowerCase().includes("hot")) { statusColor = 'var(--warning)'; resultClass = 'result-warning'; }
-        else if (data.status.toLowerCase().includes("cold") || data.status.includes("Low")) { statusColor = 'var(--danger)'; resultClass = 'result-danger'; }
-
-        if (elements.habitabilityResult) {
-            elements.habitabilityResult.className = resultClass;
-            elements.habitabilityResult.innerHTML = `
-                <strong>${escapeHtml(data.planet)}</strong>: <span style="color:${statusColor}">${escapeHtml(data.status)}</span><br>
-                <small>Orbital Period: ${data.period_days} days</small>`;
-        }
-    } catch (e) {
-        console.error(e);
-        if (elements.habitabilityResult) {
-            elements.habitabilityResult.innerHTML = "<span class='badge danger'>System Offline</span>";
-        }
-    }
-}
-
-function buildExplorerObjects(asteroids, exoplanets) {
-    const objects = [];
-    const asteroidItems = Array.isArray(asteroids) ? asteroids : [];
-    const exoItems = Array.isArray(exoplanets) ? exoplanets : [];
-
-    // Distribute asteroids across the galaxy using deterministic pseudo-random positions
-    const numAsteroids = Math.min(asteroidItems.length, 22);
-    asteroidItems.slice(0, numAsteroids).forEach((item, index) => {
-        const spread = 900;
-        const x = (50 + ((index * 97) % spread)) % 900;
-        const y = (50 + ((index * 161) % 470)) % 520;
-        objects.push({
-            id: `asteroid-${index}-${item.name || 'unknown'}`,
-            type: 'asteroid',
-            x: Math.max(20, Math.min(880, x)),
-            y: Math.max(20, Math.min(500, y)),
-            radius: Math.max(8, (parseFloat(item.diameter_km) || 5) / 10),
-            name: item.name || 'Unknown Asteroid',
-            data: item
-        });
-    });
-
-    // Distribute exoplanets with emphasis on higher ESI values
-    const numExoplanets = Math.min(exoItems.length, 18);
-    exoItems.slice(0, numExoplanets).forEach((item, index) => {
-        const esi = parseFloat(item.esi) || 0.5;
-        const safeRadius = Math.max(14, Math.min(28, esi * 25 + 8));
-        const spread = 900;
-        const x = (100 + ((index * 113) % spread)) % 900;
-        const y = (120 + ((index * 149) % 450)) % 520;
-        objects.push({
-            id: `exoplanet-${index}-${item.pl_name || 'unknown'}`,
-            type: 'exoplanet',
-            x: Math.max(20, Math.min(880, x)),
-            y: Math.max(20, Math.min(500, y)),
-            radius: safeRadius,
-            name: item.pl_name || 'Unknown Exoplanet',
-            data: item
-        });
-    });
-
-    return objects;
-}
-
-function renderExplorerScanCard(object) {
-    if (!object || !object.data) {
-        return '<p>No target in range. Keep moving.</p>';
-    }
-
-    if (object.type === 'asteroid') {
-        const item = object.data;
-        return `
-            <h3>🪨 ${escapeHtml(item.name || 'Unknown asteroid')}</h3>
-            <div class="data-grid">
-                <div><strong>Diameter:</strong> ${(parseFloat(item.diameter_km) || 0).toFixed(2)} km</div>
-                <div><strong>Velocity:</strong> ${(parseFloat(item.velocity_kmh) || 0).toFixed(2)} km/h</div>
-                <div><strong>Hazardous:</strong> ${item.hazardous ? 'Yes' : 'No'}</div>
-                <div><strong>Date:</strong> ${escapeHtml(item.date || 'N/A')}</div>
-            </div>
-        `;
-    }
-
-    const item = object.data;
-    return `
-        <h3>🪐 ${escapeHtml(item.pl_name || 'Unknown planet')}</h3>
-        <div class="data-grid">
-            <div><strong>Host Star:</strong> ${escapeHtml(item.hostname || 'Unknown')}</div>
-            <div><strong>ESI:</strong> ${item.esi !== undefined ? parseFloat(item.esi).toFixed(3) : 'N/A'}</div>
-            <div><strong>Water:</strong> ${escapeHtml(item.water_status || 'Unknown')}</div>
-            <div><strong>Radius:</strong> ${(parseFloat(item.pl_rade) || 0).toFixed(2)} R⊕</div>
-            <div><strong>Mass:</strong> ${(parseFloat(item.pl_bmasse) || 0).toFixed(2)} M⊕</div>
-        </div>
-    `;
-}
-
-function updateExplorerLog(logEl, visitedList) {
-    if (!logEl) return;
-    logEl.innerHTML = '<h4>Discovery Log</h4><ul>' + visitedList.slice(0, 6).map(entry => `<li>${escapeHtml(entry)}</li>`).join('') + '</ul>';
-}
-
-function distanceBetween(x1, y1, x2, y2) {
-    return Math.hypot(x2 - x1, y2 - y1);
-}
-
-async function openExplorerGame() {
-    closeChartModal();
-    closeThreeModal();
-    closeMapModal();
-
-    const modal = document.getElementById('explorer-modal');
-    if (!modal) return;
-
-    modal.classList.add('open');
-
-    const canvas = document.getElementById('explorer-canvas');
-    const statusEl = document.getElementById('explorer-status');
-    const dataEl = document.getElementById('explorer-data');
-    const logEl = document.getElementById('explorer-log');
-
-    if (!canvas || !statusEl || !dataEl || !logEl) return;
-
-    const ctx = canvas.getContext('2d');
-    const sceneWidth = canvas.width;
-    const sceneHeight = canvas.height;
-
-    const ship = {
-        x: sceneWidth / 2,
-        y: sceneHeight / 2,
-        radius: 12,
-        vx: 0,
-        vy: 0,
-        angle: -Math.PI / 2,
-        turnSpeed: 0.06,
-        fuel: 100,
-        maxFuel: 100,
-        credits: 0,
-        shieldHealth: 100,
-        maxShield: 100,
-        upgrades: { engine: 1, shield: 1, scanner: 1 },
-        radiationExposure: 0
-    };
-    const keys = {};
-    const objectList = [];
-    const visitedList = [];
-    const visited = new Set();
-    const hazardZones = [];
-    const gravityWells = [];
-    const sectors = [
-        { name: 'Solar System', xMin: 0, xMax: 220, yMin: 0, yMax: 180, targetX: 100, targetY: 90, color: '#ffa500' },
-        { name: 'Sirius Expanse', xMin: 221, xMax: 450, yMin: 0, yMax: 180, targetX: 320, targetY: 80, color: '#00d4ff' },
-        { name: 'Kepler Reach', xMin: 451, xMax: 900, yMin: 0, yMax: 180, targetX: 650, targetY: 100, color: '#70d6ff' },
-        { name: 'Alpha Sector', xMin: 0, xMax: 220, yMin: 181, yMax: 360, targetX: 110, targetY: 250, color: '#ff6b9d' },
-        { name: 'Proxima Deep', xMin: 221, xMax: 450, yMin: 181, yMax: 360, targetX: 330, targetY: 280, color: '#c44cff' },
-        { name: 'TRAPPIST Frontier', xMin: 451, xMax: 900, yMin: 181, yMax: 360, targetX: 680, targetY: 290, color: '#a3e6ff' },
-        { name: 'Wolf 1061 Region', xMin: 0, xMax: 220, yMin: 361, yMax: 520, targetX: 110, targetY: 430, color: '#ffcc00' },
-        { name: 'Outer Reaches', xMin: 221, xMax: 900, yMin: 361, yMax: 520, targetX: 550, targetY: 440, color: '#7ef0a3' }
-    ];
-
-    // Generate hazard zones and gravity wells for each sector
-    sectors.forEach((sector, sectorIdx) => {
-        // 1-2 radiation zones per sector
-        for (let i = 0; i < (sectorIdx % 2 === 0 ? 1 : 2); i++) {
-            hazardZones.push({
-                x: Math.random() * (sector.xMax - sector.xMin) + sector.xMin,
-                y: Math.random() * (sector.yMax - sector.yMin) + sector.yMin,
-                radius: 60 + Math.random() * 40,
-                type: 'radiation',
-                intensity: 0.5 + Math.random() * 0.5
-            });
-        }
-        // 1 gravity well per sector near center
-        const gravX = sector.targetX + (Math.random() - 0.5) * 100;
-        const gravY = sector.targetY + (Math.random() - 0.5) * 100;
-        gravityWells.push({
-            x: Math.max(sector.xMin + 50, Math.min(sector.xMax - 50, gravX)),
-            y: Math.max(sector.yMin + 50, Math.min(sector.yMax - 50, gravY)),
-            radius: 80,
-            strength: 1.2 + Math.random() * 0.8
-        });
-    });
-
-    try {
-        const [asteroidRes, exoRes] = await Promise.all([
-            fetch('/api/asteroids?limit=12'),
-            fetch('/api/exoplanets?limit=10')
-        ]);
-
-        const asteroidData = asteroidRes.ok ? (await asteroidRes.json()).data || [] : [];
-        const exoData = exoRes.ok ? (await exoRes.json()).data || [] : [];
-        const builtObjects = buildExplorerObjects(asteroidData, exoData);
-        builtObjects.forEach(obj => objectList.push(obj));
-
-        statusEl.textContent = `Free exploration active: ${objectList.length} objects detected across nearby sectors.`;
-    } catch (error) {
-        console.error('Explorer game fetch error:', error);
-        statusEl.textContent = 'Offline mode active: using a small local exploration sector.';
-
-        objectList.push(
-            { id: 'demo-asteroid', type: 'asteroid', x: 200, y: 220, radius: 18, name: 'Bennu', data: { name: 'Bennu', diameter_km: 0.49, velocity_kmh: 28000, hazardous: true, date: '2026-09-01' } },
-            { id: 'demo-exoplanet', type: 'exoplanet', x: 650, y: 260, radius: 24, name: 'TRAPPIST-1 e', data: { pl_name: 'TRAPPIST-1 e', hostname: 'TRAPPIST-1', esi: 0.91, water_status: 'High (Likely Liquid)', pl_rade: 1.12, pl_bmasse: 1.02 } }
-        );
-    }
-
-    const onKeyDown = (event) => {
-        keys[event.key.toLowerCase()] = true;
-        keys[event.key] = true;
-    };
-    const onKeyUp = (event) => {
-        keys[event.key.toLowerCase()] = false;
-        keys[event.key] = false;
-    };
-
-    window.addEventListener('keydown', onKeyDown);
-    window.addEventListener('keyup', onKeyUp);
-
-    function setExplorerSector(sectorName) {
-        const targetSector = sectors.find(item => item.name === sectorName);
-        if (!targetSector) return;
-        ship.x = targetSector.targetX;
-        ship.y = targetSector.targetY;
-        ship.vx = 0;
-        ship.vy = 0;
-        statusEl.textContent = `${sectorName} engaged. Free exploration is active.`;
-    }
-    window.__explorerSetSector = setExplorerSector;
-    window.setExplorerSector = setExplorerSector;
-
-    function getActiveSector() {
-        const sector = sectors.find(item => ship.x >= item.xMin && ship.x <= item.xMax && ship.y >= item.yMin && ship.y <= item.yMax);
-        return sector ? sector.name : 'Outer Void';
-    }
-
-    function drawBackground() {
-        ctx.fillStyle = '#020711';
-        ctx.fillRect(0, 0, sceneWidth, sceneHeight);
-
-        // Draw nebula layers with gradient effects
-        const nebulaGradient = ctx.createRadialGradient(sceneWidth * 0.3, sceneHeight * 0.2, 50, sceneWidth * 0.35, sceneHeight * 0.25, 300);
-        nebulaGradient.addColorStop(0, 'rgba(255, 107, 157, 0.08)');
-        nebulaGradient.addColorStop(1, 'rgba(255, 107, 157, 0)');
-        ctx.fillStyle = nebulaGradient;
-        ctx.fillRect(0, 0, sceneWidth, sceneHeight);
-
-        const nebula2Gradient = ctx.createRadialGradient(sceneWidth * 0.7, sceneHeight * 0.7, 40, sceneWidth * 0.75, sceneHeight * 0.75, 280);
-        nebula2Gradient.addColorStop(0, 'rgba(112, 214, 255, 0.06)');
-        nebula2Gradient.addColorStop(1, 'rgba(112, 214, 255, 0)');
-        ctx.fillStyle = nebula2Gradient;
-        ctx.fillRect(0, 0, sceneWidth, sceneHeight);
-
-        // Enhanced starfield with varied brightness
-        for (let i = 0; i < 250; i++) {
-            const x = (i * 79 + (i % 7) * 123) % sceneWidth;
-            const y = (i * 137 + (i % 11) * 89) % sceneHeight;
-            const brightness = ((i % 5) + 1) * 0.2;
-            const size = (i % 3) + 0.5;
-            ctx.fillStyle = i % 3 === 0 ? `rgba(246, 211, 101, ${brightness})` : i % 3 === 1 ? `rgba(191, 233, 255, ${brightness})` : `rgba(255, 200, 150, ${brightness})`;
-            ctx.beginPath();
-            ctx.arc(x, y, size, 0, Math.PI * 2);
-            ctx.fill();
-        }
-
-        // Sector boundaries
-        ctx.strokeStyle = 'rgba(255,255,255,0.12)';
-        ctx.lineWidth = 1.5;
-        ctx.setLineDash([5, 5]);
-        ctx.beginPath();
-        ctx.moveTo(220, 0);
-        ctx.lineTo(220, sceneHeight);
-        ctx.moveTo(450, 0);
-        ctx.lineTo(450, sceneHeight);
-        ctx.moveTo(0, 180);
-        ctx.lineTo(sceneWidth, 180);
-        ctx.moveTo(0, 360);
-        ctx.lineTo(sceneWidth, 360);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        // Sector labels
-        ctx.font = 'bold 11px system-ui, sans-serif';
-        ctx.fillStyle = 'rgba(255,255,255,0.25)';
-        const sectorLabels = ['Solar', 'Sirius', 'Kepler', 'Alpha', 'Proxima', 'TRAPPIST', 'Wolf', 'Outer'];
-        const labelPositions = [
-            { x: 60, y: 20 }, { x: 280, y: 20 }, { x: 580, y: 20 },
-            { x: 60, y: 240 }, { x: 280, y: 240 }, { x: 580, y: 240 },
-            { x: 60, y: 460 }, { x: 450, y: 460 }
-        ];
-        labelPositions.forEach((pos, i) => {
-            if (sectorLabels[i]) ctx.fillText(sectorLabels[i], pos.x, pos.y);
-        });
-    }
-
-    function drawShip() {
-        ctx.save();
-        ctx.translate(ship.x, ship.y);
-        ctx.rotate(ship.angle);
-        
-        // Ship body
-        ctx.fillStyle = '#c7e5ff';
-        ctx.beginPath();
-        ctx.moveTo(0, -16);
-        ctx.lineTo(12, 12);
-        ctx.lineTo(0, 8);
-        ctx.lineTo(-12, 12);
-        ctx.closePath();
-        ctx.fill();
-
-        // Engine glow
-        if (ship.vx !== 0 || ship.vy !== 0) {
-            ctx.fillStyle = 'rgba(126, 240, 163, 0.6)';
-            ctx.beginPath();
-            ctx.moveTo(-6, 12);
-            ctx.lineTo(6, 12);
-            ctx.lineTo(2, 20 + Math.random() * 4);
-            ctx.lineTo(-2, 20 + Math.random() * 4);
-            ctx.closePath();
-            ctx.fill();
-        }
-
-        // Fuel bar
-        ctx.fillStyle = '#7ef0a3';
-        ctx.fillRect(-10, 16, 20 * (ship.fuel / ship.maxFuel), 5);
-        ctx.strokeStyle = '#7ef0a3';
-        ctx.lineWidth = 1;
-        ctx.strokeRect(-10, 16, 20, 5);
-        
-        ctx.restore();
-    }
-
-    function drawHazards() {
-        // Draw radiation zones
-        hazardZones.forEach((zone) => {
-            const dist = distanceBetween(ship.x, ship.y, zone.x, zone.y);
-            const inZone = dist < zone.radius;
-            ctx.fillStyle = inZone ? 'rgba(255, 100, 100, 0.3)' : 'rgba(255, 100, 100, 0.1)';
-            ctx.beginPath();
-            ctx.arc(zone.x, zone.y, zone.radius, 0, Math.PI * 2);
-            ctx.fill();
-            if (inZone) {
-                ctx.strokeStyle = '#ff6464';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-            }
-        });
-        
-        // Draw gravity wells
-        gravityWells.forEach((well) => {
-            const dist = distanceBetween(ship.x, ship.y, well.x, well.y);
-            const inWell = dist < well.radius;
-            ctx.strokeStyle = inWell ? 'rgba(100, 200, 255, 0.5)' : 'rgba(100, 200, 255, 0.2)';
-            ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            ctx.arc(well.x, well.y, well.radius, 0, Math.PI * 2);
-            ctx.stroke();
-        });
-    }
-
-    function drawRadar() {
-        const radarX = sceneWidth - 90;
-        const radarY = 20;
-        const radarRadius = 40;
-
-        // Radar background
-        ctx.fillStyle = 'rgba(2, 7, 17, 0.8)';
-        ctx.beginPath();
-        ctx.arc(radarX, radarY, radarRadius, 0, Math.PI * 2);
-        ctx.fill();
-        
-        ctx.strokeStyle = 'rgba(112, 214, 255, 0.5)';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        // Radar grid
-        ctx.strokeStyle = 'rgba(112, 214, 255, 0.2)';
-        ctx.lineWidth = 0.5;
-        ctx.beginPath();
-        ctx.arc(radarX, radarY, radarRadius * 0.66, 0, Math.PI * 2);
-        ctx.stroke();
-
-        // Ship center
-        ctx.fillStyle = '#c7e5ff';
-        ctx.beginPath();
-        ctx.arc(radarX, radarY, 2, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Objects on radar (scale down to radar)
-        const radarScale = radarRadius / (Math.max(sceneWidth, sceneHeight) * 0.8);
-        objectList.slice(0, 15).forEach((obj) => {
-            const dx = (obj.x - ship.x) * radarScale;
-            const dy = (obj.y - ship.y) * radarScale;
-            const dist = Math.hypot(dx, dy);
-            
-            if (dist < radarRadius) {
-                const color = obj.type === 'asteroid' ? '#f5a623' : '#70d6ff';
-                ctx.fillStyle = color;
-                ctx.beginPath();
-                ctx.arc(radarX + dx, radarY + dy, 2, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        });
-
-        // Radar label
-        ctx.font = 'bold 10px system-ui, sans-serif';
-        ctx.fillStyle = '#70d6ff';
-        ctx.fillText('RADAR', radarX - 18, radarY + radarRadius + 15);
-    }
-
-    function drawObjects() {
-        // Draw glow halos for visibility
-        objectList.forEach((obj) => {
-            const color = obj.type === 'asteroid' ? '#f5a623' : '#70d6ff';
-            
-            // Glow effect
-            ctx.beginPath();
-            ctx.arc(obj.x, obj.y, obj.radius + 8, 0, Math.PI * 2);
-            ctx.fillStyle = color.replace(')', ', 0.15)').replace('rgb', 'rgba');
-            ctx.fill();
-            
-            // Main object
-            ctx.beginPath();
-            ctx.arc(obj.x, obj.y, obj.radius, 0, Math.PI * 2);
-            ctx.fillStyle = color;
-            ctx.fill();
-
-            // Visited indicator - bright ring
-            if (visited.has(obj.id)) {
-                ctx.beginPath();
-                ctx.arc(obj.x, obj.y, obj.radius + 12, 0, Math.PI * 2);
-                ctx.strokeStyle = '#7ef0a3';
-                ctx.lineWidth = 2.5;
-                ctx.stroke();
-            }
-        });
-    }
-
-    function updateShip() {
-        const engineMult = 1 + (ship.upgrades.engine - 1) * 0.4;
-        const throttle = keys.shift ? 1.8 : 1;
-        const acceleration = 0.38 * throttle * engineMult;
-
-        if (keys['arrowleft'] || keys['a']) ship.angle -= ship.turnSpeed * throttle;
-        if (keys['arrowright'] || keys['d']) ship.angle += ship.turnSpeed * throttle;
-
-        const forwardX = Math.cos(ship.angle);
-        const forwardY = Math.sin(ship.angle);
-
-        if (keys['arrowup'] || keys['w']) {
-            ship.vx += forwardX * acceleration;
-            ship.vy += forwardY * acceleration;
-        }
-        if (keys['arrowdown'] || keys['s']) {
-            ship.vx -= forwardX * acceleration * 0.5;
-            ship.vy -= forwardY * acceleration * 0.5;
-        }
-
-        if (ship.fuel > 0 && (keys['arrowup'] || keys['w'] || keys['arrowdown'] || keys['s'] || keys['arrowleft'] || keys['a'] || keys['arrowright'] || keys['d'])) {
-            ship.fuel = Math.max(0, ship.fuel - 0.18 * throttle);
-        } else {
-            ship.fuel = Math.min(ship.maxFuel, ship.fuel + 0.08);
-        }
-
-        // Apply gravity well effects
-        gravityWells.forEach((well) => {
-            const dx = well.x - ship.x;
-            const dy = well.y - ship.y;
-            const dist = Math.hypot(dx, dy);
-            if (dist < well.radius) {
-                const pull = (1 - dist / well.radius) * 0.06 * well.strength;
-                ship.vx += (dx / dist) * pull;
-                ship.vy += (dy / dist) * pull;
-            }
-        });
-
-        // Apply drag from hazard zones (radiation)
-        let dragMult = 1.0;
-        hazardZones.forEach((zone) => {
-            const dx = zone.x - ship.x;
-            const dy = zone.y - ship.y;
-            const dist = Math.hypot(dx, dy);
-            if (dist < zone.radius) {
-                dragMult *= (1 - (1 - dist / zone.radius) * 0.2);
-                ship.radiationExposure += (1 - dist / zone.radius) * 0.5;
-                ship.fuel = Math.max(0, ship.fuel - (1 - dist / zone.radius) * 0.1);
-            }
-        });
-
-        ship.vx *= 0.96 * dragMult;
-        ship.vy *= 0.96 * dragMult;
-
-        ship.x += ship.vx;
-        ship.y += ship.vy;
-
-        ship.x = Math.max(18, Math.min(sceneWidth - 18, ship.x));
-        ship.y = Math.max(18, Math.min(sceneHeight - 18, ship.y));
-        
-        // Shield auto-regenerate (slowly)
-        if (ship.shieldHealth < ship.maxShield) {
-            ship.shieldHealth += 0.05;
-        }
-        
-        // Radiation decay
-        if (ship.radiationExposure > 0) {
-            ship.radiationExposure = Math.max(0, ship.radiationExposure - 0.15);
-        }
-    }
-
-    function updateDiscovery() {
-        let nearest = null;
-        let nearestDistance = Infinity;
-
-        objectList.forEach((obj) => {
-            const dist = distanceBetween(ship.x, ship.y, obj.x, obj.y);
-            if (dist < nearestDistance) {
-                nearest = obj;
-                nearestDistance = dist;
-            }
-        });
-
-        const sectorName = getActiveSector();
-        const fuelPercent = ship.fuel.toFixed(0);
-        const speed = Math.hypot(ship.vx, ship.vy).toFixed(1);
-        const shieldPercent = ship.shieldHealth.toFixed(0);
-        const radExposure = ship.radiationExposure.toFixed(0);
-        
-        // Enhanced HUD status with all stats
-        let statusText = `[${sectorName}] Fuel: ${fuelPercent}% | Shield: ${shieldPercent}% | Speed: ${speed} u/s | Credits: ${ship.credits}`;
-        if (radExposure > 10) statusText += ` | ⚠️ Radiation: ${radExposure}%`;
-        if (nearest && nearestDistance <= nearest.radius + ship.radius + 30) {
-            statusText += ` | Signal: ${nearest.name}`;
-        }
-        statusEl.textContent = statusText;
-
-        // Scanning and discovery
-        if (nearest && nearestDistance <= nearest.radius + ship.radius + 25) {
-            dataEl.innerHTML = renderExplorerScanCard(nearest);
-            if (!visited.has(nearest.id)) {
-                visited.add(nearest.id);
-                const reward = 10 + Math.floor(Math.random() * 20);
-                ship.credits += reward;
-                const discoveryEntry = `✓ ${nearest.name} (+${reward} Cr)`;
-                visitedList.unshift(discoveryEntry);
-                updateExplorerLog(logEl, visitedList);
-            }
-        } else {
-            dataEl.innerHTML = '<p>Navigate toward glowing objects to scan and discover celestial bodies. Watch for radiation zones (red) and gravity wells (blue circles).</p>';
-        }
-    }
-
-    function updateUpgradesUI() {
-        const upgradesPanel = document.getElementById('upgrades-panel');
-        if (!upgradesPanel) return;
-        
-        const upgradeCosts = { engine: 50, shield: 60, scanner: 40 };
-        const upgradeNames = { engine: 'Engine Boost', shield: 'Shield Upgrade', scanner: 'Scanner Range' };
-        
-        let html = '';
-        Object.keys(ship.upgrades).forEach(type => {
-            const currentLevel = ship.upgrades[type];
-            const maxLevel = 5;
-            const cost = upgradeCosts[type] * currentLevel;
-            const canAfford = ship.credits >= cost;
-            const isMaxed = currentLevel >= maxLevel;
-            
-            const btnDisabled = isMaxed || !canAfford;
-            const btnClass = btnDisabled ? 'upgrade-btn disabled' : 'upgrade-btn';
-            const btnText = isMaxed ? '✓ Max' : canAfford ? `Upgrade (${cost})` : `Need ${cost}`;
-            
-            html += `
-                <div class="upgrade-item">
-                    <span class="upgrade-name">${upgradeNames[type]}</span>
-                    <span class="upgrade-level">Lv${currentLevel}</span>
-                    <button class="${btnClass}" onclick="window.__upgradeShip && window.__upgradeShip('${type}')" ${btnDisabled ? 'disabled' : ''}>${btnText}</button>
-                </div>
-            `;
-        });
-        
-        upgradesPanel.innerHTML = html;
-    }
-
-    function upgradeShip(type) {
-        const upgradeCosts = { engine: 50, shield: 60, scanner: 40 };
-        const maxLevel = 5;
-        
-        if (!ship.upgrades[type]) return;
-        if (ship.upgrades[type] >= maxLevel) return;
-        
-        const cost = upgradeCosts[type] * ship.upgrades[type];
-        if (ship.credits < cost) return;
-        
-        ship.credits -= cost;
-        ship.upgrades[type]++;
-        
-        // Apply upgrade effects
-        if (type === 'shield') {
-            ship.maxShield = 100 + (ship.upgrades[type] - 1) * 30;
-            ship.shieldHealth = ship.maxShield;
-        }
-        
-        updateUpgradesUI();
-    }
-    window.__upgradeShip = upgradeShip;
-
-    let frameCount = 0;
-    function gameLoop() {
-        frameCount++;
-        updateShip();
-        drawBackground();
-        drawHazards();
-        drawObjects();
-        drawShip();
-        drawRadar();
-        updateDiscovery();
-        
-        // Update UI every 30 frames
-        if (frameCount % 30 === 0) {
-            updateUpgradesUI();
-        }
-        
-        window.requestAnimationFrame(gameLoop);
-    }
-
-    updateExplorerLog(logEl, visitedList);
-    updateUpgradesUI();
-    gameLoop();
-
-    modal._explorerCleanup = () => {
-        window.removeEventListener('keydown', onKeyDown);
-        window.removeEventListener('keyup', onKeyUp);
-        statusEl.textContent = 'Free exploration closed.';
-    };
-}
-
-function closeExplorerGame() {
-    const modal = document.getElementById('explorer-modal');
-    if (!modal) return;
+function closeModalById(modalId) {
+  const modal = document.getElementById(modalId);
+  if (modal) {
     modal.classList.remove('open');
-    if (modal._explorerCleanup) {
-        modal._explorerCleanup();
-        modal._explorerCleanup = null;
-    }
+    document.body.style.overflow = '';
+  }
 }
 
-async function askLocalChat() {
-    const input = document.getElementById('chat-input');
-    const resultBox = document.getElementById('chat-result');
-    const question = input?.value.trim();
-    if (!question) {
-        if (resultBox) resultBox.textContent = 'Please type a question about the dataset.';
-        return;
-    }
-
-    if (resultBox) {
-        resultBox.textContent = 'Thinking...';
-    }
-
-    try {
-        const res = await fetch(`/api/chat?question=${encodeURIComponent(question)}`);
-        const data = await res.json();
-        if (data.error) {
-            if (resultBox) resultBox.textContent = data.error;
-            return;
-        }
-        if (resultBox) resultBox.textContent = data.answer || 'No answer generated.';
-    } catch (error) {
-        console.error(error);
-        if (resultBox) resultBox.textContent = 'The local assistant is unavailable right now.';
-    }
+function closeAllModals() {
+  document.querySelectorAll('.modal-overlay.open').forEach(modal => {
+    modal.classList.remove('open');
+  });
+  document.body.style.overflow = '';
 }
 
-function escapeHtml(text) {
-    if (text === null || text === undefined) return '';
-    const AMP = '&' + 'amp;';
-    const LT = '&' + 'lt;';
-    const GT = '&' + 'gt;';
-    const QUOT = '&' + 'quot;';
-    const APOS = '&#' + '039;';
-    const map = {
-        '&': AMP,
-        '<': LT,
-        '>': GT,
-        '"': QUOT,
-        "'": APOS
-    };
-    return String(text).replace(/[&<>"']/g, function(ch) { return map[ch]; });
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    console.log("Universe Data Booklet Initialized");
-
-    const savedTheme = localStorage.getItem('udb-theme');
-    if (savedTheme && THEMES.includes(savedTheme)) setTheme(savedTheme);
-    else setTheme('cream');
-
-    const savedDensity = localStorage.getItem('udb-density');
-    if (savedDensity) setDensity(savedDensity);
-
-    fetchData(true);
-});
-
-window.switchTab = switchTab;
-window.showChart = showChart;
-window.toggle3DView = toggle3DView;
-window.checkHabitability = checkHabitability;
-window.askLocalChat = askLocalChat;
-window.openExplorerGame = openExplorerGame;
-window.closeExplorerGame = closeExplorerGame;
-window.setExplorerSector = function(sectorName) {
-    const modal = document.getElementById('explorer-modal');
-    if (!modal || !modal.classList.contains('open')) return;
-    const setter = window.__explorerSetSector;
-    if (typeof setter === 'function') setter(sectorName);
+// Global functions for inline handlers
+window.openModal = (modalKey) => {
+  const modalId = MODAL_MAP[modalKey];
+  if (modalId) openModalById(modalId);
 };
-window.handleSearch = handleSearch;
+
+window.closeModal = (modalKey) => {
+  const modalId = MODAL_MAP[modalKey];
+  if (modalId) closeModalById(modalId);
+};
+
 window.showDetail = showDetail;
-window.closeModal = closeModal;
-window.setTheme = setTheme;
-window.setDensity = setDensity;
-window.showMap = showMap;
-window.closeChartModal = closeChartModal;
-window.closeThreeModal = closeThreeModal;
-window.closeMapModal = closeMapModal;
+window.switchTab = setCurrentView;
+window.App = {
+  loadCurrentView: () => loadData(getCurrentView(), true),
+  refreshData: () => loadData(getCurrentView(), true),
+};
 
-/**
- * Open the merged-in Project Base (Planetary Explorer) feature in a new tab.
- * Kept for backwards compatibility with any external callers; the in-app
- * "🪐 Planetary Explorer" tab (switchTab('planetary')) is the primary entry
- * point and embeds the same app inline.
- */
-function openPlanetaryExplorer() {
-    window.open('/pb/', '_blank', 'noopener');
+// Initialize application
+async function initApp() {
+  // Core initialization
+  initTheme();
+  initSidebar();
+  initStarfield();
+  initNavbar();
+  
+  // Set up navigation
+  initNavigation(
+    (view) => {
+      setCurrentView(view);
+      loadData(view, true);
+    },
+    (modalKey) => {
+      const modalId = MODAL_MAP[modalKey];
+      if (modalId) openModalById(modalId);
+    }
+  );
+  
+  // Set up search and filters
+  initSearch(() => loadData(getCurrentView(), true));
+  initFilters(() => loadData(getCurrentView(), true));
+  
+  // Refresh button
+  initRefreshButton(() => loadData(getCurrentView(), true));
+  
+  // Load initial data
+  await loadData('asteroids', true);
+  
+  // Modal close handlers
+  document.querySelectorAll('.modal-close').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const modal = btn.closest('.modal-overlay');
+      if (modal) {
+        modal.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+    });
+  });
+  
+  // Close on overlay click
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        overlay.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+    });
+  });
+  
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeAllModals();
+    }
+    
+    // Ctrl/Cmd + K for search
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      document.getElementById('search-input')?.focus();
+    }
+    
+    // Numbers for quick view switching
+    if (e.key === '1' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      const input = document.activeElement;
+      if (!input || input.tagName !== 'INPUT') {
+        setCurrentView('asteroids');
+        loadData('asteroids', true);
+      }
+    }
+    if (e.key === '2' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      const input = document.activeElement;
+      if (!input || input.tagName !== 'INPUT') {
+        setCurrentView('exoplanets');
+        loadData('exoplanets', true);
+      }
+    }
+  });
+  
+  // Handle window resize
+  let resizeTimeout;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      // Trigger chart resizes
+      window.dispatchEvent(new Event('resize'));
+    }, 100);
+  });
+  
+  console.log('🌌 Universe Data Booklet initialized');
 }
-window.openPlanetaryExplorer = openPlanetaryExplorer;
 
+// Start the app when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
+
+// Export for debugging
+window.UniverseDataBooklet = {
+  State,
+  Config,
+  openModal: openModalById,
+  closeModal: closeModalById,
+  closeAllModals,
+  loadData,
+  getCurrentView,
+  getCurrentData,
+};

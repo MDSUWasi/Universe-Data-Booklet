@@ -37,9 +37,9 @@
         _tabs() {
             return `
               <div class="encyclopedia-tabs" role="tablist" aria-label="Browse by category">
-                <button class="tab-btn${this._activeTab === 'planets' ? ' active' : ''}" type="button" data-tab="planets" role="tab">🪐 Planets</button>
-                <button class="tab-btn${this._activeTab === 'moons' ? ' active' : ''}" type="button" data-tab="moons" role="tab">🌙 Moons</button>
-                <button class="tab-btn${this._activeTab === 'sites' ? ' active' : ''}" type="button" data-tab="sites" role="tab">📍 Terrain Sites</button>
+                <button class="tab-btn${this._activeTab === 'planets' ? ' active' : ''}" type="button" data-tab="planets" role="tab">Planets</button>
+                <button class="tab-btn${this._activeTab === 'moons' ? ' active' : ''}" type="button" data-tab="moons" role="tab">Moons</button>
+                <button class="tab-btn${this._activeTab === 'sites' ? ' active' : ''}" type="button" data-tab="sites" role="tab">Terrain Sites</button>
               </div>
             `;
         },
@@ -161,7 +161,7 @@
             return `<div id="encyclopedia-tab-content" class="encyclopedia-sites">${sections}</div>`;
         },
 
-        _siteCard(s, color) => {
+        _siteCard(s, color) {
             return `
               <article class="ency-card site-card" style="border-color:${color}">
                 <div class="ency-card-head">

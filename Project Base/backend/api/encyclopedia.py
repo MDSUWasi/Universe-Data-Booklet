@@ -22,7 +22,7 @@ PLANETS: dict[str, dict[str, Any]] = {
     "sun": {
         "id": "sun",
         "name": "Sun",
-        "symbol": "\u2609\ufe0f",
+        "symbol": "☀ Sun",
         "type": "Star (G-type main-sequence)",
         "description": (
             "The star at the centre of the Solar System. A nearly perfect sphere of "
@@ -55,7 +55,7 @@ PLANETS: dict[str, dict[str, Any]] = {
     "mercury": {
         "id": "mercury",
         "name": "Mercury",
-        "symbol": "\u263F\ufe0f",
+        "symbol": "Mercury",
         "type": "Terrestrial planet",
         "description": (
             "The smallest and innermost planet, with no natural satellites. Its "
@@ -84,7 +84,7 @@ PLANETS: dict[str, dict[str, Any]] = {
     "venus": {
         "id": "venus",
         "name": "Venus",
-        "symbol": "\u2640",
+        "symbol": "Venus",
         "type": "Terrestrial planet",
         "description": (
             "The second planet from the Sun and Earth's closest planetary neighbour. "
@@ -114,7 +114,7 @@ PLANETS: dict[str, dict[str, Any]] = {
     "earth": {
         "id": "earth",
         "name": "Earth",
-        "symbol": "\U0001F30D",
+        "symbol": "Earth",
         "type": "Terrestrial planet",
         "description": (
             "The third planet from the Sun and the only known world to support "
@@ -144,7 +144,7 @@ PLANETS: dict[str, dict[str, Any]] = {
     "moon": {
         "id": "moon",
         "name": "Moon",
-        "symbol": "\U0001F319",
+        "symbol": "Moon",
         "type": "Natural satellite of Earth",
         "description": (
             "Earth's only natural satellite and the fifth largest moon in the "
@@ -174,7 +174,7 @@ PLANETS: dict[str, dict[str, Any]] = {
     "mars": {
         "id": "mars",
         "name": "Mars",
-        "symbol": "\U0001F7E4",
+        "symbol": "Mars",
         "type": "Terrestrial planet",
         "description": (
             "The fourth planet from the Sun, known as the Red Planet because of "
@@ -204,7 +204,7 @@ PLANETS: dict[str, dict[str, Any]] = {
     "jupiter": {
         "id": "jupiter",
         "name": "Jupiter",
-        "symbol": "\U0001F7E2",
+        "symbol": "Jupiter",
         "type": "Gas giant",
         "description": (
             "The fifth planet from the Sun and the largest in the Solar System. "
@@ -233,7 +233,7 @@ PLANETS: dict[str, dict[str, Any]] = {
     "saturn": {
         "id": "saturn",
         "name": "Saturn",
-        "symbol": "\u2644",
+        "symbol": "Saturn",
         "type": "Gas giant",
         "description": (
             "The sixth planet from the Sun, famous for its extensive ring system "
@@ -262,7 +262,7 @@ PLANETS: dict[str, dict[str, Any]] = {
     "uranus": {
         "id": "uranus",
         "name": "Uranus",
-        "symbol": "\u2645",
+        "symbol": "Uranus",
         "type": "Ice giant",
         "description": (
             "The seventh planet from the Sun, an ice giant of water, ammonia, and "
@@ -292,7 +292,7 @@ PLANETS: dict[str, dict[str, Any]] = {
     "neptune": {
         "id": "neptune",
         "name": "Neptune",
-        "symbol": "\u2646",
+        "symbol": "Neptune",
         "type": "Ice giant",
         "description": (
             "The eighth and farthest planet from the Sun, the only planet not "
@@ -322,7 +322,7 @@ PLANETS: dict[str, dict[str, Any]] = {
     "pluto": {
         "id": "pluto",
         "name": "Pluto",
-        "symbol": "\u2644\ufe0f",
+        "symbol": "Pluto",
         "type": "Dwarf planet",
         "description": (
             "The best-known member of the Kuiper belt, reclassified as a dwarf planet "
@@ -352,7 +352,7 @@ PLANETS: dict[str, dict[str, Any]] = {
     "ceres": {
         "id": "ceres",
         "name": "Ceres",
-        "symbol": "\U0001F4AE",
+        "symbol": "Ceres",
         "type": "Dwarf planet (asteroid belt)",
         "description": (
             "The only dwarf planet in the asteroid belt and the largest object "
@@ -385,7 +385,7 @@ MOONS: dict[str, dict[str, Any]] = {
     "phobos": {
         "id": "phobos",
         "name": "Phobos",
-        "symbol": "\U0001F5FF",
+        "symbol": "Moon",
         "parent": "Mars",
         "type": "Irregular moon",
         "description": (
@@ -415,7 +415,7 @@ MOONS: dict[str, dict[str, Any]] = {
     "deimos": {
         "id": "deimos",
         "name": "Deimos",
-        "symbol": "\U0001F5FF",
+        "symbol": "Moon",
         "parent": "Mars",
         "type": "Irregular moon",
         "description": (
@@ -443,7 +443,7 @@ MOONS: dict[str, dict[str, Any]] = {
     "io": {
         "id": "io",
         "name": "Io",
-        "symbol": "\U0001F5FF",
+        "symbol": "Moon",
         "parent": "Jupiter",
         "type": "Volcanic moon",
         "description": (
@@ -471,7 +471,7 @@ MOONS: dict[str, dict[str, Any]] = {
     "europa": {
         "id": "europa",
         "name": "Europa",
-        "symbol": "\U0001F5FF",
+        "symbol": "Moon",
         "parent": "Jupiter",
         "type": "Galilean moon (icy)",
         "description": (
@@ -499,7 +499,7 @@ MOONS: dict[str, dict[str, Any]] = {
     "ganymede": {
         "id": "ganymede",
         "name": "Ganymede",
-        "symbol": "\U0001F5FF",
+        "symbol": "Moon",
         "parent": "Jupiter",
         "type": "Galilean moon (icy/rocky)",
         "description": (
@@ -526,7 +526,7 @@ MOONS: dict[str, dict[str, Any]] = {
 "callisto": {
         "id": "callisto",
         "name": "Callisto",
-        "symbol": "🗿",
+        "symbol": "●",
         "parent": "Jupiter",
         "type": "Galilean moon (heavily cratered)",
         "description": "The outermost Galilean moon and third-largest moon in the Solar System. Its ancient, heavily cratered surface is the most heavily cratered in the Solar System, with bright ice outcrops on the crater rims. Beneath the icy crust lies a possible subsurface ocean. It is the most distant of the Galilean moons from Jupiter.",
@@ -548,7 +548,7 @@ MOONS: dict[str, dict[str, Any]] = {
     "titan": {
         "id": "titan",
         "name": "Titan",
-        "symbol": "🗿",
+        "symbol": "Site",
         "parent": "Saturn",
         "type": "Saturn's largest moon",
         "description": "The largest moon of Saturn and the second-largest in the Solar System. It is the only moon known to have a dense atmosphere and the only body in the Solar System other than Earth with stable liquid on its surface - lakes and seas of methane and ethane. Its surface is covered in water-ice bedrock and organic-rich dunes.",
@@ -570,7 +570,7 @@ MOONS: dict[str, dict[str, Any]] = {
     "enceladus": {
         "id": "enceladus",
         "name": "Enceladus",
-        "symbol": "🗿",
+        "symbol": "Site",
         "parent": "Saturn",
         "type": "Icy moon",
         "description": "A small, bright icy moon of Saturn with a global subsurface ocean. Its famous tiger stripe fractures at the south pole erupt plumes of water ice and organic molecules into space. Its reflective surface makes it one of the brightest bodies in the Solar System.",
@@ -592,7 +592,7 @@ MOONS: dict[str, dict[str, Any]] = {
     "triton": {
         "id": "triton",
         "name": "Triton",
-        "symbol": "🗿",
+        "symbol": "Site",
         "parent": "Neptune",
         "type": "Captured Kuiper-belt moon",
         "description": "The largest moon of Neptune and the only large moon in the Solar System that orbits in the direction opposite to its planet's rotation, suggesting it was captured from the Kuiper belt. Its surface is a mix of nitrogen ice, methane ice, and dark organic compounds, with a thin nitrogen atmosphere and active cryovolcanism.",

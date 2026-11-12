@@ -1,264 +1,1074 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="cream">
+<html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universe Data Booklet</title>
-    <meta name="description" content="Interactive explorer for Near-Earth Asteroids and Exoplanets">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Universe Data Booklet - Interactive explorer for Near-Earth Asteroids, Exoplanets, and Planetary Terrain">
+  <title>Universe Data Booklet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="lib/leaflet.css">
+  <script src="lib/leaflet.js"></script>
+  <script src="lib/three.min.js"></script>
+  <script src="lib/chart.min.js"></script>
 </head>
 <body>
-    <canvas id="cosmos-canvas"></canvas>
-
-    <nav class="topbar">
-        <div class="topbar-left">
-            <h1>Universe Data Booklet</h1>
-            <p>Welcome. Let's explore some data on Exoplanets and Near-Earth Asteroids</p>
+  <canvas id="stars-canvas" aria-hidden="true"></canvas>
+  
+  <div class="app">
+    <header class="navbar" role="banner">
+      <div class="nav-left">
+        <a href="#" class="nav-brand" aria-label="Universe Data Booklet Home">
+          <div class="nav-brand-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+          </div>
+          <div class="nav-brand-text">
+            <span class="nav-brand-title">Universe Data Booklet</span>
+            <span class="nav-brand-tagline">Asteroids • Exoplanets • Terrain</span>
+          </div>
+        </a>
+      </div>
+      
+      <div class="nav-actions">
+        <button class="nav-btn" id="btn-refresh" aria-label="Refresh data" title="Refresh data">
+          <svg class="nav-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M23 4v6h-6"></path>
+            <path d="M1 20v-6h6"></path>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+          <span class="nav-btn-text">Refresh</span>
+        </button>
+        
+        <button class="nav-btn primary" id="btn-explorer" aria-label="Open 3D Explorer" title="3D Explorer">
+          <svg class="nav-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon>
+            <line x1="12" y1="22" x2="12" y2="15.5"></line>
+            <polyline points="22 8.5 12 15.5 2 8.5"></polyline>
+          </svg>
+          <span class="nav-btn-text">Explorer</span>
+        </button>
+        
+        <button class="nav-btn mobile-menu-btn" id="btn-menu" aria-label="Open navigation menu" aria-expanded="false" aria-controls="sidebar">
+          <svg class="nav-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </header>
+    
+    <div class="main">
+      <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
+        <div class="sidebar-section">
+          <span class="sidebar-section-title">Data Explorer</span>
+          <button class="nav-item" data-view="asteroids" role="tab" aria-selected="true">
+            <span class="nav-item-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 6v6l4 2"></path>
+              </svg>
+            </span>
+            <div class="nav-item-content">
+              <span class="nav-item-label">Near-Earth Asteroids</span>
+              <span class="nav-item-desc">Last 30 days</span>
+            </div>
+            <span class="nav-item-badge" id="asteroid-count">0</span>
+          </button>
+          <button class="nav-item" data-view="exoplanets" role="tab" aria-selected="false">
+            <span class="nav-item-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+              </svg>
+            </span>
+            <div class="nav-item-content">
+              <span class="nav-item-label">Exoplanets</span>
+              <span class="nav-item-desc">Confirmed discoveries</span>
+            </div>
+            <span class="nav-item-badge" id="exoplanet-count">0</span>
+          </button>
         </div>
-        <div class="topbar-right">
-<div class="theme-switcher">
-                <button class="theme-dot active" data-theme="cream" onclick="setTheme('cream')" title="Cream" style="background:#c97b3c"></button>
-                <button class="theme-dot" data-theme="neon" onclick="setTheme('neon')" title="Neon" style="background:#4facfe"></button>
-                <button class="theme-dot" data-theme="solar" onclick="setTheme('solar')" title="Solar" style="background:#f39c12"></button>
-                <button class="theme-dot" data-theme="lab" onclick="setTheme('lab')" title="Lab" style="background:#2ecc71"></button>
+        
+        <div class="sidebar-section">
+          <span class="sidebar-section-title">Analysis Tools</span>
+          <button class="nav-item" data-modal="map" role="button">
+            <span class="nav-item-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon>
+                <line x1="9" y1="3" x2="9" y2="21"></line>
+                <line x1="15" y1="6" x2="15" y2="21"></line>
+              </svg>
+            </span>
+            <div class="nav-item-content">
+              <span class="nav-item-label">Map View</span>
+              <span class="nav-item-desc">Earth • Moon • Mars sites</span>
             </div>
-            <button id="hamburger" class="hamburger" onclick="toggleSidebar()" aria-label="Toggle Settings">
-                <span></span><span></span><span></span>
-            </button>
+          </button>
+          <button class="nav-item" data-modal="encyclopedia" role="button">
+            <span class="nav-item-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+              </svg>
+            </span>
+            <div class="nav-item-content">
+              <span class="nav-item-label">Encyclopedia</span>
+              <span class="nav-item-desc">Planets, moons & sites</span>
+            </div>
+          </button>
+          <button class="nav-item" data-modal="discovery" role="button">
+            <span class="nav-item-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </span>
+            <div class="nav-item-content">
+              <span class="nav-item-label">Discovery Lab</span>
+              <span class="nav-item-desc">Screen any Earth coordinate</span>
+            </div>
+          </button>
+          <button class="nav-item" data-modal="realtime" role="button">
+            <span class="nav-item-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+              </svg>
+            </span>
+            <div class="nav-item-content">
+              <span class="nav-item-label">Realtime Dashboard</span>
+              <span class="nav-item-desc">ISS, space weather & live data</span>
+            </div>
+          </button>
         </div>
-    </nav>
-
-    <div class="layout">
-        <main class="main-content">
-            <section class="controls-section">
-                <div class="tab-group">
-                    <button class="tab-btn active" onclick="switchTab('asteroids')">Asteroids Data (Near Earth for last 30 days)</button>
-                    <button class="tab-btn" onclick="switchTab('exoplanets')">Exoplanets Data</button>
-                    <button class="tab-btn" onclick="switchTab('planetary')">🪐 Planetary Explorer</button>
-                </div>
-                <div class="action-group">
-                    <input type="text" id="search-input" class="search-input" placeholder="🔍 Search..." oninput="handleSearch(this.value)">
-                    <button class="action-btn" onclick="showChart()">📊 Charts View</button>
-                    <button class="action-btn" onclick="toggle3DView()">🌍 3D View</button>
-                    <button class="action-btn" onclick="showMap()">🗺️ Map View</button>
-<button class="action-btn" onclick="openExplorerGame()">🚀 Free Exploration</button>
-                <button class="action-btn" onclick="openStudyModal()">🎓 Study & Research Mode</button>
-                <button class="action-btn" onclick="switchTab('planetary')">🪐 Planetary Explorer</button>
-                <button class="action-btn" onclick="exportPDF()">📄 PDF Download</button>
-                </div>
-            </section>
-
-            <section class="glass-panel stats-panel">
-                <h2>📊 Live Stats</h2>
-                <div id="stats-display">Loading....</div>
-            </section>
-
-            <section class="glass-panel data-panel">
-                <div id="data-container"><div class="skeleton"></div></div>
-                <div id="planetary-container" class="planetary-container" style="display:none;">
-                    <iframe id="planetary-iframe" class="planetary-iframe" src="/pb/" title="Planetary Explorer (Project Base)" loading="lazy"></iframe>
-                </div>
-            </section>
-
-            <section class="glass-panel habitability-panel">
-                <h2>🔬 Habitability Scanner</h2>
-                <div class="scanner-input">
-                    <input type="text" id="planet-input" placeholder="Enter Planet Name (e.g., Kepler-186f)">
-                    <button class="action-btn scan-btn" onclick="checkHabitability()">Scan</button>
-                </div>
-                <div id="habitability-result"></div>
-            </section>
-
-            <section class="glass-panel local-chat-panel">
-                <h2>🤖 Local Data Assistant</h2>
-                <div class="scanner-input">
-                    <input type="text" id="chat-input" placeholder="Ask about asteroid or exoplanet data...">
-                    <button class="action-btn scan-btn" onclick="askLocalChat()">Ask</button>
-                </div>
-                <div id="chat-result" class="chat-result">Currently under development (It will not function properly in current condition)</div>
-            </section>
-
-            <footer class="disclaimer">
-                ⚠️ <strong>Disclaimer:</strong> All calculations are for educational purposes only. Not for navigation or mission planning. [And I can not give gurrantee that the data and all the calculations are Accurate and Correct. So, please do not use this data for any critical purpose.]<br>
-                <a href="/terms" class="footer-link">Terms &amp; Conditions</a> ·
-                <a href="/privacy" class="footer-link">Privacy Policy</a> ·
-                <a href="/dependencies" class="footer-link">Dependencies</a> ·
-                <a href="/thank-you" class="footer-link">Thank You</a> ·
-                <a href="https://github.com/MDSUWasi/Universe-Data-Booklet" class="footer-link" target="_blank" rel="noopener">Source (GitHub)</a>
-            </footer>
-        </main>
-
-        <aside class="settings-sidebar" id="settings-sidebar">
-            <div class="sidebar-header">
-                <h2>⚙️ Settings</h2>
-                <button class="close-btn" onclick="toggleSidebar()" aria-label="Close">✕</button>
+        
+        <div class="sidebar-section">
+          <span class="sidebar-section-title">Terrain Analysis</span>
+          <button class="nav-item" data-modal="terrain" role="button">
+            <span class="nav-item-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M8 3 4 7l4 4"></path>
+                <path d="M16 3 20 7l-4 4"></path>
+                <path d="M8 21 4 17l4-4"></path>
+                <path d="M16 21 20 17l-4-4"></path>
+              </svg>
+            </span>
+            <div class="nav-item-content">
+              <span class="nav-item-label">3D Terrain Lab</span>
+              <span class="nav-item-desc">Real DEM windows</span>
             </div>
-
-            <div class="settings-group">
-                <h3>🎨 Themes</h3>
-                <div class="density-options">
-                    <button class="density-btn theme-btn active" data-theme="cream" onclick="setTheme('cream')">🍦 Cream</button>
-                    <button class="density-btn theme-btn" data-theme="neon" onclick="setTheme('neon')">🌃 Neon</button>
-                    <button class="density-btn theme-btn" data-theme="solar" onclick="setTheme('solar')">☀️ Solar</button>
-                    <button class="density-btn theme-btn" data-theme="lab" onclick="setTheme('lab')">🧪 Lab</button>
-                </div>
+          </button>
+          <button class="nav-item" data-modal="patches" role="button">
+            <span class="nav-item-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+              </svg>
+            </span>
+            <div class="nav-item-content">
+              <span class="nav-item-label">Patch Explorer</span>
+              <span class="nav-item-desc">Inspect classified patches</span>
             </div>
-
-            <div class="settings-group">
-                <h3>📐 Density</h3>
-                <div class="density-options">
-                    <button class="density-btn" onclick="setDensity('comfortable')">Comfortable</button>
-                    <button class="density-btn active" onclick="setDensity('compact')">Compact</button>
-                </div>
+          </button>
+          <button class="nav-item" data-modal="scale" role="button">
+            <span class="nav-item-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+                <path d="M21 21V7a2 2 0 0 0-2-2H7"></path>
+                <path d="M3 16a2 2 0 0 1 2-2h14"></path>
+              </svg>
+            </span>
+            <div class="nav-item-content">
+              <span class="nav-item-label">Scale Sensitivity</span>
+              <span class="nav-item-desc">Window size matters</span>
             </div>
-
-            <div class="settings-group">
-                <h3>🔔 Notifications</h3>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="live-updates" checked>
-                    <span class="toggle-slider"></span>
-                    <span class="toggle-label">Live Updates</span>
-                </label>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="sound-alerts">
-                    <span class="toggle-slider"></span>
-                    <span class="toggle-label">Sound Alerts</span>
-                </label>
+          </button>
+        </div>
+        
+        <div class="sidebar-section">
+          <span class="sidebar-section-title">Mission Planning</span>
+          <button class="nav-item" data-modal="calculator" role="button">
+            <span class="nav-item-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="16"></line>
+                <line x1="8" y1="12" x2="16" y2="12"></line>
+              </svg>
+            </span>
+            <div class="nav-item-content">
+              <span class="nav-item-label">Terrain Comparison</span>
+              <span class="nav-item-desc">Compare terrain metrics</span>
             </div>
-
-            <div class="settings-group">
-                <P>This website is fully open-source. The full source code is available at My GitHub Repository. To check, review and see the repository; click <a href="https://github.com/MDSUWasi/Universe-Data-Booklet"> Here.</a></P>
-
-            <div class="settings-group">
-                <h3>ℹ️ About</h3>
-                <p class="about-text">Universe Data Booklet (V10.0.0.0.1)<br>Educational tool for astronomy enthusiasts.<br><br>
-                Data sources:<br>
-                • NASA NEO API (free & public)<br>
-                • NASA Exoplanet Archive (free & public)</p>
+          </button>
+          <button class="nav-item" data-modal="planner" role="button">
+            <span class="nav-item-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+            </span>
+            <div class="nav-item-content">
+              <span class="nav-item-label">Explore Mission</span>
+              <span class="nav-item-desc">Design a campaign</span>
             </div>
-
-            <div class="sidebar-footer">
-                <small>Made with 💜 for Curiosity & 💜 for Universe</small>
+          </button>
+          <button class="nav-item" data-modal="compare" role="button">
+            <span class="nav-item-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <line x1="10" y1="14" x2="21" y2="3"></line>
+              </svg>
+            </span>
+            <div class="nav-item-content">
+              <span class="nav-item-label">Full Comparison</span>
+              <span class="nav-item-desc">Terrain numbers</span>
             </div>
-        </aside>
+          </button>
+        </div>
+        
+        <div class="sidebar-section">
+          <span class="sidebar-section-title">Learning</span>
+          <button class="nav-item" data-modal="study" role="button">
+            <span class="nav-item-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+              </svg>
+            </span>
+            <div class="nav-item-content">
+              <span class="nav-item-label">Study Mode</span>
+              <span class="nav-item-desc">Flashcards, quiz & challenges</span>
+            </div>
+          </button>
+        </div>
+        
+        <div class="sidebar-footer">
+          <div class="theme-selector">
+            <span class="theme-selector-label">Theme</span>
+            <div class="theme-options" role="radiogroup" aria-label="Color theme">
+              <button class="theme-option" data-theme="terracota" role="radio" aria-checked="true">
+                <span class="theme-option-swatch" style="background: linear-gradient(135deg, #e07a5f, #f4a261);"></span>
+                <span>Terracota</span>
+              </button>
+            </div>
+          </div>
+          
+          <div style="display: flex; flex-direction: column; gap: 0.5rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.06);">
+            <a href="/dependencies" class="footer-link" style="text-align: center; padding: 0.5rem;">Dependencies</a>
+            <a href="/thank-you" class="footer-link" style="text-align: center; padding: 0.5rem;">Thank You</a>
+            <a href="https://github.com/MDSUWasi/Universe-Data-Booklet" class="footer-link" target="_blank" rel="noopener" style="text-align: center; padding: 0.5rem;">Source on GitHub</a>
+          </div>
+        </div>
+</aside>
 
-        <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+      <main class="content" role="main">
+        <div class="page-header">
+          <h1 class="page-title" id="page-title">Near-Earth Asteroids</h1>
+          <p class="page-subtitle" id="page-subtitle">Tracking close approaches from the last 30 days</p>
+        </div>
+        
+        <div class="toolbar" role="search" aria-label="Data tools">
+          <div class="toolbar-group">
+            <div class="search-input-wrapper">
+              <svg class="search-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="search" class="search-input" id="search-input" placeholder="Search by name, designation..." aria-label="Search asteroids or exoplanets" autocomplete="off">
+            </div>
+          </div>
+          
+          <div class="toolbar-divider" aria-hidden="true"></div>
+          
+          <div class="toolbar-group">
+            <div class="tab-group" role="tablist" aria-label="Data source">
+              <button class="tab-btn active" role="tab" aria-selected="true" data-tab="asteroids" id="tab-asteroids">Asteroids</button>
+              <button class="tab-btn" role="tab" aria-selected="false" data-tab="exoplanets" id="tab-exoplanets">Exoplanets</button>
+            </div>
+          </div>
+          
+          <div class="toolbar-divider" aria-hidden="true"></div>
+          
+          <div class="toolbar-group">
+            <select class="filter-select" id="filter-hazard" aria-label="Filter by hazard level">
+              <option value="">All Hazard Levels</option>
+              <option value="hazardous">Hazardous Only</option>
+              <option value="safe">Safe Only</option>
+            </select>
+          </div>
+          
+          <div class="toolbar-divider" aria-hidden="true"></div>
+          
+          <div class="toolbar-group">
+            <select class="filter-select" id="filter-sort" aria-label="Sort order">
+              <option value="date-desc">Newest First</option>
+              <option value="date-asc">Oldest First</option>
+              <option value="diameter-desc">Largest First</option>
+              <option value="diameter-asc">Smallest First</option>
+              <option value="velocity-desc">Fastest First</option>
+              <option value="velocity-asc">Slowest First</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="stats-grid" id="stats-grid" aria-label="Statistics">
+        </div>
+        
+        <section class="data-panel" aria-label="Data table">
+          <div class="data-table-wrapper">
+            <table class="data-table" id="data-table">
+              <thead>
+                <tr id="table-head"></tr>
+              </thead>
+              <tbody id="table-body">
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="pagination" id="pagination" aria-label="Pagination">
+          </div>
+</section>
+      </main>
     </div>
 
-    <div class="modal-overlay" id="detail-modal" onclick="closeModal()">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <button class="close-btn modal-close" onclick="closeModal()">✕</button>
-            <div id="modal-body"></div>
-        </div>
-    </div>
+      <div class="sidebar-overlay" id="sidebar-overlay" aria-hidden="true"></div>
 
-    <div class="modal-overlay" id="chart-modal" onclick="closeChartModal()">
-        <div class="modal-content modal-lg" onclick="event.stopPropagation()">
-            <button class="close-btn modal-close" onclick="closeChartModal()">✕</button>
-            <h2 class="modal-title">📊 Charts View</h2>
-            <div class="chart-modal-body">
-                <canvas id="chart-canvas"></canvas>
+    <footer class="footer" role="contentinfo">
+      <div class="footer-content">
+        <p class="footer-disclaimer">
+          ⚠️ <strong>Disclaimer:</strong> All calculations are for educational purposes only. Not for navigation or mission planning. Data accuracy cannot be guaranteed.
+        </p>
+        <div class="footer-links">
+          <a href="/terms" class="footer-link">Terms & Conditions</a>
+          <a href="/privacy" class="footer-link">Privacy Policy</a>
+          <a href="/dependencies" class="footer-link">Dependencies</a>
+          <a href="/thank-you" class="footer-link">Thank You</a>
+          <a href="https://github.com/MDSUWasi/Universe-Data-Booklet" class="footer-link" target="_blank" rel="noopener">Source (GitHub)</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- ==================== MODALS ==================== -->
+  
+  <!-- Map View Modal -->
+  <div class="modal-overlay" id="modal-map" role="dialog" aria-modal="true" aria-labelledby="modal-map-title">
+    <div class="modal modal-wide">
+      <header class="modal-header">
+        <h2 class="modal-title" id="modal-map-title">
+          <span class="modal-title-icon" style="background: linear-gradient(135deg, rgba(6,182,212,0.2), rgba(20,184,166,0.2)); color: var(--color-aurora-400);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon>
+              <line x1="9" y1="3" x2="9" y2="21"></line>
+              <line x1="15" y1="6" x2="15" y2="21"></line>
+            </svg>
+          </span>
+          Map View
+        </h2>
+        <button class="modal-close" aria-label="Close map view">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </header>
+      <div class="modal-body">
+        <p class="modal-intro">Interactive map of catalogued landing sites across Earth, Moon, and Mars. Click markers or use the sidebar to explore terrain metrics.</p>
+        
+        <div style="display: grid; grid-template-columns: 280px 1fr; gap: 1rem; height: 500px;">
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;" role="group" aria-label="Planetary body filters">
+              <button class="btn btn-sm" data-layer="earth" aria-pressed="true" style="background: linear-gradient(135deg, rgba(34,197,94,0.2), rgba(34,197,94,0.1)); border-color: rgba(34,197,94,0.3); color: var(--color-success-400);">● Earth</button>
+              <button class="btn btn-sm" data-layer="moon" aria-pressed="false" style="background: linear-gradient(135deg, rgba(107,114,128,0.2), rgba(107,114,128,0.1)); border-color: rgba(107,114,128,0.3); color: var(--color-space-400);">○ Moon</button>
+              <button class="btn btn-sm" data-layer="mars" aria-pressed="false" style="background: linear-gradient(135deg, rgba(239,68,68,0.2), rgba(239,68,68,0.1)); border-color: rgba(239,68,68,0.3); color: var(--color-danger-400);">▲ Mars</button>
             </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="three-modal" onclick="closeThreeModal()">
-        <div class="modal-content modal-lg" onclick="event.stopPropagation()">
-            <button class="close-btn modal-close" onclick="closeThreeModal()">✕</button>
-            <h2 class="modal-title">🌍 3D View</h2>
-            <div class="three-modal-body">
-                <div id="three-view-container"></div>
+            
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <button class="btn btn-sm btn-secondary" id="map-fit">⤢ Fit All</button>
+              <button class="btn btn-sm btn-secondary" id="map-tiles">◇ Basemap</button>
             </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="map-modal" onclick="closeMapModal()">
-        <div class="modal-content modal-lg" onclick="event.stopPropagation()">
-            <button class="close-btn modal-close" onclick="closeMapModal()">✕</button>
-            <h2 class="modal-title">🗺️ Map View</h2>
-            <div class="map-modal-body" id="map-container"></div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="explorer-modal" onclick="closeExplorerGame()">
-        <div class="modal-content modal-lg explorer-modal" onclick="event.stopPropagation()">
-            <button class="close-btn modal-close" onclick="closeExplorerGame()">✕</button>
-            <h2 class="modal-title">🚀 Exploration Game (Currently a prototype)</h2>
-            <div class="explorer-layout">
-                <div class="explorer-canvas-wrap">
-                    <canvas id="explorer-canvas" width="900" height="520"></canvas>
+            
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: var(--radius-md); padding: 1rem; font-size: 0.75rem; color: var(--color-space-400); line-height: 1.6;">
+              <strong style="color: var(--color-space-100);">Legend</strong>
+              <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;"><span style="width: 10px; height: 10px; border-radius: 50%; background: #4E8C6E;"></span> Earth sites</div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;"><span style="width: 10px; height: 10px; border-radius: 50%; background: #C9821A;"></span> Moon sites</div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;"><span style="width: 10px; height: 10px; border-radius: 50%; background: #F08080;"></span> Mars sites</div>
+              </div>
+            </div>
+            
+            <div style="flex: 1; overflow-y: auto;">
+              <h4 style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-space-500); margin-bottom: 0.75rem;">All Sites</h4>
+              <div id="map-sites-list" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
+            </div>
+          </div>
+          
+          <div style="position: relative; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid rgba(255,255,255,0.06); background: #0a0f1a;">
+            <div id="map" style="width: 100%; height: 100%;"></div>
+            <div id="map-detail" style="position: absolute; bottom: 1rem; left: 1rem; right: 1rem; background: rgba(12,18,34,0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-md); padding: 1rem; transform: translateY(100%); opacity: 0; transition: var(--transition-base);">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+                <div>
+                  <h4 id="map-detail-name" style="font-family: var(--font-display); font-weight: 600; color: var(--color-space-50);"></h4>
+                  <p id="map-detail-body" style="font-size: 0.75rem; color: var(--color-space-400);"></p>
                 </div>
-                <div class="explorer-sidebar">
-                    <div id="explorer-status" class="explorer-status">Use the ship freely and explore the sector.</div>
-                    <div class="explorer-mini-panel">
-                        <strong>Controls</strong>
-                        <p>WASD / Arrow keys to fly</p>
-                        <p>Hold Shift for a boost</p>
-                        <p>Approach objects to scan them</p>
-                        <div class="explorer-sector-buttons">
-                            <button class="mini-sector-btn" onclick="setExplorerSector('Solar System')">Solar System</button>
-                            <button class="mini-sector-btn" onclick="setExplorerSector('Sirius Expanse')">Sirius Expanse</button>
-                            <button class="mini-sector-btn" onclick="setExplorerSector('Kepler Reach')">Kepler Reach</button>
-                            <button class="mini-sector-btn" onclick="setExplorerSector('Alpha Sector')">Alpha Sector</button>
-                            <button class="mini-sector-btn" onclick="setExplorerSector('Proxima Deep')">Proxima Deep</button>
-                            <button class="mini-sector-btn" onclick="setExplorerSector('TRAPPIST Frontier')">TRAPPIST Frontier</button>
-                            <button class="mini-sector-btn" onclick="setExplorerSector('Wolf 1061 Region')">Wolf 1061 Region</button>
-                            <button class="mini-sector-btn" onclick="setExplorerSector('Outer Reaches')">Outer Reaches</button>
-                        </div>
-                    </div>
-                    <div id="explorer-data" class="explorer-data">Nothing in range.</div>
-                    <div id="explorer-log" class="explorer-log"></div>
-                    <div id="explorer-upgrades" class="explorer-upgrades">
-                        <h4>⚡ Ship Upgrades (Under Development)</h4>
-                        <div id="upgrades-panel"></div>
-                    </div>
+                <button class="btn btn-ghost btn-sm" id="map-detail-close">✕</button>
+              </div>
+              <div id="map-detail-metrics" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; font-size: 0.75rem;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Encyclopedia Modal -->
+  <div class="modal-overlay" id="modal-encyclopedia" role="dialog" aria-modal="true" aria-labelledby="modal-encyclopedia-title">
+    <div class="modal modal-wide">
+      <header class="modal-header">
+        <h2 class="modal-title" id="modal-encyclopedia-title">
+          <span class="modal-title-icon" style="background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(168,85,247,0.2)); color: var(--color-nebula-400);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+            </svg>
+          </span>
+          Planetary Encyclopedia
+        </h2>
+        <button class="modal-close" aria-label="Close encyclopedia">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </header>
+      <div class="modal-body">
+        <p class="modal-intro">Browse planets, moons, and diverse terrain candidate sites across the Solar System. Each body lists multiple regions for exploration.</p>
+        <div id="encyclopedia-content" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Discovery Lab Modal -->
+  <div class="modal-overlay" id="modal-discovery" role="dialog" aria-modal="true" aria-labelledby="modal-discovery-title">
+    <div class="modal modal-wide">
+      <header class="modal-header">
+        <h2 class="modal-title" id="modal-discovery-title">
+          <span class="modal-title-icon" style="background: linear-gradient(135deg, rgba(6,182,212,0.2), rgba(20,184,166,0.2)); color: var(--color-aurora-400);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </span>
+          Discovery Lab
+        </h2>
+        <button class="modal-close" aria-label="Close discovery lab">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </header>
+      <div class="modal-body">
+        <p class="modal-intro">Enter any <strong>Earth</strong> coordinate. We sample a 3×3 elevation grid from the <a href="https://open-meteo.com/en/docs/elevation-api" target="_blank" rel="noopener" style="color: var(--color-aurora-400);">Open-Meteo elevation API</a> and estimate local slope and relief <em>in your browser</em>. Results are cached to avoid repeat requests.</p>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start;">
+          <div>
+            <h3 style="font-family: var(--font-display); font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: var(--color-space-100);">Coordinate Input</h3>
+            <div class="input-row">
+              <div class="input-group">
+                <label class="input-label" for="disc-lat">Latitude</label>
+                <input type="number" class="input" id="disc-lat" step="0.0001" placeholder="-77.6" min="-90" max="90" aria-label="Latitude in decimal degrees">
+              </div>
+              <div class="input-group">
+                <label class="input-label" for="disc-lng">Longitude</label>
+                <input type="number" class="input" id="disc-lng" step="0.0001" placeholder="162.2" min="-180" max="180" aria-label="Longitude in decimal degrees">
+              </div>
+            </div>
+            <div style="display: flex; gap: 0.75rem; margin-top: 1rem; flex-wrap: wrap;">
+              <button class="btn btn-primary" id="disc-run">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                Analyze Terrain
+              </button>
+              <button class="btn btn-secondary" id="disc-random">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="17 3 5 17 11 11 17 21"></polyline>
+                  <path d="M21 21V7a2 2 0 0 0-2-2H7"></path>
+                </svg>
+                Surprise Me
+              </button>
+            </div>
+            
+            <details style="margin-top: 1.5rem; padding: 1rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: var(--radius-md);">
+              <summary style="cursor: pointer; font-weight: 500; color: var(--color-space-300); display: flex; align-items: center; gap: 0.5rem;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="3"></circle>
+                  <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
+                </svg>
+                Smart Cache Internals <span id="cache-summary" style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-aurora-400);"></span>
+              </summary>
+              <div class="cache-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.06);">
+                <div><span style="color: var(--color-space-500);">Hits:</span> <strong id="cache-hits" style="font-family: var(--font-mono); color: var(--color-success-400);">0</strong></div>
+                <div><span style="color: var(--color-space-500);">Misses:</span> <strong id="cache-misses" style="font-family: var(--font-mono); color: var(--color-danger-400);">0</strong></div>
+                <div><span style="color: var(--color-space-500);">Entries:</span> <strong id="cache-entries" style="font-family: var(--font-mono); color: var(--color-nebula-400);">0</strong></div>
+                <div><span style="color: var(--color-space-500);">In-flight:</span> <strong id="cache-live" style="font-family: var(--font-mono); color: var(--color-solar-400);">0</strong></div>
+              </div>
+              <button class="btn btn-ghost btn-sm" style="margin-top: 1rem;" id="disc-cache-clear">Clear Cache</button>
+            </details>
+          </div>
+          
+          <div>
+            <h3 style="font-family: var(--font-display); font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: var(--color-space-100);">Analysis Result</h3>
+            <div id="disc-result" style="min-height: 300px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: var(--radius-lg); padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+              <div class="disc-placeholder" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; color: var(--color-space-500);">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 1rem; opacity: 0.5;">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <p style="max-width: 25ch;">Awaiting coordinates… discoveries are screened, not guessed — we only claim what open data can support.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Realtime Dashboard Modal -->
+  <div class="modal-overlay" id="modal-realtime" role="dialog" aria-modal="true" aria-labelledby="modal-realtime-title">
+    <div class="modal modal-wide">
+      <header class="modal-header">
+        <h2 class="modal-title" id="modal-realtime-title">
+          <span class="modal-title-icon" style="background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,191,36,0.2)); color: var(--color-solar-400);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </span>
+          Realtime Dashboard
+        </h2>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn btn-ghost btn-sm" id="realtime-refresh" aria-label="Refresh live data">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 4v6h-6"></path>
+              <path d="M1 20v-6h6"></path>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg>
+          </button>
+          <button class="modal-close" aria-label="Close realtime dashboard">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      </header>
+      <div class="modal-body">
+        <p class="modal-intro">Live data from free public APIs: Open Notify (ISS, astronauts), NASA (APOD, EONET, InSight Mars weather, DONKI space weather), and USGS (earthquakes). No API keys required.</p>
+        <div id="realtime-content" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3D Terrain Lab Modal -->
+  <div class="modal-overlay" id="modal-terrain" role="dialog" aria-modal="true" aria-labelledby="modal-terrain-title">
+    <div class="modal modal-wide">
+      <header class="modal-header">
+        <h2 class="modal-title" id="modal-terrain-title">
+          <span class="modal-title-icon" style="background: linear-gradient(135deg, rgba(20,184,166,0.2), rgba(6,182,212,0.2)); color: var(--color-void-400);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M8 3 4 7l4 4"></path>
+              <path d="M16 3 20 7l-4 4"></path>
+              <path d="M8 21 4 17l4-4"></path>
+              <path d="M16 21 20 17l-4-4"></path>
+            </svg>
+          </span>
+          3D Terrain Lab
+        </h2>
+        <button class="modal-close" aria-label="Close terrain lab">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </header>
+      <div class="modal-body">
+        <p class="modal-intro">A 3 km window sampled from the local DEM and matching slope/roughness rasters. The vertical scale is exaggerated for visibility; colors show the selected metric, not suitability.</p>
+        
+        <div style="display: grid; grid-template-columns: 260px 1fr; gap: 1.5rem;">
+          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <div class="input-group">
+              <label class="input-label" for="terrain-body">Planetary Body</label>
+              <select class="input" id="terrain-body" aria-label="Select planetary body">
+                <option value="Earth">● Earth</option>
+                <option value="Moon">○ Moon</option>
+                <option value="Mars">▲ Mars</option>
+              </select>
+            </div>
+            
+            <div class="input-group">
+              <label class="input-label" for="terrain-site">Site</label>
+              <select class="input" id="terrain-site" aria-label="Select site">
+                <option value="">Select a body first</option>
+              </select>
+            </div>
+            
+            <div class="input-group">
+              <label class="input-label" for="terrain-mode">Surface Metric</label>
+              <select class="input" id="terrain-mode" aria-label="Select surface metric">
+                <option value="elevation">Elevation</option>
+                <option value="slope">Slope</option>
+                <option value="roughness">Roughness</option>
+                <option value="safe">≤3° Slope Screen</option>
+              </select>
+            </div>
+            
+            <div class="slider-group">
+              <div class="slider-header">
+                <span class="slider-label">Vertical Exaggeration</span>
+                <span class="slider-value" id="terrain-exaggeration-value">4×</span>
+              </div>
+              <input type="range" class="slider" id="terrain-exaggeration" min="1" max="10" step="0.5" value="4" aria-label="Vertical exaggeration factor">
+            </div>
+            
+            <div id="terrain-status" style="padding: 1rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: var(--radius-md); font-size: 0.8125rem; color: var(--color-space-400); min-height: 60px;">Select a site to load its terrain.</div>
+            
+            <div id="terrain-meta" style="font-size: 0.75rem; color: var(--color-space-500); line-height: 1.8;"></div>
+          </div>
+          
+          <div class="chart-container" style="height: 480px;">
+            <canvas id="terrain-canvas" aria-label="Interactive 3D terrain surface"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Patch Explorer Modal -->
+  <div class="modal-overlay" id="modal-patches" role="dialog" aria-modal="true" aria-labelledby="modal-patches-title">
+    <div class="modal modal-wide">
+      <header class="modal-header">
+        <h2 class="modal-title" id="modal-patches-title">
+          <span class="modal-title-icon" style="background: linear-gradient(135deg, rgba(236,72,153,0.2), rgba(244,114,182,0.2)); color: var(--color-cosmic-400);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+            </svg>
+          </span>
+          Patch Explorer
+        </h2>
+        <button class="modal-close" aria-label="Close patch explorer">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </header>
+      <div class="modal-body">
+        <p class="modal-intro">Rows come from the committed patch-comparison report. Filled-surface flags are shown as recorded so water, ice, and other zero-filled regions can be inspected rather than hidden.</p>
+        
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+          <div class="input-group" style="flex: 1; min-width: 200px;">
+            <label class="input-label" for="patch-body">Planetary Body</label>
+            <select class="input" id="patch-body" aria-label="Filter by planetary body">
+              <option value="all">All Bodies</option>
+              <option value="Moon">○ Moon</option>
+              <option value="Earth">● Earth</option>
+              <option value="Mars">▲ Mars</option>
+            </select>
+          </div>
+          <div class="input-group" style="flex: 1; min-width: 200px;">
+            <label class="input-label" for="patch-kind">Classification</label>
+            <select class="input" id="patch-kind" aria-label="Filter by classification">
+              <option value="all">All Patches</option>
+              <option value="valid">Non-filled</option>
+              <option value="filled">Filled / Flagged</option>
+            </select>
+          </div>
+        </div>
+        
+        <p id="patch-formulas" style="font-size: 0.75rem; color: var(--color-space-500); margin-bottom: 1rem; font-family: var(--font-mono);"><strong>Formulas:</strong> area = patch cells × pixel area; slope (Horn); roughness = max − min in 3×3 window; filled if zero fraction > 0.5.</p>
+        <p id="patch-count" style="font-size: 0.8125rem; color: var(--color-space-400); margin-bottom: 1rem;">Loading patch report…</p>
+        
+        <div class="data-table-wrapper" style="max-height: 400px;">
+          <table class="data-table patch-table">
+            <thead>
+              <tr>
+                <th>Site</th><th>Body</th><th>Area km²</th><th>Slope Mean °</th><th>Centre X</th><th>Centre Y</th><th>Mean Rough m</th><th>P95 Rough m</th><th>Max Rough m</th><th>Zero Frac</th><th>Flag</th>
+              </tr>
+            </thead>
+            <tbody id="patch-rows"></tbody>
+          </table>
+        </div>
+        <div id="patch-status" style="margin-top: 1rem; font-size: 0.75rem; color: var(--color-space-500);"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scale Sensitivity Modal -->
+  <div class="modal-overlay" id="modal-scale" role="dialog" aria-modal="true" aria-labelledby="modal-scale-title">
+    <div class="modal modal-wide">
+      <header class="modal-header">
+        <h2 class="modal-title" id="modal-scale-title">
+          <span class="modal-title-icon" style="background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,191,36,0.2)); color: var(--color-solar-400);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="1" y1="1" x2="23" y2="23"></line>
+              <path d="M21 21V7a2 2 0 0 0-2-2H7"></path>
+              <path d="M3 16a2 2 0 0 1 2-2h14"></path>
+            </svg>
+          </span>
+          Scale Sensitivity
+        </h2>
+        <button class="modal-close" aria-label="Close scale sensitivity">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </header>
+      <div class="modal-body">
+        <p class="modal-intro">The lunar fingerprint samples use a nominal 12 m roughness window; the main comparison uses a nominal 90 m window. The points below show the scale difference explicitly and must not be read as a direct terrain ranking.</p>
+        <div id="scale-summary" style="padding: 1rem; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); border-radius: var(--radius-md); color: var(--color-solar-300); font-size: 0.8125rem; margin-bottom: 1.5rem;">Loading recorded fingerprints…</div>
+        <div class="chart-container">
+          <canvas id="scale-chart"></canvas>
+        </div>
+        <div id="scale-status" style="margin-top: 1rem; font-size: 0.75rem; color: var(--color-space-500);"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Terrain Comparison Modal -->
+  <div class="modal-overlay" id="modal-calculator" role="dialog" aria-modal="true" aria-labelledby="modal-calculator-title">
+    <div class="modal modal-wide">
+      <header class="modal-header">
+        <h2 class="modal-title" id="modal-calculator-title">
+          <span class="modal-title-icon" style="background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(168,85,247,0.2)); color: var(--color-nebula-400);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="16"></line>
+              <line x1="8" y1="12" x2="16" y2="12"></line>
+            </svg>
+          </span>
+          Terrain Comparison
+        </h2>
+        <button class="modal-close" aria-label="Close calculator">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </header>
+      <div class="modal-body">
+        <p class="modal-intro">Adjusted Euclidean distance in terrain-metric space (mean roughness, p95 roughness, slope discipline) — similarity %.</p>
+        
+        <div style="display: grid; grid-template-columns: 320px 1fr; gap: 1.5rem;">
+          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            <div class="slider-group">
+              <div class="slider-header">
+                <span class="slider-label">Mean Roughness Target (m)</span>
+                <span class="slider-value" id="cv-rough">2.462</span>
+              </div>
+              <input type="range" class="slider" id="c-rough" min="1.0" max="4.0" step="0.05" value="2.462" aria-label="Mean roughness target in meters">
+            </div>
+            
+            <div class="slider-group">
+              <div class="slider-header">
+                <span class="slider-label">P95 Hazard Ceiling (m)</span>
+                <span class="slider-value" id="cv-p95">4.138</span>
+              </div>
+              <input type="range" class="slider" id="c-p95" min="2.0" max="6.0" step="0.05" value="4.138" aria-label="P95 hazard ceiling in meters">
+            </div>
+            
+            <div class="slider-group">
+              <div class="slider-header">
+                <span class="slider-label">Min Area ≤3° Slope (%)</span>
+                <span class="slider-value" id="cv-slope">0%</span>
+              </div>
+              <input type="range" class="slider" id="c-slope" min="0" max="100" step="5" value="0" aria-label="Minimum area passing 3 degree slope">
+            </div>
+            
+            <div class="slider-group">
+              <div class="slider-header">
+                <span class="slider-label">Area Gate (km²)</span>
+                <span class="slider-value" id="cv-area">1</span>
+              </div>
+              <input type="range" class="slider" id="c-area" min="0" max="500" step="1" value="1" aria-label="Area gate in square kilometers">
+            </div>
+            
+            <div id="calc-notes" style="padding: 1rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: var(--radius-md); font-size: 0.75rem; color: var(--color-space-500);"></div>
+          </div>
+          
+          <div class="chart-container">
+            <canvas id="calc-chart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Explore Mission Modal -->
+  <div class="modal-overlay" id="modal-planner" role="dialog" aria-modal="true" aria-labelledby="modal-planner-title">
+    <div class="modal">
+      <header class="modal-header">
+        <h2 class="modal-title" id="modal-planner-title">
+          <span class="modal-title-icon" style="background: linear-gradient(135deg, rgba(20,184,166,0.2), rgba(6,182,212,0.2)); color: var(--color-void-400);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+          </span>
+          Explore Mission
+        </h2>
+        <button class="modal-close" aria-label="Close planner">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </header>
+      <div class="modal-body" id="planner-steps" style="min-height: 300px;">
+      </div>
+      <footer class="modal-footer">
+        <button class="btn btn-ghost" id="planner-back" disabled>← Back</button>
+        <button class="btn btn-primary" id="planner-next">Next →</button>
+        <button class="btn btn-secondary" id="planner-pdf" disabled>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></polyline>
+          </svg>
+          Save PDF
+        </button>
+      </footer>
+      <div id="planner-output"></div>
+    </div>
+  </div>
+
+  <!-- Full Comparison Modal -->
+  <div class="modal-overlay" id="modal-compare" role="dialog" aria-modal="true" aria-labelledby="modal-compare-title">
+    <div class="modal modal-wide">
+      <header class="modal-header">
+        <h2 class="modal-title" id="modal-compare-title">
+          <span class="modal-title-icon" style="background: linear-gradient(135deg, rgba(236,72,153,0.2), rgba(244,114,182,0.2)); color: var(--color-cosmic-400);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+          </span>
+          Full Comparison
+        </h2>
+        <button class="modal-close" aria-label="Close comparison">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </header>
+      <div class="modal-body">
+        <p class="modal-intro">Comparison metrics are derived offline from LRO, CTX, and Copernicus DEMs. The processing records describe a common 30 m grid and nominal 90 m roughness window. Similarity percentages are relative to the lunar reference, not a universal cross-body score.</p>
+        
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;" role="group" aria-label="Filter by planetary body">
+          <button class="btn btn-sm active" data-body="all" aria-pressed="true">All Bodies</button>
+          <button class="btn btn-sm" data-body="earth" aria-pressed="false" style="color: var(--color-success-400); border-color: rgba(34,197,94,0.3);">● Earth</button>
+          <button class="btn btn-sm" data-body="moon" aria-pressed="false" style="color: var(--color-space-400); border-color: rgba(107,114,128,0.3);">○ Moon</button>
+          <button class="btn btn-sm" data-body="mars" aria-pressed="false" style="color: var(--color-danger-400); border-color: rgba(239,68,68,0.3);">▲ Mars</button>
+        </div>
+        
+        <div class="data-table-wrapper" style="max-height: 350px; margin-bottom: 1.5rem;">
+          <table class="data-table" id="cmp-table">
+            <thead>
+              <tr>
+                <th scope="col" data-sort="name">Site</th>
+                <th scope="col" data-sort="body">Body</th>
+                <th scope="col" data-sort="area">Flat Area km²</th>
+                <th scope="col" data-sort="rough">Mean Rough m</th>
+                <th scope="col" data-sort="p95">P95 Rough m</th>
+                <th scope="col" data-sort="sim">Moon Similarity %</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        
+        <section style="margin-bottom: 1.5rem;" aria-labelledby="cross-body-title">
+          <h3 id="cross-body-title" style="font-family: var(--font-display); font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--color-space-100);">Cross-Body Terrain Matches</h3>
+          <p class="modal-intro">Pairwise, symmetric heuristic based on mean and p95 roughness for the five catalogued sites. This ranks available data; it does not search for new regions or establish mission suitability.</p>
+          <div class="data-table-wrapper" style="max-height: 250px;">
+            <table class="data-table cross-cmp-table" id="cross-cmp-table">
+              <thead><tr><th scope="col">Site A</th><th scope="col">Body</th><th scope="col">Site B</th><th scope="col">Body</th><th scope="col">Roughness Similarity</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </section>
+        
+        <div class="chart-container">
+          <canvas id="cmp-chart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Study Mode Modal -->
+  <div class="modal-overlay" id="modal-study" role="dialog" aria-modal="true" aria-labelledby="modal-study-title">
+    <div class="modal modal-full">
+      <header class="modal-header">
+        <h2 class="modal-title" id="modal-study-title">
+          <span class="modal-title-icon" style="background: linear-gradient(135deg, rgba(6,182,212,0.2), rgba(20,184,166,0.2)); color: var(--color-aurora-400);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+              <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+            </svg>
+          </span>
+          Study & Research Mode
+        </h2>
+        <button class="modal-close" aria-label="Close study mode">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </header>
+      <div class="modal-body" style="padding: 0; overflow: hidden;">
+        <div class="study-tabs" style="display: flex; gap: 0.25rem; padding: 0.75rem; background: rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.06); overflow-x: auto;" role="tablist" aria-label="Study modes">
+          <button class="tab-btn study-tab-btn active" role="tab" aria-selected="true" data-study-tab="flashcards" style="padding: 0.625rem 1.25rem;">📚 Flashcards</button>
+          <button class="tab-btn study-tab-btn" role="tab" aria-selected="false" data-study-tab="quiz" style="padding: 0.625rem 1.25rem;">🧠 Quiz</button>
+          <button class="tab-btn study-tab-btn" role="tab" aria-selected="false" data-study-tab="challenges" style="padding: 0.625rem 1.25rem;">🎮 Challenges</button>
+          <button class="tab-btn study-tab-btn" role="tab" aria-selected="false" data-study-tab="compare" style="padding: 0.625rem 1.25rem;">⚖️ Compare</button>
+          <button class="tab-btn study-tab-btn" role="tab" aria-selected="false" data-study-tab="progress" style="padding: 0.625rem 1.25rem;">🏆 Progress</button>
+          <button class="tab-btn study-tab-btn" role="tab" aria-selected="false" data-study-tab="discover" style="padding: 0.625rem 1.25rem;">🔬 Discover</button>
+        </div>
+        <div class="study-body" style="padding: 1.5rem; height: calc(90vh - 140px); overflow-y: auto;">
+          <div class="study-pane" id="study-flashcards" role="tabpanel" aria-labelledby="flashcards-tab">
+            <div id="flashcard-area" style="display: flex; flex-direction: column; align-items: center; padding: 2rem 0;">
+              <p style="text-align: center; color: var(--color-space-500);">Loading flashcards…</p>
+            </div>
+          </div>
+          <div class="study-pane" id="study-quiz" role="tabpanel" aria-labelledby="quiz-tab" style="display: none;">
+            <div id="quiz-area"></div>
+          </div>
+          <div class="study-pane" id="study-challenges" role="tabpanel" aria-labelledby="challenges-tab" style="display: none;">
+            <div id="challenges-area"></div>
+          </div>
+          <div class="study-pane" id="study-compare" role="tabpanel" aria-labelledby="compare-tab" style="display: none;">
+            <div id="compare-area"></div>
+          </div>
+          <div class="study-pane" id="study-progress" role="tabpanel" aria-labelledby="progress-tab" style="display: none;">
+            <div id="progress-area"></div>
+          </div>
+          <div class="study-pane" id="study-discover" role="tabpanel" aria-labelledby="discover-tab" style="display: none;">
+            <div id="discover-area"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3D Explorer Modal -->
+  <div class="modal-overlay" id="modal-explorer" role="dialog" aria-modal="true" aria-labelledby="modal-explorer-title">
+    <div class="modal modal-full">
+      <header class="modal-header">
+        <h2 class="modal-title" id="modal-explorer-title">
+          <span class="modal-title-icon" style="background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(168,85,247,0.2)); color: var(--color-nebula-400);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon>
+              <line x1="12" y1="22" x2="12" y2="15.5"></line>
+              <polyline points="22 8.5 12 15.5 2 8.5"></polyline>
+            </svg>
+          </span>
+          3D Space Explorer
+        </h2>
+        <button class="modal-close" aria-label="Close explorer">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </header>
+      <div class="modal-body" style="padding: 0; overflow: hidden;">
+        <div style="display: grid; grid-template-columns: 1fr 320px; height: calc(90vh - 80px);">
+          <div style="position: relative; background: #030712;">
+            <canvas id="explorer-canvas" style="width: 100%; height: 100%; display: block;"></canvas>
+            <div style="position: absolute; top: 1rem; left: 1rem; right: 1rem; display: flex; justify-content: space-between; align-items: flex-start; pointer-events: none;">
+              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;" id="explorer-sectors" pointer-events="auto"></div>
+              <div style="background: rgba(12,18,34,0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-md); padding: 0.75rem 1rem; font-family: var(--font-mono); font-size: 0.75rem; color: var(--color-space-300); pointer-events: auto;">
+                <div style="display: flex; gap: 1.5rem;">
+                  <div>Fuel: <span id="explorer-fuel" style="color: var(--color-success-400);">100%</span></div>
+                  <div>Shield: <span id="explorer-shield" style="color: var(--color-aurora-400);">100%</span></div>
+                  <div>Credits: <span id="explorer-credits" style="color: var(--color-solar-400);">0</span></div>
                 </div>
+              </div>
             </div>
+            <div style="position: absolute; bottom: 1rem; left: 1rem; right: 1rem; background: rgba(12,18,34,0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-md); padding: 0.75rem 1rem; font-size: 0.75rem; color: var(--color-space-400); pointer-events: auto;">
+              <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: center;">
+                <kbd style="background: rgba(255,255,255,0.1); padding: 0.125rem 0.375rem; border-radius: var(--radius-xs); border: 1px solid rgba(255,255,255,0.1);">WASD</kbd> Fly &nbsp;
+                <kbd style="background: rgba(255,255,255,0.1); padding: 0.125rem 0.375rem; border-radius: var(--radius-xs); border: 1px solid rgba(255,255,255,0.1);">Shift</kbd> Boost &nbsp;
+                <kbd style="background: rgba(255,255,255,0.1); padding: 0.125rem 0.375rem; border-radius: var(--radius-xs); border: 1px solid rgba(255,255,255,0.1);">Click</kbd> Scan &nbsp;
+                <span style="color: var(--color-space-500);">Approach objects to discover them</span>
+              </div>
+            </div>
+          </div>
+          
+          <div style="display: flex; flex-direction: column; gap: 1rem; padding: 1rem; background: rgba(12,18,34,0.6); backdrop-filter: blur(10px); border-left: 1px solid rgba(255,255,255,0.06); overflow-y: auto;">
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: var(--radius-md); padding: 1rem;">
+              <h4 style="font-family: var(--font-display); font-size: 0.875rem; font-weight: 600; margin-bottom: 0.75rem; color: var(--color-space-100);">Status</h4>
+              <p id="explorer-status" style="font-size: 0.8125rem; color: var(--color-space-400); line-height: 1.5;">Use the ship freely and explore the sector.</p>
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: var(--radius-md); padding: 1rem;">
+              <h4 style="font-family: var(--font-display); font-size: 0.875rem; font-weight: 600; margin-bottom: 0.75rem; color: var(--color-space-100);">Target Data</h4>
+              <div id="explorer-data" style="font-size: 0.8125rem; color: var(--color-space-400); line-height: 1.6;">Nothing in range.</div>
+            </div>
+            
+            <div style="flex: 1; min-height: 150px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: var(--radius-md); padding: 1rem; display: flex; flex-direction: column;">
+              <h4 style="font-family: var(--font-display); font-size: 0.875rem; font-weight: 600; margin-bottom: 0.75rem; color: var(--color-space-100);">Discovery Log</h4>
+              <div id="explorer-log" style="flex: 1; overflow-y: auto; font-size: 0.75rem; color: var(--color-space-500); line-height: 1.6;"></div>
+            </div>
+            
+            <div style="background: rgba(20,184,166,0.1); border: 1px solid rgba(20,184,166,0.2); border-radius: var(--radius-md); padding: 1rem;">
+              <h4 style="font-family: var(--font-display); font-size: 0.875rem; font-weight: 600; margin-bottom: 0.75rem; color: var(--color-void-400);">⚡ Ship Upgrades</h4>
+              <div id="upgrades-panel" style="display: flex; flex-direction: column; gap: 0.75rem;"></div>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 
-    <div class="modal-overlay" id="study-modal" onclick="closeStudyModal()">
-        <div class="modal-content modal-lg" onclick="event.stopPropagation()">
-            <button class="close-btn modal-close" onclick="closeStudyModal()">✕</button>
-            <h2 class="modal-title">🎓 Study & Research Mode</h2>
-            <div class="study-tabs">
-                <button class="study-tab-btn active" data-tab="flashcards" onclick="switchStudyTab('flashcards')">📚 Flashcards</button>
-                <button class="study-tab-btn" data-tab="quiz" onclick="switchStudyTab('quiz')">🧠 Quiz</button>
-                <button class="study-tab-btn" data-tab="challenges" onclick="switchStudyTab('challenges')">🎮 Challenges</button>
-                <button class="study-tab-btn" data-tab="compare" onclick="switchStudyTab('compare')">⚖️ Compare</button>
-                <button class="study-tab-btn" data-tab="progress" onclick="switchStudyTab('progress')">🏆 Progress</button>
-                <button class="study-tab-btn" data-tab="discover" onclick="switchStudyTab('discover')">🔬 Discover</button>
-            </div>
-            <div class="study-body">
-                <div class="study-pane" id="study-flashcards"><div id="flashcard-area"><p style="text-align:center;color:var(--text-muted);padding:20px;">Loading...</p></div></div>
-                <div class="study-pane" id="study-quiz" style="display:none;"><div id="quiz-area"></div></div>
-                <div class="study-pane" id="study-challenges" style="display:none;"><div id="challenges-area"></div></div>
-                <div class="study-pane" id="study-compare" style="display:none;"><div id="compare-area"></div></div>
-                <div class="study-pane" id="study-progress" style="display:none;"><div id="progress-area"></div></div>
-                <div class="study-pane" id="study-discover" style="display:none;"><div id="discover-area"></div></div>
-            </div>
-        </div>
+  <!-- Detail Modal (for table row clicks) -->
+  <div class="modal-overlay" id="modal-detail" role="dialog" aria-modal="true" aria-labelledby="modal-detail-title">
+    <div class="modal">
+      <header class="modal-header">
+        <h2 class="modal-title" id="modal-detail-title">Details</h2>
+        <button class="modal-close" aria-label="Close details">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </header>
+      <div class="modal-body" id="modal-detail-body"></div>
     </div>
+  </div>
 
-    <script src="lib/chart.min.js"></script>
-    <script src="lib/jspdf.min.js"></script>
-    <script src="lib/jspdf.autotable.min.js"></script>
-    <script src="lib/three.min.js"></script>
-
-    <script src="charts_view.js"></script>
-    <script src="three_view.js"></script>
-
-    <script src="animations.js"></script>
-    <script src="js/pdf.js"></script>
-    <script src="app.js"></script>
-    <script src="study.js"></script>
-
-    <script>
-        function toggleSidebar() {
-            document.getElementById('settings-sidebar').classList.toggle('open');
-            document.getElementById('overlay').classList.toggle('active');
-            document.getElementById('hamburger').classList.toggle('active');
-        }
-    </script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>

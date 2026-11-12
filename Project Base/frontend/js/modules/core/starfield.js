@@ -26,6 +26,12 @@
             if (!ctx) return;
             this.canvas = canvas;
             this.ctx = ctx;
+            // Inside an iframe (UDB embed) the viewport is smaller and the
+            // host page may already be rendering other animations.  Cap the
+            // device pixel ratio and star count to keep the frame budget sane.
+            this._inIframe = (function () {
+                try { return window !== window.top; } catch (e) { return false; }
+            })();
             this.resize();
             this.spawn();
             this.bindInput();
@@ -67,7 +73,7 @@
         },
 
         resize() {
-            this.dpr = window.devicePixelRatio || 1;
+            this.dpr = this._inIframe ? 1 : Math.min(2, window.devicePixelRatio || 1);
             this.width = window.innerWidth;
             this.height = window.innerHeight;
             this.canvas.width = this.width * this.dpr;

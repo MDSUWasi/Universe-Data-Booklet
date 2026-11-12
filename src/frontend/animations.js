@@ -6,9 +6,11 @@ let stars = [];
 let meteors = [];
 let particles = [];
 
-const STAR_COUNT = 150;
+const STAR_COUNT = 100;
 const METEOR_COUNT = 3;
 const METEOR_SPEED = 8;
+const FRAME_INTERVAL = 1000 / 30; // cap at ~30fps to reduce CPU load
+let _lastFrame = 0;
 
 function resize() {
     width = canvas.width = window.innerWidth;
@@ -44,7 +46,7 @@ function spawnMeteor() {
 
 function initParticles() {
     particles = [];
-    for(let i=0; i<20; i++) {
+    for(let i=0; i<12; i++) {
         particles.push({
             x: Math.random() * width,
             y: Math.random() * height,
@@ -56,16 +58,27 @@ function initParticles() {
     }
 }
 
+let themeColors = null;
+let themeColorsTs = 0;
 function getThemeColors() {
+    const now = Date.now();
+    if (themeColors && now - themeColorsTs < 5000) return themeColors;
     const style = getComputedStyle(document.body);
-    return {
+    themeColors = {
         primary: style.getPropertyValue('--primary').trim(),
         secondary: style.getPropertyValue('--secondary').trim(),
         bg: style.getPropertyValue('--bg-color').trim()
     };
+    themeColorsTs = now;
+    return themeColors;
 }
 
-function animate() {
+function animate(timestamp) {
+    requestAnimationFrame(animate);
+    const dt = timestamp - _lastFrame;
+    if (dt < FRAME_INTERVAL) return;
+    _lastFrame = timestamp - (dt % FRAME_INTERVAL);
+
     const colors = getThemeColors();
     
     ctx.fillStyle = colors.bg;
@@ -100,7 +113,7 @@ function animate() {
         ctx.globalAlpha = 1;
     });
 
-    if (Math.random() < 0.02) spawnMeteor();
+    if (Math.random() < 0.015) spawnMeteor();
 
     for (let i = meteors.length - 1; i >= 0; i--) {
         const m = meteors[i];
@@ -124,10 +137,8 @@ function animate() {
         ctx.lineTo(m.x - Math.cos(m.angle)*m.length, m.y - Math.sin(m.angle)*m.length);
         ctx.stroke();
     }
-
-    requestAnimationFrame(animate);
 }
 
 resize();
 initParticles();
-animate();
+requestAnimationFrame(animate);

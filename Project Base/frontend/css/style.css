@@ -144,6 +144,32 @@
 }
 [data-theme="planetary"] .main-content { padding-bottom: 80px; }
 
+/* When embedded in the UDB iframe, scale up typography and padding so the
+   interface is readable and comfortable at typical iframe widths. */
+.iframe-embed {
+    --scale: 1.18;
+}
+.iframe-embed .hero-title { font-size: clamp(2.4rem, 5.8vw, 4.1rem); }
+.iframe-embed .hero-sub { font-size: 1.15rem; }
+.iframe-embed .hero { padding: 140px 24px 7vh; gap: 26px; }
+.iframe-embed .body-card { padding: 28px; gap: 16px; }
+.iframe-embed .body-card-heading h2 { font-size: 1.3rem; }
+.iframe-embed .body-card-heading p { font-size: 0.82rem; }
+.iframe-embed .body-card > p { font-size: 0.95rem; line-height: 1.6; }
+.iframe-embed .body-card-metric strong { font-size: 1.1rem; }
+.iframe-embed .body-card-metric span { font-size: 0.85rem; }
+.iframe-embed .body-card-action { padding: 14px 18px; font-size: 0.95rem; }
+.iframe-embed .stat { padding: 18px 22px; min-width: 170px; }
+.iframe-embed .stat-num { font-size: 1.8rem; }
+.iframe-embed .stat-label { font-size: 0.75rem; }
+.iframe-embed .planetary-focus { gap: 22px; }
+.iframe-embed .modal-panel { padding: 30px; }
+.iframe-embed .modal-head h2 { font-size: 1.4rem; }
+.iframe-embed .modal-intro { font-size: 0.95rem; }
+.iframe-embed .side-nav-item { padding: 16px; }
+.iframe-embed .nav-title { font-size: 0.95rem; }
+.iframe-embed .nav-desc { font-size: 0.78rem; }
+
 html {
     scroll-behavior: smooth;
     background-color: var(--bg);
@@ -1901,6 +1927,129 @@ h1, h2, h3 { color: var(--ink); line-height: 1.25; }
     outline: 3px solid var(--terracotta);
     outline-offset: 3px;
     border-radius: 8px;
+}
+
+/* ---- Encyclopedia layout ---- */
+.encyclopedia-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+.tab-btn {
+    padding: 10px 22px;
+    font-family: inherit;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--ink-soft);
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all var(--ease);
+}
+.tab-btn:hover { border-color: var(--purple); }
+.tab-btn.active {
+    color: var(--ink-on-fill);
+    background: linear-gradient(120deg, var(--purple), var(--purple-deep));
+    border-color: var(--purple);
+}
+
+.encyclopedia-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 22px;
+}
+.encyclopedia-loading {
+    text-align: center;
+    padding: 40px;
+    color: var(--ink-mute);
+    font-size: 0.95rem;
+}
+
+.ency-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 24px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    backdrop-filter: blur(9px);
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--ease), box-shadow var(--ease);
+}
+.ency-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+.ency-card-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.ency-symbol {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    font-size: 1.3rem;
+    border-radius: 12px;
+    background: linear-gradient(140deg, var(--tint-3), var(--warm-2));
+    flex-shrink: 0;
+}
+.ency-name {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--ink);
+}
+.ency-type {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+}
+.ency-desc {
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    line-height: 1.55;
+}
+.ency-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+}
+.ency-table td {
+    padding: 5px 0;
+    border-bottom: 1px dashed var(--border);
+}
+.ency-table td:first-child {
+    color: var(--ink-mute);
+    width: 45%;
+}
+.ency-table td:last-child {
+    color: var(--ink);
+    font-weight: 600;
+    text-align: right;
+}
+.ency-footer {
+    font-size: 0.7rem;
+    color: var(--ink-mute);
+    margin-top: auto;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+}
+
+/* Sites tab: grouped by body */
+.ency-section {
+    margin-bottom: 28px;
+}
+.ency-section h3 {
+    font-size: 1.05rem;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--border-warm);
 }
 
 /* ---- Encyclopedia images & warnings ---- */

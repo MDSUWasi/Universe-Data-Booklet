@@ -1,0 +1,49 @@
+/* THEME 3: PLANETARY — warm earthy golds/terracottas, parchment surfaces.
+   Active when <html> has data-theme="planetary". */
+[data-theme="planetary"] {
+    --purple-light: #C9821A;
+    --purple: #B87333;
+    --purple-deep: #8B5A2B;
+    --tint-1: #FFF6EC;
+    --tint-2: #FFEFD8;
+    --tint-3: #FBE2C4;
+    --tint-4: #F2CDA0;
+    --warm-1: #FFF9F4;
+    --warm-2: #FFEFE4;
+    --warm-3: #FDE1D1;
+    --terracotta: #C75B3C;
+    --terracotta-deep: #A0452A;
+    --gold: #F2CC8F;
+    --gold-deep: #C9821A;
+    --coral: #D97757;
+    --sage: #6B8E6B;
+    --sage-deep: #4E7A4E;
+    --sky: #5B9BD5;
+    --sky-deep: #2F6B9A;
+    --plum: #8B6F4A;
+    --ink: #5C3D2E;
+    --ink-soft: #7A5A42;
+    --ink-mute: #9A7A5A;
+    --ink-on-fill: #FFF6EC;
+    --surface: rgba(255, 246, 236, 0.92);
+    --surface-solid: #FFF8F0;
+    --border: rgba(184, 115, 51, 0.22);
+    --border-warm: rgba(199, 91, 60, 0.38);
+    --shadow-sm: 0 2px 10px rgba(139, 90, 43, 0.12);
+    --shadow-md: 0 8px 26px rgba(139, 90, 43, 0.16);
+    --shadow-lg: 0 18px 50px rgba(160, 69, 42, 0.18);
+    --bg: #FDF3E6;
+    --panel: var(--surface);
+    --panel-solid: var(--surface-solid);
+    --accent: var(--terracotta-deep);
+    --accent-soft: rgba(201, 130, 26, 0.22);
+    --text-primary: var(--ink);
+    --text-secondary: var(--ink-soft);
+    --text-muted: var(--ink-mute);
+    --grad-a: rgba(201, 130, 26, 0.18);
+    --grad-b: rgba(199, 91, 60, 0.18);
+    --grad-c: rgba(184, 115, 51, 0.16);
+    --grad-d: #FFF6EC;
+    --grad-e: #FFEFD8;
+    --grad-f: #FFF0E0;
+}

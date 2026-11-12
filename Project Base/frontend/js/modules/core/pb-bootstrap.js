@@ -26,7 +26,9 @@
     }
 
     // The prefix that routes requests back into the embedded app.
-    var PB_BASE = inIframe ? '/pb' : '';
+    // Project Base's frontend is now merged directly into UDB's index.html and
+    // its API routes are served at the root level, so no prefix is needed.
+    var PB_BASE = '';
 
     // Expose for any module that wants to build URLs explicitly.
     window.PB_BASE = PB_BASE;
@@ -94,4 +96,11 @@
 
     // Surface the flag for diagnostics / conditional module behaviour.
     window.PB_IN_IFRAME = inIframe;
+
+    // Apply the iframe-embed class only when actually inside an iframe.
+    // When served inline within UDB the host page owns layout and scaling.
+    if (inIframe) {
+        document.documentElement.classList.add('iframe-embed');
+        document.body.classList.add('iframe-embed');
+    }
 })();

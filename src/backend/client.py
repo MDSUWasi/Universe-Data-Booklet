@@ -147,11 +147,11 @@ def load_exoplanets_from_csv():
                 
                 p = {
                     'pl_name': p_name,
-                    'hostname': row.get('pl_hostname') or row.get('primary') or 'Unknown',
+                    'hostname': row.get('hostname') or row.get('pl_hostname') or row.get('primary') or 'Unknown',
                     'pl_orbper': row.get('pl_orbper', ''),
                     'pl_rade': row.get('pl_rade', ''),
                     'pl_bmasse': row.get('pl_bmasse', ''),
-                    'pl_discmethod': row.get('pl_discmethod', 'Unknown')
+                    'pl_discmethod': row.get('discoverymethod') or row.get('pl_discmethod') or row.get('pl_disc', 'Unknown')
                 }
                 
                 enriched = enrich_planet_data(p)
