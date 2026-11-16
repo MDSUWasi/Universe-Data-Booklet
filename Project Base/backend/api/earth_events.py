@@ -3,7 +3,7 @@
 Endpoint: https://earthquake.usgs.gov/fdsnws/event/1/query
 No API key required.  Cached through the shared SQLite store.
 
-Independent of: elevation, weather, tiles, nasa, opennotify, encyclopedia.
+Independent of: elevation, weather, tiles, udb, udb_notify, encyclopedia.
 """
 
 from __future__ import annotations

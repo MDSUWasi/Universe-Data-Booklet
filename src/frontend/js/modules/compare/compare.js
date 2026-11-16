@@ -5,31 +5,31 @@ let cmpChart = null;
 let crossChart = null;
 let comparisonData = [];
 
+let _compareInitialized = false;
+
 export function initCompare() {
-  const filterButtons = document.querySelectorAll('#modal-compare [data-body]');
-  const tableBody = document.querySelector('#cmp-table tbody');
-  const crossTableBody = document.querySelector('#cross-cmp-table tbody');
-  const canvas = document.getElementById('cmp-chart');
-  const crossCanvas = document.getElementById('cross-cmp-chart');
-  
-  filterButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      filterButtons.forEach(b => {
-        b.classList.remove('active');
-        b.setAttribute('aria-pressed', 'false');
+  if (!_compareInitialized) {
+    const filterButtons = document.querySelectorAll('#modal-compare [data-body]');
+    filterButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterButtons.forEach(b => {
+          b.classList.remove('active');
+          b.setAttribute('aria-pressed', 'false');
+        });
+        btn.classList.add('active');
+        btn.setAttribute('aria-pressed', 'true');
+        renderComparisonTable(btn.dataset.body);
       });
-      btn.classList.add('active');
-      btn.setAttribute('aria-pressed', 'true');
-      renderComparisonTable(btn.dataset.body);
     });
-  });
-  
-  // Table sorting
-  document.querySelectorAll('#cmp-table th[data-sort]').forEach(th => {
-    th.style.cursor = 'pointer';
-    th.addEventListener('click', () => sortTable(th.dataset.sort));
-  });
-  
+
+    document.querySelectorAll('#cmp-table th[data-sort]').forEach(th => {
+      th.style.cursor = 'pointer';
+      th.addEventListener('click', () => sortTable(th.dataset.sort));
+    });
+
+    _compareInitialized = true;
+  }
+
   loadComparisonData();
 }
 

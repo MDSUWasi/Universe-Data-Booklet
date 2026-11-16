@@ -8,7 +8,7 @@
 **Project-Base (Planetary Explorer)** is a client-side research web application for exploring, comparing, and planning across planetary terrain sites on Earth, the Moon, and Mars. It is a browser-first tool that:
 
 - Browses an encyclopedia of planets, moons, and diverse terrain candidate sites.
-- Displays live space data from free public APIs (ISS position, astronauts, Mars weather, space weather, Earth natural events, earthquakes, NASA APOD).
+- Displays live space data from free public APIs (ISS position, astronauts, Mars weather, space weather, Earth natural events, earthquakes).
 - Compares terrain metrics (roughness, slope, area) across catalogued sites using matched-scale DEM analysis.
 - Runs a Discovery Lab that screens any Earth coordinate for local slope/relief using the Open-Meteo elevation API.
 - Designs mission concepts with a wizard-style planner that ranks every site by science, cost, and risk viability.
@@ -39,8 +39,8 @@ Project ELMO/
 │       ├── tiles.py           # NASA Trek WMTS tile proxy (Moon / Mars)
 │       ├── routes.py          # Data endpoints backed by committed CSVs + encyclopedia + NASA APIs
 │       ├── encyclopedia.py    # Static planetary data (planets, moons, terrain sites)
-│       ├── nasa.py            # NASA free APIs (APOD, EONET, InSight weather, DONKI)
-│       ├── opennotify.py      # Open Notify (ISS position, astronauts)
+│       ├── udb.py                # NASA free APIs (EONET, InSight weather, DONKI)
+│       ├── udb_notify.py         # Open Notify (ISS position, astronauts)
 │       └── earth_events.py    # USGS earthquake feed
 ├── frontend/
 │   ├── index.html             # Single-page application shell + all modals
@@ -165,7 +165,6 @@ All free, public, no paid account required:
 | Open-Meteo Elevation API | 3×3 elevation grid for Discovery Lab | `api.open-meteo.com/v1/elevation` | CC BY 4.0 |
 | Open-Meteo Forecast API | Current temperature + wind | `api.open-meteo.com/v1/forecast` | CC BY 4.0 |
 | NASA Solar System Treks (WMTS) | Moon LRO WAC Mosaic, Mars Viking MDIM21 tiles | `trek.nasa.gov/tiles/...` | Public Domain |
-| NASA APOD | Astronomy Picture of the Day | `api.nasa.gov/planetary/apod` | NASA terms (DEMO_KEY) |
 | NASA EONET | Earth natural events (wildfires, storms, volcanoes) | `eonet.gsfc.nasa.gov/api/v3/events` | NASA terms (DEMO_KEY) |
 | NASA InSight Weather | Mars weather (sol reports) | `api.nasa.gov/insight_weather/` | NASA terms (DEMO_KEY) |
 | NASA DONKI | Space weather notifications (CME, flares, G-storms) | `api.nasa.gov/DONKI/` | NASA terms (DEMO_KEY) |
@@ -209,13 +208,12 @@ All free, public, no paid account required:
 | 13 | `GET /api/encyclopedia/planet/{id}` | Single planet entry | `routes.py:planet_payload` |
 | 14 | `GET /api/encyclopedia/moon/{id}` | Single moon entry | `routes.py:moon_payload` |
 | 15 | `GET /api/encyclopedia/site/{id}` | Single terrain site entry | `routes.py:site_payload` |
-| 16 | `GET /api/nasa/apod` | NASA Astronomy Picture of the Day | `routes.py:apod_payload` |
-| 17 | `GET /api/nasa/earth-events` | Earth natural events (EONET) | `routes.py:earth_events_payload` |
-| 18 | `GET /api/nasa/mars-weather` | InSight Mars weather report | `routes.py:mars_weather_payload` |
-| 19 | `GET /api/nasa/space-weather` | Space weather notifications (DONKI) | `routes.py:space_weather_payload` |
-| 20 | `GET /api/space/iss` | Current ISS position (Open Notify) | `routes.py:iss_position_payload` |
-| 21 | `GET /api/space/astronauts` | Who is in space (Open Notify) | `routes.py:astronauts_payload` |
-| 22 | `GET /api/earth/earthquakes` | Recent earthquakes worldwide (USGS) | `routes.py:earthquakes_payload` |
+| 16 | `GET /api/nasa/earth-events` | Earth natural events (EONET) | `routes.py:earth_events_payload` |
+| 17 | `GET /api/nasa/mars-weather` | InSight Mars weather report | `routes.py:mars_weather_payload` |
+| 18 | `GET /api/nasa/space-weather` | Space weather notifications (DONKI) | `routes.py:space_weather_payload` |
+| 19 | `GET /api/space/iss` | Current ISS position (Open Notify) | `routes.py:iss_position_payload` |
+| 20 | `GET /api/space/astronauts` | Who is in space (Open Notify) | `routes.py:astronauts_payload` |
+| 21 | `GET /api/earth/earthquakes` | Recent earthquakes worldwide (USGS) | `routes.py:earthquakes_payload` |
 
 All upstream calls pass through the shared SQLite cache in `backend/api/cache.py:CacheStore`.
 
@@ -262,15 +260,15 @@ All upstream calls pass through the shared SQLite cache in `backend/api/cache.py
 │  api/tiles.py     → NASA Trek WMTS tile proxy                   │
 │  api/routes.py    → CSV-backed + encyclopedia + NASA API routes │
 │  api/encyclopedia.py → Static planets/moons/sites data          │
-│  api/nasa.py      → APOD, EONET, InSight, DONKI                 │
-│  api/opennotify.py → ISS position, astronauts                   │
+│  api/udb.py      → EONET, InSight, DONKI                 │
+│  api/udb_notify.py → ISS position, astronauts                   │
 │  api/earth_events.py → USGS earthquakes                         │
 └─────────────────────────────────────────────────────────────────┘
                               │ HTTP
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                   EXTERNAL PUBLIC APIs (free)                    │
-│  Open-Meteo, NASA (APOD/EONET/InSight/DONKI), Open Notify,      │
+│  Open-Meteo, NASA (EONET/InSight/DONKI), Open Notify,      │
 │  USGS Earthquakes, NASA Solar System Treks (WMTS)               │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -314,8 +312,8 @@ All frontend modules are **independent classic scripts** that register themselve
 - **`api/tiles.py`**: NASA Trek WMTS tile proxy. Moon = LRO WAC Mosaic, Mars = Viking MDIM21. Validates tile paths (zoom ≤ 6, row/col bounds). Cached as immutable (no age refresh).
 - **`api/routes.py`**: Aggregates all endpoints. Reads committed CSVs (`all_sites_comparison.csv`, `site_comparison.csv`, `lunar_fingerprints.csv`) for data endpoints; delegates encyclopedia to `encyclopedia.py`; delegates NASA/Open Notify/USGS calls to respective modules.
 - **`api/encyclopedia.py`**: Static data — 5 planets (Earth, Moon, Mars, Jupiter, Saturn), 2 moons (Phobos, Deimos), 17 terrain sites (6 Earth, 4 Moon, 5 Mars) with physical properties, colors, descriptions.
-- **`api/nasa.py`**: APOD, EONET, InSight Mars weather, DONKI space weather. Uses `DEMO_KEY`. Cached via shared store.
-- **`api/opennotify.py`**: ISS position, astronauts in space.
+- **`api/udb.py`**: EONET, InSight Mars weather, DONKI space weather. Uses `DEMO_KEY`. Cached via shared store.
+- **`api/udb_notify.py`**: ISS position, astronauts in space.
 - **`api/earth_events.py`**: USGS earthquake feed (GeoJSON, min magnitude 2.5, limit 30).
 
 ---
@@ -357,13 +355,11 @@ Project-Base is a **planetary terrain research and comparison atlas**. Its core 
 - "Surprise Me" picks a random Earth site from `SITE_DATA`.
 
 #### D. Realtime Dashboard
-- Fetches 8 live endpoints in parallel via `Promise.all`:
+- Fetches 5 live endpoints in parallel via `Promise.all`:
   - ISS position (Open Notify)
   - Astronauts in space (Open Notify)
-  - NASA APOD (image + explanation)
   - Mars weather (InSight latest sol)
   - Space weather / DONKI (last 7 days)
-  - Earth natural events / EONET (last 20)
   - Recent earthquakes / USGS (min M2.5, limit 30)
 - Each result shows cache state (HIT/MISS/STALE). Silent failure tolerance (offline-friendly).
 - Refresh button re-fetches all.

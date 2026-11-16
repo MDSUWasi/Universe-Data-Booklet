@@ -52,29 +52,32 @@ def _load_module(name: str, file_path: Path):
 def _load_project_base():
     """Import Project Base's backend stack by file path.  Returns the
     ``AppHandler`` class or raises on failure."""
-    # Register the ``backend`` and ``backend.api`` packages so Project Base's
-    # relative imports (``from .api import ...``) resolve correctly.
     import types
 
-    backend_pkg = types.ModuleType("backend")
+    # Use a unique namespace prefix ("pb_backend") so Project Base's modules
+    # never collide with Universe Data Booklet's own ``backend`` package.
+    PB_PKG = "pb_backend"
+    PB_API_PKG = "pb_backend.api"
+
+    backend_pkg = types.ModuleType(PB_PKG)
     backend_pkg.__path__ = [str(PB_BACKEND_DIR)]  # type: ignore[attr-defined]
     backend_pkg.__file__ = str(PB_BACKEND_DIR / "__init__.py")
-    sys.modules["backend"] = backend_pkg
+    sys.modules[PB_PKG] = backend_pkg
 
-    api_pkg = types.ModuleType("backend.api")
+    api_pkg = types.ModuleType(PB_API_PKG)
     api_pkg.__path__ = [str(PB_BACKEND_DIR / "api")]  # type: ignore[attr-defined]
     api_pkg.__file__ = str(PB_BACKEND_DIR / "api" / "__init__.py")
-    sys.modules["backend.api"] = api_pkg
+    sys.modules[PB_API_PKG] = api_pkg
     backend_pkg.api = api_pkg  # type: ignore[attr-defined]
 
     api_dir = PB_BACKEND_DIR / "api"
     for sub in ("cache", "weather", "tiles", "routes",
-                "encyclopedia", "nasa", "opennotify", "earth_events"):
-        _load_module(f"backend.api.{sub}", api_dir / f"{sub}.py")
+                "encyclopedia", "udb", "udb_notify", "earth_events", "elevation"):
+        _load_module(f"{PB_API_PKG}.{sub}", api_dir / f"{sub}.py")
 
     # Load the package __init__ last so it can re-export the submodule names.
-    _load_module("backend.api", api_dir / "__init__.py")
-    return _load_module("backend.server", PB_BACKEND_DIR / "server.py")
+    _load_module(PB_API_PKG, api_dir / "__init__.py")
+    return _load_module(f"{PB_PKG}.server", PB_BACKEND_DIR / "server.py")
 
 
 try:  # pragma: no cover - import side effects only

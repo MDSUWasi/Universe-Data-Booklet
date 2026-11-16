@@ -2,42 +2,49 @@
 import { fetchApi, showToast } from '../core/state.js';
 
 let scaleChart = null;
+let refreshTimer = null;
 
 export function initScale() {
-  const summaryDiv = document.getElementById('scale-summary');
-  const statusDiv = document.getElementById('scale-status');
-  const canvas = document.getElementById('scale-chart');
-  
-  if (!canvas) return;
-  
   loadScaleData();
+  if (refreshTimer) clearInterval(refreshTimer);
+  refreshTimer = setInterval(loadScaleData, 30000);
 }
 
 async function loadScaleData() {
   const summaryDiv = document.getElementById('scale-summary');
   const statusDiv = document.getElementById('scale-status');
   const canvas = document.getElementById('scale-chart');
-  
+
+  if (!canvas) return;
+
   try {
     const result = await fetchApi('/api/scale-sensitivity');
     if (result.error) throw new Error(result.error);
-    
+
     renderScaleChart(result, canvas);
-    
+
+    const fingerprints = result.fingerprints || [];
+    const reference = result.comparison_reference || {};
+    const shortWindow = result.fingerprint_window_m;
+    const longWindow = result.comparison_window_m;
+
     if (summaryDiv) {
-      const lunar12 = result.lunar_12m || {};
-      const lunar90 = result.lunar_90m || {};
-      summaryDiv.innerHTML = `
-        <strong>Lunar 12m fingerprint:</strong> ${lunar12.count || 0} sites, mean roughness ${lunar12.mean_rough?.toFixed(2) || '—'}m, p95 ${lunar12.p95_rough?.toFixed(2) || '—'}m<br>
-        <strong>Lunar 90m comparison:</strong> ${lunar90.count || 0} sites, mean roughness ${lunar90.mean_rough?.toFixed(2) || '—'}m, p95 ${lunar90.p95_rough?.toFixed(2) || '—'}m<br>
-        <strong>Scale factor:</strong> ${result.scale_factor?.toFixed(2) || '—'}× roughness increase from 12m to 90m window
-      `;
+      summaryDiv.textContent = result.warning || '';
     }
-    
+
     if (statusDiv) {
-      statusDiv.textContent = `Data from ${result.source || 'processed DEMs'} • ${new Date().toLocaleDateString()}`;
+      const means = fingerprints.map(p => p.roughness_mean_m);
+      const areas = fingerprints.map(p => p.area_km2);
+      const slopes = fingerprints.map(p => p.slope_mean_deg);
+      statusDiv.textContent =
+        'Recorded ' + shortWindow + ' m fingerprints: mean ' +
+        means.map(v => v.toFixed(3)).join(', ') + ' m; area ' +
+        areas.map(v => v.toFixed(3)).join(', ') + ' km²; slope ' +
+        slopes.map(v => (Number.isFinite(v) ? v.toFixed(3) : '-')).join(', ') +
+        '°. ' + longWindow + ' m reference: mean ' +
+        (reference.mean_roughness_m ?? 0).toFixed(3) + ' m, p95 ' +
+        (reference.p95_roughness_m ?? 0).toFixed(3) + '. Updated ' + new Date().toLocaleTimeString();
     }
-    
   } catch (error) {
     console.error('Scale load error:', error);
     if (summaryDiv) summaryDiv.textContent = `Error loading data: ${error.message}`;
@@ -50,105 +57,42 @@ function renderScaleChart(data, canvas) {
     console.warn('Chart.js not loaded');
     return;
   }
-  
+
   const ctx = canvas.getContext('2d');
-  
+  const fingerprints = data.fingerprints || [];
+  const reference = data.comparison_reference || {};
+  const shortWindow = data.fingerprint_window_m;
+  const longWindow = data.comparison_window_m;
+
+  const labels = fingerprints.map(p => 'Patch ' + p.patch_id + ' (' + shortWindow + ' m)')
+    .concat(['Main reference (' + longWindow + ' m)']);
+  const means = fingerprints.map(p => p.roughness_mean_m).concat([reference.mean_roughness_m]);
+  const p95s = fingerprints.map(p => p.roughness_p95_m).concat([reference.p95_roughness_m]);
+
+  const chartData = {
+    labels,
+    datasets: [
+      { label: 'Mean roughness (m)', data: means, backgroundColor: '#55d6a5' },
+      { label: 'p95 roughness (m)', data: p95s, backgroundColor: '#f5c451' }
+    ]
+  };
+
   if (scaleChart) {
-    scaleChart.destroy();
+    scaleChart.data = chartData;
+    scaleChart.update('none');
+    return;
   }
-  
-  const sites12 = data.sites_12m || [];
-  const sites90 = data.sites_90m || [];
-  
-  const allSites = [...new Set([...sites12.map(s => s.name), ...sites90.map(s => s.name)])];
-  
+
   scaleChart = new Chart(ctx, {
     type: 'bar',
-    data: {
-      labels: allSites,
-      datasets: [
-        {
-          label: 'Mean Roughness (12m window)',
-          data: allSites.map(name => {
-            const site = sites12.find(s => s.name === name);
-            return site?.mean_rough ?? null;
-          }),
-          backgroundColor: 'rgba(124, 58, 237, 0.7)',
-          borderColor: 'var(--color-nebula-400)',
-          borderWidth: 1,
-          borderRadius: 4,
-        },
-        {
-          label: 'Mean Roughness (90m window)',
-          data: allSites.map(name => {
-            const site = sites90.find(s => s.name === name);
-            return site?.mean_rough ?? null;
-          }),
-          backgroundColor: 'rgba(6, 182, 212, 0.7)',
-          borderColor: 'var(--color-aurora-400)',
-          borderWidth: 1,
-          borderRadius: 4,
-        },
-        {
-          label: 'P95 Roughness (12m)',
-          data: allSites.map(name => {
-            const site = sites12.find(s => s.name === name);
-            return site?.p95_rough ?? null;
-          }),
-          backgroundColor: 'rgba(124, 58, 237, 0.3)',
-          borderColor: 'var(--color-nebula-300)',
-          borderWidth: 1,
-          borderRadius: 4,
-          borderDash: [5, 5],
-        },
-        {
-          label: 'P95 Roughness (90m)',
-          data: allSites.map(name => {
-            const site = sites90.find(s => s.name === name);
-            return site?.p95_rough ?? null;
-          }),
-          backgroundColor: 'rgba(6, 182, 212, 0.3)',
-          borderColor: 'var(--color-aurora-300)',
-          borderWidth: 1,
-          borderRadius: 4,
-          borderDash: [5, 5],
-        },
-      ],
-    },
+    data: chartData,
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: {
-          position: 'top',
-          labels: { color: 'var(--color-space-300)', font: { family: 'Space Grotesk', size: 11 }, usePointStyle: true, padding: 20 },
-        },
-        tooltip: {
-          backgroundColor: 'var(--color-space-900)',
-          titleColor: 'var(--color-space-50)',
-          bodyColor: 'var(--color-space-300)',
-          borderColor: 'rgba(255,255,255,0.1)',
-          borderWidth: 1,
-          padding: 12,
-          displayColors: true,
-          callbacks: {
-            label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y?.toFixed(2) ?? 'N/A'} m`,
-          },
-        },
-      },
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: '#e8eaf6' } } },
       scales: {
-        x: {
-          grid: { display: false },
-          ticks: { color: 'var(--color-space-500)', font: { family: 'Space Grotesk', size: 10 }, maxRotation: 45, minRotation: 45 },
-        },
-        y: {
-          title: { display: true, text: 'Roughness (meters)', color: 'var(--color-space-400)', font: { family: 'Space Grotesk', size: 11 } },
-          grid: { color: 'rgba(255,255,255,0.04)' },
-          ticks: { color: 'var(--color-space-500)', font: { family: 'JetBrains Mono', size: 10 } },
-          beginAtZero: true,
-        },
-      },
-    },
+        y: { beginAtZero: true, title: { display: true, text: 'Roughness (m)', color: '#9aa0c3' }, ticks: { color: '#9aa0c3' } },
+        x: { ticks: { color: '#e8eaf6', maxRotation: 0, minRotation: 0 } }
+      }
+    }
   });
 }

@@ -5,3 +5,12 @@ __pycache__/
 # Only seed data (exoplanets.csv, exoplanets.json) is tracked.
 src/data/asteroids.json
 src/data/cached_asteroids.json
+
+# Project Base runtime caches
+Project Base/.cache/
+
+# Environment files (never commit secrets)
+.env
+
+# Deployment artifacts
+*.log

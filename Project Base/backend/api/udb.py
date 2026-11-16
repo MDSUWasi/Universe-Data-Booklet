@@ -2,9 +2,8 @@
 
 Wraps several NASA open services that need no paid account:
 
-* APOD        -- Astronomy Picture of the Day (https://api.nasa.gov/planetary/apod)
 * EONET       -- Earth Observatory Natural Event Tracker
-               (https://eonet.gsfc.nasa.gov/api/v3/events)
+   (https://eonet.gsfc.nasa.gov/api/v3/events)
 * Mars Weather -- InSight lander weather
                (https://api.nasa.gov/insight_weather/)
 * DONKI       -- Space Weather Database Of Notifications, Knowledge, Information
@@ -37,10 +36,12 @@ from .cache import (
 NASA_BASE = "https://api.nasa.gov"
 DEMO_KEY = "DEMO_KEY"
 
-APOD_URL = NASA_BASE + "/planetary/apod"
 EONET_URL = "https://eonet.gsfc.nasa.gov/api/v3/events"
 MARS_WEATHER_URL = NASA_BASE + "/insight_weather/"
 DONKI_BASE = NASA_BASE + "/DONKI"
+# The DONKI service exposes separate sub-paths per notification type.
+# The legacy root path (/DONKI/) returns 404; each type must be queried individually.
+DONKI_TYPES = ("CME", "FLR", "GST")
 
 
 # --------------------------------------------------------------------------- #
@@ -69,34 +70,6 @@ def _cached_fetch(service: str, params_query: str, ttl: int, stale_ttl: int,
     key = cache_key(service, params_query)
     result = STORE.get_or_fetch(key, do_fetch, ttl, stale_ttl)
     return result.entry.body, result.entry.content_type, result.state
-
-
-# --------------------------------------------------------------------------- #
-# APOD
-# --------------------------------------------------------------------------- #
-
-def _validate_apod(payload: dict[str, Any]) -> None:
-    if not isinstance(payload, dict) or "title" not in payload:
-        raise UpstreamUnavailable("APOD returned an invalid response")
-
-
-def get_apod() -> dict[str, Any]:
-    """Return the latest APOD entry with cache state."""
-    url = APOD_URL + "?" + _nasa_params({})
-    body, content_type, state = _cached_fetch(
-        "apod", url, STATIC_TTL, STATIC_STALE_TTL, _validate_apod
-    )
-    payload = json.loads(body)
-    return {
-        "title": payload.get("title"),
-        "explanation": payload.get("explanation"),
-        "url": payload.get("url"),
-        "hdurl": payload.get("hdurl"),
-        "media_type": payload.get("media_type"),
-        "date": payload.get("date"),
-        "copyright": payload.get("copyright"),
-        "cache_state": state,
-    }
 
 
 # --------------------------------------------------------------------------- #
@@ -178,26 +151,38 @@ def _validate_donki(payload: Any) -> None:
 
 
 def get_space_weather(days: int = 7) -> dict[str, Any]:
-    """Return recent space weather notifications (CME, flares, G-Storms)."""
+    """Return recent space weather notifications (CME, flares, G-Storms).
+
+    The DONKI service exposes separate sub-paths per notification type
+    (``/DONKI/CME``, ``/DONKI/FLR``, ``/DONKI/GST``); the legacy root path
+    returns 404, so each type is queried individually and merged here.
+    """
     from urllib.parse import urlencode
     end_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     start_date = (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%Y-%m-%d")
-    params = urlencode({
-        "startDate": start_date,
-        "endDate": end_date,
-        "type": "all",
-    })
-    url = DONKI_BASE + "/" + params
-    body, content_type, state = _cached_fetch(
-        "donki", url, WEATHER_TTL, WEATHER_STALE_TTL, _validate_donki
-    )
-    payload = json.loads(body)
-    events = []
-    for ev in payload[:50]:
-        events.append({
-            "type": ev.get("activityType"),
-            "start_time": ev.get("startTime"),
-            "linked_flares": ev.get("linkedEvents", {}).get("FLR", []),
-            "cme": ev.get("linkedEvents", {}).get("CME", []),
+
+    events: list[dict[str, Any]] = []
+    for donki_type in DONKI_TYPES:
+        params = urlencode({
+            "startDate": start_date,
+            "endDate": end_date,
         })
-    return {"events": events, "count": len(events), "cache_state": state}
+        url = f"{DONKI_BASE}/{donki_type}?" + params
+        try:
+            body, content_type, state = _cached_fetch(
+                f"donki_{donki_type.lower()}", url,
+                WEATHER_TTL, WEATHER_STALE_TTL, _validate_donki
+            )
+            payload = json.loads(body)
+            for ev in payload[:50]:
+                events.append({
+                    "type": ev.get("activityType") or donki_type,
+                    "start_time": ev.get("startTime"),
+                    "linked_flares": ev.get("linkedEvents", {}).get("FLR", []),
+                    "cme": ev.get("linkedEvents", {}).get("CME", []),
+                })
+        except UpstreamUnavailable:
+            # One type failing should not break the whole endpoint.
+            continue
+
+    return {"events": events, "count": len(events), "cache_state": "HIT" if events else "MISS"}

@@ -46,4 +46,14 @@
     --grad-d: #FFF6EC;
     --grad-e: #FFEFD8;
     --grad-f: #FFF0E0;
+
+    /* Background glow layers (body::before) — warm terracotta-cream. */
+    --bg-grad-a: rgba(224, 122, 95, 0.22);
+    --bg-grad-b: rgba(244, 162, 97, 0.18);
+    --bg-grad-c: rgba(201, 130, 26, 0.10);
+
+    /* RGB fallbacks for rgba(var(...)) usage in style.css */
+    --color-space-900-rgb: 252, 232, 221;
+    --color-space-850-rgb: 245, 220, 200;
+    --color-space-800-rgb: 240, 201, 176;
 }

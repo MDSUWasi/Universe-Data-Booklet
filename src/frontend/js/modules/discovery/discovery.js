@@ -147,7 +147,7 @@ function renderResult(data, lat, lng) {
             border-radius: 4px;
             display: flex; align-items: center; justify-content: center;
             font-size: 0.625rem; font-family: var(--font-mono); font-weight: 600;
-            color: ${intensity > 0.5 ? '#030712' : 'white'};
+            color: ${intensity > 0.5 ? '#2d1810' : '#fef2ea'};
             box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1);
           " title="Elevation: ${elev.toFixed(1)}m">${Math.round(elev)}</div>
         `;

@@ -1,8 +1,8 @@
 /* Realtime dashboard: live data from free public APIs.
    Shows ISS position, astronauts in space, Mars weather, space weather,
-   Earth natural events, and recent earthquakes. Data comes from:
+   and recent earthquakes. Data comes from:
    - Open Notify (ISS, astronauts) — no key required
-   - NASA APOD, EONET, Mars Weather, DONKI — demo key
+   - NASA Mars Weather, DONKI — demo key
    - USGS Earthquakes — no key required
    Classic script: registers window.Realtime. */
 'use strict';
@@ -11,20 +11,16 @@
     const R = {
         _iss: null,
         _astros: null,
-        _apod: null,
         _marsWeather: null,
         _spaceWeather: null,
-        _earthEvents: null,
         _earthquakes: null,
 
         async loadAll() {
             await Promise.all([
                 this._fetchIss(),
                 this._fetchAstros(),
-                this._fetchApod(),
                 this._fetchMarsWeather(),
                 this._fetchSpaceWeather(),
-                this._fetchEarthEvents(),
                 this._fetchEarthquakes(),
             ]);
             this.render();
@@ -44,13 +40,6 @@
             } catch { /* silent */ }
         },
 
-        async _fetchApod() {
-            try {
-                const res = await fetch('/api/nasa/apod');
-                if (res.ok) this._apod = await res.json();
-            } catch { /* silent */ }
-        },
-
         async _fetchMarsWeather() {
             try {
                 const res = await fetch('/api/nasa/mars-weather');
@@ -62,13 +51,6 @@
             try {
                 const res = await fetch('/api/nasa/space-weather');
                 if (res.ok) this._spaceWeather = await res.json();
-            } catch { /* silent */ }
-        },
-
-        async _fetchEarthEvents() {
-            try {
-                const res = await fetch('/api/nasa/earth-events');
-                if (res.ok) this._earthEvents = await res.json();
             } catch { /* silent */ }
         },
 
@@ -117,17 +99,6 @@
                    </div>`
                 : `<div class="rt-card empty">☀️ Space weather unavailable</div>`;
 
-            const eventsHtml = this._earthEvents
-                ? `<div class="rt-card">
-                    <div class="rt-kicker">🌍 Earth Natural Events (EONET)</div>
-                    <div class="rt-value big">${this._earthEvents.count}</div>
-                    <div class="rt-list">${(this._earthEvents.events || []).slice(0, 6).map(e =>
-                        '<div class="rt-event">' + e.title + ' <span style="font-size:0.75rem;opacity:0.6">(' + (e.categories || []).join(', ') + ')</span></div>'
-                    ).join('')}</div>
-                    <div class="rt-note">Cache: ${this._earthEvents.cache_state}</div>
-                   </div>`
-                : `<div class="rt-card empty">🌍 Earth events unavailable</div>`;
-
             const quakesHtml = this._earthquakes
                 ? `<div class="rt-card">
                     <div class="rt-kicker">📉 Recent Earthquakes (USGS)</div>
@@ -139,28 +110,16 @@
                    </div>`
                 : `<div class="rt-card empty">📉 Earthquake data unavailable</div>`;
 
-            const apodHtml = this._apod
-                ? `<div class="rt-card rt-apod">
-                    <div class="rt-kicker">🌌 NASA APOD</div>
-                    <div class="rt-apod-title">${this._apod.title || 'Astronomy Picture of the Day'}</div>
-                    ${this._apod.url ? `<img class="rt-apod-img" src="${this._apod.url}" alt="APOD" />` : ''}
-                    <div class="rt-apod-desc">${(this._apod.explanation || '').slice(0, 200)}…</div>
-                    <div class="rt-note">Date: ${this._apod.date || '—'} · Cache: ${this._apod.cache_state}</div>
-                   </div>`
-                : `<div class="rt-card empty">🌌 APOD unavailable</div>`;
-
             panel.innerHTML = `
               <div class="realtime-grid">
                 ${issHtml}
                 ${astrosHtml}
                 ${marsHtml}
                 ${swHtml}
-                ${eventsHtml}
                 ${quakesHtml}
-                ${apodHtml}
               </div>
               <div class="realtime-footer">
-                All data from free public APIs: Open Notify, NASA (APOD · EONET · InSight · DONKI), USGS. No API keys required.
+                All data from free public APIs: Open Notify, NASA (InSight · DONKI), USGS. No API keys required.
               </div>
             `;
         },

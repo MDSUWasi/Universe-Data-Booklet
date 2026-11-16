@@ -1,0 +1,53 @@
+# Universe Data Booklet - systemd service
+#
+# Install:
+#   sudo cp universe-data-booklet.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable universe-data-booklet
+#   sudo systemctl start universe-data-booklet
+#
+# Manage:
+#   sudo systemctl status universe-data-booklet
+#   sudo systemctl restart universe-data-booklet
+#   sudo journalctl -u universe-data-booklet -f
+
+[Unit]
+Description=Universe Data Booklet - Astronomy & Planetary Science Web App
+Documentation=https://github.com/MDSUWasi/Universe-Data-Booklet
+After=network.target
+
+[Service]
+Type=simple
+User=appuser
+Group=appuser
+WorkingDirectory=/opt/universe-data-booklet
+EnvironmentFile=/opt/universe-data-booklet/.env
+ExecStart=/usr/bin/python3 /opt/universe-data-booklet/src/backend/server.py
+Restart=on-failure
+RestartSec=5
+StartLimitInterval=300
+StartLimitBurst=5
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/universe-data-booklet/src/data
+ReadWritePaths=/opt/universe-data-booklet/Project Base/.cache
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=true
+LockPersonality=true
+RestrictRealtime=true
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=universe-data-booklet
+
+[Install]
+WantedBy=multi-user.target

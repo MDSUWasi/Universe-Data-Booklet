@@ -1,48 +1,48 @@
 /* ============================================================
  *  THEME 1: LIGHT
- *  Purple fills + terracotta highlights, light surfaces.
+ *  Warm cream fills + terracotta highlights, light surfaces.
  *  Active when <html> has data-theme="light" (the default).
  *  #B200ED · #8F00FF · #81007F  →  backgrounds / fills only
  * ============================================================ */
 :root {
-    /* Saturated purples — FILLS & BACKGROUNDS ONLY */
-    --purple-light: #B200ED;
-    --purple: #8F00FF;
-    --purple-deep: #81007F;
+    /* Warm cream fills — FILLS & BACKGROUNDS ONLY */
+    --purple-light: #f5dcc8;
+    --purple: #f0c9b0;
+    --purple-deep: #e8b493;
 
-    /* Light purple tints (surfaces) */
-    --tint-1: #FBF6FF;
-    --tint-2: #F4EAFF;
-    --tint-3: #EBDDFF;
-    --tint-4: #DEC9FA;
+    /* Light cream tints (surfaces) */
+    --tint-1: #fef2ea;
+    --tint-2: #fce8dd;
+    --tint-3: #f5dcc8;
+    --tint-4: #f0c9b0;
 
     /* Warm light surfaces */
-    --warm-1: #FFF9F4;
-    --warm-2: #FFEFE4;
-    --warm-3: #FDE1D1;
+    --warm-1: #fff9f4;
+    --warm-2: #ffefe4;
+    --warm-3: #fde1d1;
 
     /* Eye-catching highlights (text / icons / borders) */
-    --terracotta: #E07A5F;
-    --terracotta-deep: #C75B3C;
-    --gold: #F2CC8F;
-    --gold-deep: #C9821A;
-    --coral: #F08080;
-    --sage: #81B29A;
-    --sage-deep: #4E8C6E;
-    --sky: #62B6CB;
-    --sky-deep: #2E7D9A;
-    --plum: #7A5C8E;
+    --terracotta: #e07a5f;
+    --terracotta-deep: #c75b3c;
+    --gold: #f2cc8f;
+    --gold-deep: #c9821a;
+    --coral: #f08080;
+    --sage: #81b29a;
+    --sage-deep: #4e8c6e;
+    --sky: #62b6cb;
+    --sky-deep: #2e7d9a;
+    --plum: #7a5c8e;
 
-    /* Text — muted plum, never black */
-    --ink: #52406A;
-    --ink-soft: #6E5C82;
-    --ink-mute: #9A8AAE;
-    --ink-on-fill: #FFF9F2;
+    /* Text — muted brown, never black */
+    --ink: #5c3d2e;
+    --ink-soft: #7a5a42;
+    --ink-mute: #9a7a5a;
+    --ink-on-fill: #fff6ec;
 
     /* Surfaces */
-    --surface: rgba(255, 255, 255, 0.86);
-    --surface-solid: #FFFFFF;
-    --border: rgba(143, 0, 255, 0.16);
+    --surface: rgba(254, 242, 234, 0.86);
+    --surface-solid: #fef2ea;
+    --border: rgba(199, 91, 60, 0.16);
     --border-warm: rgba(224, 122, 95, 0.34);
 
     /* Structure */
@@ -50,20 +50,20 @@
     --sidebar-width: 284px;
     --ease: 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 
-    --shadow-sm: 0 2px 10px rgba(107, 58, 160, 0.08);
-    --shadow-md: 0 8px 26px rgba(107, 58, 160, 0.13);
+    --shadow-sm: 0 2px 10px rgba(45, 24, 16, 0.08);
+    --shadow-md: 0 8px 26px rgba(45, 24, 16, 0.13);
     --shadow-lg: 0 18px 50px rgba(199, 91, 60, 0.16);
 
     --font: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", sans-serif;
     --mono: "Cascadia Code", "SF Mono", Consolas, monospace;
 
     /* ---- Compatibility aliases ---- */
-    --bg: #FCF8FF;
+    --bg: #fef2ea;
     --panel: var(--surface);
     --panel-solid: var(--surface-solid);
     --ink-dim: var(--ink-mute);
     --accent: var(--terracotta-deep);
-    --accent-soft: rgba(231, 214, 253, 0.65);
+    --accent-soft: rgba(245, 220, 200, 0.65);
     --moon-gold: var(--gold-deep);
     --earth: var(--sage-deep);
     --mars: var(--terracotta-deep);
@@ -75,10 +75,20 @@
     --text-muted: var(--ink-mute);
 
     /* Theme-aware body gradients (used by the body background-image). */
-    --grad-a: rgba(178, 0, 237, 0.15);
-    --grad-b: rgba(224, 122, 95, 0.17);
-    --grad-c: rgba(143, 0, 255, 0.14);
-    --grad-d: #FDFAFF;
-    --grad-e: #F7F0FF;
-    --grad-f: #FFF7F1;
+    --grad-a: rgba(224, 122, 95, 0.18);
+    --grad-b: rgba(244, 162, 97, 0.14);
+    --grad-c: rgba(201, 130, 26, 0.08);
+    --grad-d: #fef2ea;
+    --grad-e: #fce8dd;
+    --grad-f: #f5dcc8;
+
+    /* Background glow layers (body::before) — warm terracotta-cream. */
+    --bg-grad-a: rgba(224, 122, 95, 0.18);
+    --bg-grad-b: rgba(244, 162, 97, 0.14);
+    --bg-grad-c: rgba(201, 130, 26, 0.08);
+
+    /* RGB fallbacks for rgba(var(...)) usage in style.css */
+    --color-space-900-rgb: 252, 232, 221;
+    --color-space-850-rgb: 245, 220, 200;
+    --color-space-800-rgb: 240, 201, 176;
 }

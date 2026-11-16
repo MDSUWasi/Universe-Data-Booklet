@@ -256,6 +256,9 @@
         spaceView: 'all',
         spaceTime: 0,
         spaceOrbitGroup: null,
+        milkyWayGroup: null,
+        galacticDisk: null,
+        galaxyCenter: null,
         detailPanel: null,
         detailCloseBtn: null,
         detailNameEl: null,
@@ -659,7 +662,11 @@
         M.controls.updateSpherical();
 
         if (M.disclaimerEl) {
-            M.disclaimerEl.innerHTML = '<strong style="color:#fbbf24;">⚠ Simulated View:</strong> Asteroid and exoplanet positions are illustrative — these objects are in constant orbital motion and their locations change continuously. This visualization is for educational purposes only and not for navigation or mission planning.';
+            if (M.spaceView === 'exoplanets') {
+                M.disclaimerEl.innerHTML = '<strong style="color:#fbbf24;">⚠ Simulated View:</strong> Exoplanets orbit their own host stars across a simulated Milky Way — positions are illustrative (the bundled catalog has no parallax distances) and are not real sky coordinates. Objects are in constant orbital motion. Educational purposes only, not for navigation.';
+            } else {
+                M.disclaimerEl.innerHTML = '<strong style="color:#fbbf24;">⚠ Simulated View:</strong> Asteroid and exoplanet positions are illustrative — these objects are in constant orbital motion and their locations change continuously. This visualization is for educational purposes only and not for navigation or mission planning.';
+            }
             M.disclaimerEl.style.display = 'block';
         }
 
@@ -683,6 +690,13 @@
             M.scene.remove(M.spaceOrbitGroup);
             disposeObject(M.spaceOrbitGroup);
             M.spaceOrbitGroup = null;
+        }
+        if (M.milkyWayGroup) {
+            M.scene.remove(M.milkyWayGroup);
+            disposeObject(M.milkyWayGroup);
+            M.milkyWayGroup = null;
+            M.galacticDisk = null;
+            M.galaxyCenter = null;
         }
         M.spaceObjects = [];
         M.controls.enablePan = false;
@@ -727,24 +741,32 @@
             }
         }
 
-        const sunGeo = new THREE.SphereGeometry(0.5, 32, 32);
-        const sunMat = new THREE.MeshBasicMaterial({ color: 0xffd700 });
-        const sunGlow = new THREE.Sprite(new THREE.SpriteMaterial({
-            map: createGlowTexture('rgba(255,215,0,1)', 'rgba(255,150,0,0)'),
-            color: 0xffffaa,
-            blending: THREE.AdditiveBlending,
-        }));
-        sunGlow.scale.set(8, 8, 1);
-        const sun = new THREE.Mesh(sunGeo, sunMat);
-        sun.add(sunGlow);
-        sun.userData = { id: 'sun', name: 'Sun', type: 'sun' };
-        M.spaceOrbitGroup.add(sun);
-        M.spaceObjects.push({ mesh: sun, type: 'sun', name: 'Sun', angle: 0, orbitRadius: 0 });
+        const showSun = M.spaceView === 'asteroids';
+        if (showSun) {
+            const sunGeo = new THREE.SphereGeometry(0.5, 32, 32);
+            const sunMat = new THREE.MeshBasicMaterial({ color: 0xffd700 });
+            const sunGlow = new THREE.Sprite(new THREE.SpriteMaterial({
+                map: createGlowTexture('rgba(255,215,0,1)', 'rgba(255,150,0,0)'),
+                color: 0xffffaa,
+                blending: THREE.AdditiveBlending,
+            }));
+            sunGlow.scale.set(8, 8, 1);
+            const sun = new THREE.Mesh(sunGeo, sunMat);
+            sun.add(sunGlow);
+            sun.userData = { id: 'sun', name: 'Sun', type: 'sun' };
+            M.spaceOrbitGroup.add(sun);
+            M.spaceObjects.push({ mesh: sun, type: 'sun', name: 'Sun', angle: 0, orbitRadius: 0 });
 
-        const sunLight = new THREE.PointLight(0xffe0b0, 2.5, 200);
-        M.spaceOrbitGroup.add(sunLight);
+            const sunLight = new THREE.PointLight(0xffe0b0, 2.5, 200);
+            M.spaceOrbitGroup.add(sunLight);
+        }
 
-        if (M.spaceView === 'all' || M.spaceView === 'asteroids') {
+        // Exoplanets orbit their own host stars across a simulated Milky Way — not a single central Sun.
+        if (M.spaceView === 'exoplanets' || M.spaceView === 'all') {
+            buildMilkyWay();
+        }
+
+        if (M.spaceView === 'asteroids') {
             const asteroids = M.spaceData.asteroids || [];
             const orbitRadius = 5;
             asteroids.forEach((item, i) => {
@@ -771,47 +793,8 @@
             });
         }
 
-        if (M.spaceView === 'all' || M.spaceView === 'exoplanets') {
-            const exoplanets = M.spaceData.exoplanets || [];
-            const baseRadius = M.spaceView === 'all' ? 12 : 10;
-            exoplanets.forEach((item, i) => {
-                const esi = parseFloat(item.esi) || 0;
-                const dist = Math.max(1, parseFloat(item.sy_dist) || (10 + i * 2));
-                const angle = (i / Math.max(1, exoplanets.length)) * Math.PI * 2 + Math.random() * 0.1;
-                const r = baseRadius + Math.log1p(dist) * 2;
-                const color = esi > 0.7 ? 0x22c55e : esi > 0.4 ? 0xf4a261 : 0x94a3b8;
-                const geo = new THREE.SphereGeometry(0.06, 12, 12);
-                const mat = new THREE.MeshBasicMaterial({ color: color });
-                const mesh = new THREE.Mesh(geo, mat);
-                const x = Math.cos(angle) * r;
-                const z = Math.sin(angle) * r;
-                mesh.position.set(x, (Math.random() - 0.5) * 0.3, z);
-                mesh.userData = {
-                    id: 'exo-' + i, name: item.pl_name || 'Exoplanet ' + (i + 1),
-                    type: 'exoplanet', angle: angle, orbitRadius: r,
-                    dist: dist, esi: esi,
-                    radius: parseFloat(item.pl_rade) || 0,
-                    mass: parseFloat(item.pl_bmasse) || 0,
-                    hostname: item.hostname || '—',
-                    discovery: item.pl_discmethod || '—',
-                    water: item.water_status || '—',
-                    raw: item,
-                };
-                M.spaceOrbitGroup.add(mesh);
-                M.spaceObjects.push({ mesh: mesh, type: 'exoplanet', angle: angle, orbitRadius: r, userData: mesh.userData, speed: 0.0003 + Math.random() * 0.0005 });
-
-                const orbitGeo = new THREE.RingGeometry(r - 0.02, r + 0.02, 64);
-                const orbitMat = new THREE.MeshBasicMaterial({
-                    color: color,
-                    transparent: true,
-                    opacity: 0.15,
-                    side: THREE.DoubleSide,
-                    depthWrite: false,
-                });
-                const orbit = new THREE.Mesh(orbitGeo, orbitMat);
-                orbit.rotation.x = -Math.PI / 2;
-                M.spaceOrbitGroup.add(orbit);
-            });
+        if (M.spaceView === 'exoplanets' || M.spaceView === 'all') {
+            buildExoplanetGalaxy();
         }
     }
 
@@ -827,14 +810,195 @@
         return new THREE.CanvasTexture(c);
     }
 
+    function createGlowSprite(colorHex, scale) {
+        const inner = '#' + colorHex.toString(16).padStart(6, '0');
+        return new THREE.Sprite(new THREE.SpriteMaterial({
+            map: createGlowTexture(inner, 'rgba(0,0,0,0)'),
+            color: new THREE.Color(colorHex),
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            transparent: true,
+        }));
+    }
+
+    // Build a simulated Milky Way: galactic center bulge, spiral arms, and a thin
+    // disk starfield along the galactic plane. Positions are illustrative only.
+    function buildMilkyWay() {
+        if (M.milkyWayGroup) {
+            M.scene.remove(M.milkyWayGroup);
+            disposeObject(M.milkyWayGroup);
+            M.milkyWayGroup = null;
+            M.galacticDisk = null;
+            M.galaxyCenter = null;
+        }
+        M.milkyWayGroup = new THREE.Group();
+        M.milkyWayGroup.name = 'milky-way';
+        M.scene.add(M.milkyWayGroup);
+
+        // Galactic center bulge
+        const bulgeGeo = new THREE.SphereGeometry(1.5, 32, 32);
+        const bulgeMat = new THREE.MeshBasicMaterial({ color: 0xfffde7 });
+        const bulge = new THREE.Mesh(bulgeGeo, bulgeMat);
+        bulge.name = 'galactic-center';
+        bulge.add(createGlowSprite(0xfffde7, 15));
+        bulge.add(createGlowSprite(0xffe082, 7));
+        M.milkyWayGroup.add(bulge);
+        M.galaxyCenter = bulge;
+
+        // Spiral arms (logarithmic spiral)
+        const armCount = 4;
+        const armPoints = 72;
+        const a = 0.85, b = 0.32;
+        const armColor = 0x7c3aed;
+        for (let arm = 0; arm < armCount; arm++) {
+            const armOffset = (arm / armCount) * Math.PI * 2;
+            const pts = [];
+            for (let j = 0; j <= armPoints; j++) {
+                const t = (j / armPoints) * Math.PI * 4.6;
+                const r = a * Math.exp(b * t);
+                const theta = t + armOffset;
+                pts.push(new THREE.Vector3(Math.cos(theta) * r, 0, Math.sin(theta) * r));
+                if (j % 4 === 0) {
+                    const star = new THREE.Mesh(
+                        new THREE.SphereGeometry(0.02 + Math.random() * 0.025, 6, 6),
+                        new THREE.MeshBasicMaterial({ color: 0xffffff })
+                    );
+                    star.position.set(
+                        Math.cos(theta) * r + (Math.random() - 0.5) * 0.4,
+                        (Math.random() - 0.5) * 0.12,
+                        Math.sin(theta) * r + (Math.random() - 0.5) * 0.4
+                    );
+                    M.milkyWayGroup.add(star);
+                }
+            }
+            const curve = new THREE.CatmullRomCurve3(pts);
+            const tube = new THREE.Mesh(
+                new THREE.TubeGeometry(curve, armPoints, 0.014, 8, false),
+                new THREE.MeshBasicMaterial({ color: armColor, transparent: true, opacity: 0.16 })
+            );
+            M.milkyWayGroup.add(tube);
+        }
+
+        // Galactic disk starfield (thin band along the plane)
+        const diskCount = 1800;
+        const diskPos = new Float32Array(diskCount * 3);
+        const diskCol = new Float32Array(diskCount * 3);
+        const diskSize = new Float32Array(diskCount);
+        for (let i = 0; i < diskCount; i++) {
+            const r = 2.5 + Math.random() * 44;
+            const theta = Math.random() * Math.PI * 2;
+            diskPos[i * 3] = Math.cos(theta) * r + (Math.random() - 0.5) * 1.6;
+            diskPos[i * 3 + 1] = (Math.random() - 0.5) * 0.7;
+            diskPos[i * 3 + 2] = Math.sin(theta) * r + (Math.random() - 0.5) * 1.6;
+            const c = Math.random();
+            if (c < 0.55) { diskCol[i * 3] = 1; diskCol[i * 3 + 1] = 0.95; diskCol[i * 3 + 2] = 0.9; }
+            else if (c < 0.8) { diskCol[i * 3] = 1; diskCol[i * 3 + 1] = 0.8; diskCol[i * 3 + 2] = 0.6; }
+            else { diskCol[i * 3] = 0.7; diskCol[i * 3 + 1] = 0.85; diskCol[i * 3 + 2] = 1; }
+            diskSize[i] = 0.04 + Math.random() * 0.14;
+        }
+        const dGeo = new THREE.BufferGeometry();
+        dGeo.setAttribute('position', new THREE.BufferAttribute(diskPos, 3));
+        dGeo.setAttribute('color', new THREE.BufferAttribute(diskCol, 3));
+        dGeo.setAttribute('size', new THREE.BufferAttribute(diskSize, 1));
+        const dMat = new THREE.PointsMaterial({ size: 0.07, vertexColors: true, transparent: true, opacity: 0.55, sizeAttenuation: true });
+        const diskStars = new THREE.Points(dGeo, dMat);
+        diskStars.name = 'galactic-disk';
+        M.milkyWayGroup.add(diskStars);
+        M.galacticDisk = diskStars;
+    }
+
+    // Place each confirmed exoplanet in orbit around its own host star, distributing
+    // host stars across the simulated Milky Way disk. Uses the real catalog data
+    // (hostname, radius, ESI, orbital period, discovery method).
+    function buildExoplanetGalaxy() {
+        const exoplanets = M.spaceData.exoplanets || [];
+        if (!exoplanets.length) return;
+
+        const byHost = new Map();
+        exoplanets.forEach(item => {
+            const host = item.hostname || 'Unknown';
+            if (!byHost.has(host)) byHost.set(host, []);
+            byHost.get(host).push(item);
+        });
+
+        const hosts = Array.from(byHost.entries());
+
+        hosts.forEach(([host, planets], hi) => {
+            // Place the host star on the galactic disk, biased toward spiral arms.
+            const armOffset = (hi % 4) * (Math.PI * 2 / 4);
+            const t = (hi / Math.max(1, hosts.length)) * Math.PI * 4.6 + armOffset;
+            const a = 0.85, b = 0.32;
+            const r = a * Math.exp(b * t) * 0.9 + 3;
+            const jitter = (Math.random() - 0.5) * 2.2;
+            const x = Math.cos(t) * r + jitter;
+            const z = Math.sin(t) * r + jitter;
+            const y = (Math.random() - 0.5) * 0.5;
+
+            const hostMesh = new THREE.Mesh(
+                new THREE.SphereGeometry(0.11 + Math.random() * 0.05, 14, 14),
+                new THREE.MeshBasicMaterial({ color: 0xfff176 })
+            );
+            hostMesh.position.set(x, y, z);
+            hostMesh.add(createGlowSprite(0xfff176, 3.2));
+            const hostObj = {
+                mesh: hostMesh, type: 'hostStar', name: host, angle: t,
+                orbitRadius: Math.sqrt(x * x + z * z), speed: 0, baseX: x, baseZ: z, baseY: y,
+            };
+            M.spaceOrbitGroup.add(hostMesh);
+            M.spaceObjects.push(hostObj);
+
+            planets.forEach((item, pi) => {
+                const esi = parseFloat(item.esi) || 0;
+                const rad = parseFloat(item.pl_rade) || 1;
+                const size = 0.022 + Math.min(rad, 14) * 0.007;
+                const color = esi > 0.7 ? 0x22c55e : esi > 0.4 ? 0xf4a261 : 0x94a3b8;
+                const orbitR = 0.35 + Math.log1p(pi + 1) * 0.16;
+                const period = Math.max(parseFloat(item.pl_orbper) || 10, 0.5);
+                const speed = 0.0005 / Math.sqrt(period);
+                const angle = Math.random() * Math.PI * 2;
+                const mesh = new THREE.Mesh(new THREE.SphereGeometry(size, 10, 10), new THREE.MeshBasicMaterial({ color: color }));
+                mesh.position.set(x + Math.cos(angle) * orbitR, y + (Math.random() - 0.5) * 0.04, z + Math.sin(angle) * orbitR);
+                mesh.userData = {
+                    id: 'exo-' + hi + '-' + pi, name: item.pl_name || 'Exoplanet ' + (pi + 1),
+                    type: 'exoplanet', angle: angle, orbitRadius: orbitR, speed: speed, hostObj: hostObj,
+                    dist: parseFloat(item.sy_dist) || 0, esi: esi,
+                    radius: rad, mass: parseFloat(item.pl_bmasse) || 0,
+                    hostname: host, discovery: item.pl_discmethod || '—',
+                    water: item.water_status || '—', raw: item,
+                };
+                M.spaceOrbitGroup.add(mesh);
+                M.spaceObjects.push({ mesh: mesh, type: 'exoplanet', name: item.pl_name, angle: angle, orbitRadius: orbitR, speed: speed, hostObj: hostObj, userData: mesh.userData });
+
+                // Orbit ring around the host star
+                const orbitGeo = new THREE.RingGeometry(orbitR - 0.012, orbitR + 0.012, 48);
+                const orbitMat = new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 0.12, side: THREE.DoubleSide, depthWrite: false });
+                const orbit = new THREE.Mesh(orbitGeo, orbitMat);
+                orbit.rotation.x = -Math.PI / 2;
+                orbit.position.set(x, y, z);
+                M.spaceOrbitGroup.add(orbit);
+            });
+        });
+    }
+
     function updateSpaceOrbits() {
         if (!M.spaceMode) return;
         M.spaceTime += 0.01;
+
+        // Slowly rotate the simulated Milky Way background
+        if (M.milkyWayGroup) M.milkyWayGroup.rotation.y += 0.00012;
+        if (M.galacticDisk) M.galacticDisk.rotation.y += 0.00008;
+
         M.spaceObjects.forEach(obj => {
-            if (obj.type === 'sun' || !obj.mesh) return;
+            if ((obj.type === 'sun' || obj.type === 'hostStar') || !obj.mesh) return;
             obj.angle += obj.speed || 0.001;
             const yOffset = obj.type === 'asteroid' ? Math.sin(M.spaceTime * 2 + obj.angle * 10) * 0.1 : Math.sin(M.spaceTime * 0.5 + obj.angle * 5) * 0.05;
-            obj.mesh.position.set(Math.cos(obj.angle) * obj.orbitRadius, yOffset, Math.sin(obj.angle) * obj.orbitRadius);
+            if (obj.type === 'exoplanet' && obj.hostObj && obj.hostObj.mesh) {
+                // Exoplanets orbit their own host star, not a single central Sun.
+                const h = obj.hostObj.mesh.position;
+                obj.mesh.position.set(h.x + Math.cos(obj.angle) * obj.orbitRadius, h.y + yOffset, h.z + Math.sin(obj.angle) * obj.orbitRadius);
+            } else {
+                obj.mesh.position.set(Math.cos(obj.angle) * obj.orbitRadius, yOffset, Math.sin(obj.angle) * obj.orbitRadius);
+            }
         });
     }
 
@@ -875,7 +1039,8 @@
         M.detailNameEl.textContent = escapeHtml(data.name);
         M.detailBodyEl.textContent = (data.type === 'asteroid' ? 'Near-Earth Asteroid' : 'Exoplanet') +
             (data.hostname ? ' • Host: ' + escapeHtml(data.hostname) : '') +
-            ' • ' + escapeHtml(String(data.date || ''));
+            ' • ' + escapeHtml(String(data.date || '')) +
+            (data.type === 'exoplanet' ? ' • Catalog: NASA Exoplanet Archive / IPAC' : '');
         M.detailMetricsEl.innerHTML =
             '<div style="border:1px solid rgba(255,255,255,0.06);border-radius:6px;padding:0.5rem;background:rgba(255,255,255,0.02);">' +
             '<div style="font-size:0.65rem;color:var(--color-space-500);text-transform:uppercase;">Distance</div>' +
@@ -898,7 +1063,10 @@
                   '<div style="font-weight:600;color:var(--color-space-100);">' + window.fmt(data.radius) + ' R⊕</div></div>' +
                   '<div style="border:1px solid rgba(255,255,255,0.06);border-radius:6px;padding:0.5rem;background:rgba(255,255,255,0.02);">' +
                   '<div style="font-size:0.65rem;color:var(--color-space-500);text-transform:uppercase;">Water</div>' +
-                  '<div style="font-weight:600;color:var(--color-space-100);">' + escapeHtml(String(data.water)) + '</div></div>');
+                  '<div style="font-weight:600;color:var(--color-space-100);">' + escapeHtml(String(data.water)) + '</div></div>' +
+                  '<div style="border:1px solid rgba(255,255,255,0.06);border-radius:6px;padding:0.5rem;background:rgba(255,255,255,0.02);">' +
+                  '<div style="font-size:0.65rem;color:var(--color-space-500);text-transform:uppercase;">Data source</div>' +
+                  '<div style="font-weight:600;color:var(--color-space-100);font-size:0.72rem;">NASA Exoplanet Archive / IPAC</div></div>');
         M.detailPanel.style.transform = 'translateY(0)';
         M.detailPanel.style.opacity = '1';
         if (M.detailCloseBtn) M.detailCloseBtn.onclick = () => clearDetail();

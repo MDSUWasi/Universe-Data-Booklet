@@ -9,25 +9,36 @@ export function initPatches() {
   const rowsBody = document.getElementById('patch-rows');
   const countDiv = document.getElementById('patch-count');
   const statusDiv = document.getElementById('patch-status');
+  const refreshBtn = document.getElementById('patch-refresh');
   
   if (!bodySelect || !kindSelect || !rowsBody) return;
   
   bodySelect.addEventListener('change', renderPatches);
   kindSelect.addEventListener('change', renderPatches);
+  refreshBtn?.addEventListener('click', () => loadPatches(true));
   
   loadPatches();
 }
 
-async function loadPatches() {
+async function loadPatches(forceRefresh = false) {
   const countDiv = document.getElementById('patch-count');
   const rowsBody = document.getElementById('patch-rows');
   const statusDiv = document.getElementById('patch-status');
+  const refreshBtn = document.getElementById('patch-refresh');
+  const refreshIcon = refreshBtn?.querySelector('svg');
+  
+  if (forceRefresh) {
+    refreshBtn?.classList.add('loading');
+    refreshIcon?.style.setProperty('animation', 'spin 1s linear infinite');
+  } else if (!patchesData.length) {
+    if (countDiv) countDiv.textContent = 'Loading patch report…';
+  }
   
   try {
-    const result = await fetchApi('/api/patches');
+    const result = await fetchApi('/api/patches' + (forceRefresh ? '?t=' + Date.now() : ''));
     if (result.error) throw new Error(result.error);
     
-    patchesData = result.patches || result.data || [];
+    patchesData = result.records || result.patches || result.data || [];
     renderPatches();
     
   } catch (error) {
@@ -35,6 +46,9 @@ async function loadPatches() {
     if (countDiv) countDiv.textContent = 'Failed to load patch data';
     if (statusDiv) statusDiv.textContent = `Error: ${error.message}`;
     showToast('Failed to load patches: ' + error.message, 'error');
+  } finally {
+    refreshBtn?.classList.remove('loading');
+    refreshIcon?.style.removeProperty('animation');
   }
 }
 
@@ -79,12 +93,12 @@ function renderPatches() {
       </td>
       <td style="font-family: var(--font-mono);">${patch.area_km2?.toFixed(2) || '—'}</td>
       <td style="font-family: var(--font-mono);">${patch.slope_mean_deg?.toFixed(2) || '—'}</td>
-      <td style="font-family: var(--font-mono);">${patch.center_x || '—'}</td>
-      <td style="font-family: var(--font-mono);">${patch.center_y || '—'}</td>
-      <td style="font-family: var(--font-mono);">${patch.mean_rough_m?.toFixed(2) || '—'}</td>
-      <td style="font-family: var(--font-mono);">${patch.p95_rough_m?.toFixed(2) || '—'}</td>
-      <td style="font-family: var(--font-mono);">${patch.max_rough_m?.toFixed(2) || '—'}</td>
-      <td style="font-family: var(--font-mono);">${(patch.zero_fraction * 100).toFixed(1) || '—'}%</td>
+      <td style="font-family: var(--font-mono);">${patch.centre_x || '—'}</td>
+      <td style="font-family: var(--font-mono);">${patch.centre_y || '—'}</td>
+      <td style="font-family: var(--font-mono);">${patch.rough_mean_m?.toFixed(2) || '—'}</td>
+      <td style="font-family: var(--font-mono);">${patch.rough_p95_m?.toFixed(2) || '—'}</td>
+      <td style="font-family: var(--font-mono);">${patch.rough_max_m?.toFixed(2) || '—'}</td>
+      <td style="font-family: var(--font-mono);">${(patch.zero_frac * 100).toFixed(1) || '—'}%</td>
       <td>
         ${patch.filled ? `
           <span class="badge badge-danger" style="background: rgba(239,68,68,0.2); color: var(--color-danger-400); border-color: rgba(239,68,68,0.3);">

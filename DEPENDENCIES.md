@@ -43,7 +43,6 @@ paid accounts are required.
 ### Planetary Explorer (Project Base)
 | Source | Endpoint | License / Attribution |
 |---|---|---|
-| **NASA Astronomy Picture of the Day (APOD)** | `https://api.nasa.gov/planetary/apod` | NASA public domain |
 | **NASA DONKI** | `https://api.nasa.gov/DONKI` | NASA public domain |
 | **NASA InSight Mars Weather** | `https://api.nasa.gov/insight_weather/` | NASA public domain |
 | **NASA Solar System Treks (WMTS)** | Moon: LRO WAC Mosaic; Mars: Viking MDIM21 | NASA/JPL-Caltech public-domain rasters |

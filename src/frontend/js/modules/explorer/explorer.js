@@ -616,7 +616,7 @@ function setupUpgradeButtons() {
             font-family: 'Space Grotesk', sans-serif;
             font-size: 0.75rem;
             font-weight: 600;
-            ${isMaxed ? 'background: rgba(34,197,94,0.2); color: var(--color-success-400); border: 1px solid rgba(34,197,94,0.3);' : canAfford ? `background: ${config.color}; color: #030712; border: none;` : 'background: rgba(255,255,255,0.05); color: var(--color-space-500); border: 1px solid rgba(255,255,255,0.1);'}
+            ${isMaxed ? 'background: rgba(34,197,94,0.2); color: var(--color-success-400); border: 1px solid rgba(34,197,94,0.3);' : canAfford ? `background: ${config.color}; color: #2d1810; border: none;` : 'background: rgba(255,255,255,0.05); color: var(--color-space-500); border: 1px solid rgba(255,255,255,0.1);'}
             cursor: ${isMaxed || !canAfford ? 'not-allowed' : 'pointer'};
             opacity: ${isMaxed || !canAfford ? '0.6' : '1'};
             transition: var(--transition-fast);

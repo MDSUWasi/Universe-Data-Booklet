@@ -11,7 +11,6 @@ public work.
 ### NASA
 - **NASA NEO Web API** — Near-Earth Object close-approach data
   (`api.nasa.gov/neo`)
-- **NASA Astronomy Picture of the Day (APOD)**
 - **NASA DONKI** — Solar storm / geomagnetic data
 - **NASA InSight Mars Weather**
 - **NASA Solar System Treks** — LRO WAC Mosaic (Moon) & Viking MDIM21 (Mars)

@@ -14,11 +14,19 @@ const SITES = {
   Mars: [
     { id: 'jezero', name: 'Jezero Crater', lat: 18.4, lng: 77.5, file: 'jezero.json' },
   ],
+  Earth: [
+    { id: 'mcmurdo', name: 'McMurdo Dry Valleys', lat: -77.8419, lng: 166.6863, file: 'mcmurdo.json' },
+    { id: 'kerguelen', name: 'Kerguelen Islands', lat: -49.35, lng: 69.5, file: 'kerguelen.json' },
+    { id: 'axel', name: 'Axel Heiberg Island', lat: 79.5, lng: -90.0, file: 'axel.json' },
+  ],
 };
 
 const SITE_META = {
   moon_south: { area: '234 km²', slope: '2.1°', rough: '1.8m', p95: '3.9m', elev: '1500m' },
   jezero: { area: '156 km²', slope: '1.8°', rough: '1.3m', p95: '3.2m', elev: '-2600m' },
+  mcmurdo: { area: '9 km²', slope: '20°', rough: '8m', p95: '8m', elev: '362-500m' },
+  kerguelen: { area: '9 km²', slope: '20°', rough: '8m', p95: '8m', elev: '60-466m' },
+  axel: { area: '9 km²', slope: '20°', rough: '8m', p95: '8m', elev: '1096-1187m' },
 };
 
 export function initTerrain() {
@@ -235,12 +243,16 @@ function renderTerrain() {
   const elevations = data.elevation || data.elevations;
   const slopes = data.slope || data.slopes;
   const roughness = data.roughness || data.roughnesses;
+  const validMask = data.valid_mask;
+  const safeMask = data.slope_screen_mask;
+  const slopeScale = data.slope_scale_deg || 20.0;
+  const roughScale = data.roughness_scale_m || 8.0;
   
   if (!elevations || !elevations.length) return;
   
   const width = data.width || elevations[0].length;
   const height = data.height || elevations.length;
-  const cellSize = data.cell_size || 30; // meters per cell
+  const cellSize = data.cell_size || 30;
   
   // Create geometry
   const geometry = new THREE.PlaneGeometry(
@@ -255,53 +267,77 @@ function renderTerrain() {
   const colors = [];
   
   // Color scales
-  const getColor = (value, min, max, mode) => {
+  const getColor = (value, min, max, mode, isSafe, isValid) => {
+    if (!isValid) return new THREE.Color(0x252a33);
+    
     const t = (value - min) / (max - min || 1);
     const clamped = Math.max(0, Math.min(1, t));
     
     if (mode === 'elevation') {
-      // Blue -> Green -> Brown -> White
       if (clamped < 0.25) return new THREE.Color().setHSL(0.55, 0.7, 0.2 + clamped * 1.5);
       if (clamped < 0.5) return new THREE.Color().setHSL(0.35, 0.5, 0.3 + clamped * 0.5);
       if (clamped < 0.75) return new THREE.Color().setHSL(0.08, 0.4, 0.35 + clamped * 0.3);
       return new THREE.Color().setHSL(0, 0, 0.7 + clamped * 0.3);
     } else if (mode === 'slope') {
-      // Green -> Yellow -> Red
       return new THREE.Color().setHSL(0.33 * (1 - clamped), 0.8, 0.4);
+    } else if (mode === 'safe') {
+      return isSafe ? new THREE.Color(0x55d6a5) : new THREE.Color(0xe16b63);
     } else {
-      // Purple -> Cyan -> Yellow
       return new THREE.Color().setHSL(0.75 - clamped * 0.55, 0.8, 0.4);
     }
   };
   
   let minVal = Infinity, maxVal = -Infinity;
+  let minHeight = Infinity, maxHeight = -Infinity;
   const values = [];
+  const heightValues = [];
+  const colorFlags = [];
   
   // Flatten data for color mapping
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
+      const idx = y * width + x;
+      const isValid = !validMask || validMask[idx];
       let val;
-      if (currentMode === 'elevation') val = elevations[y][x];
-      else if (currentMode === 'slope') val = slopes?.[y]?.[x] || 0;
-      else val = roughness?.[y]?.[x] || 0;
+      let heightVal;
+      let isSafe = false;
       
-      if (currentMode === 'safe') {
+      if (currentMode === 'elevation') {
+        val = elevations[y][x];
+        heightVal = val;
+      } else if (currentMode === 'slope') {
         val = slopes?.[y]?.[x] || 0;
+        heightVal = (val / slopeScale) * 100; // Normalize to ~100m range
+      } else if (currentMode === 'roughness') {
+        val = roughness?.[y]?.[x] || 0;
+        heightVal = (val / roughScale) * 100; // Normalize to ~100m range
+      } else if (currentMode === 'safe') {
+        val = elevations[y][x];
+        heightVal = val;
+        isSafe = safeMask ? safeMask[idx] : false;
       }
       
       values.push(val);
+      heightValues.push(heightVal);
+      colorFlags.push({ isValid, isSafe });
       minVal = Math.min(minVal, val);
       maxVal = Math.max(maxVal, val);
+      minHeight = Math.min(minHeight, heightVal);
+      maxHeight = Math.max(maxHeight, heightVal);
     }
   }
   
   // Apply heights and colors
   for (let i = 0; i < positions.count; i++) {
     const y = positions.getY(i);
-    const val = values[i] || 0;
-    positions.setY(i, y + val * exaggeration);
+    const heightVal = heightValues[i] || 0;
+    const { isValid, isSafe } = colorFlags[i];
     
-    const color = getColor(val, minVal, maxVal, currentMode);
+    // For invalid cells, push them down
+    const finalHeight = isValid ? heightVal * exaggeration : -10;
+    positions.setY(i, y + finalHeight);
+    
+    const color = getColor(values[i], minVal, maxVal, currentMode, isSafe, isValid);
     colors.push(color.r, color.g, color.b);
   }
   
@@ -318,7 +354,7 @@ function renderTerrain() {
   const newMesh = new THREE.Mesh(geometry, material);
   newMesh.castShadow = true;
   newMesh.receiveShadow = true;
-  newMesh.position.y = -exaggeration * (minVal + maxVal) / 2 * 0.5;
+  newMesh.position.y = -exaggeration * (minHeight + maxHeight) / 2 * 0.5;
   
   scene.add(newMesh);
   terrainScene.mesh = newMesh;

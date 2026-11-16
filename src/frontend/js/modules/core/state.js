@@ -16,10 +16,10 @@ export const State = {
 export const Config = {
   apiBase: '/api',
   themes: {
-    dark: { name: 'Dark', primary: '#7c5ce6', secondary: '#06b6d4' },
-    light: { name: 'Light', primary: '#8f00ff', secondary: '#e07a5f' },
+    dark: { name: 'Dark', primary: '#e8b493', secondary: '#f0c9b0' },
+    light: { name: 'Light', primary: '#f5dcc8', secondary: '#fef2ea' },
     terracota: { name: 'Terracota', primary: '#e07a5f', secondary: '#f4a261' },
-    planetary: { name: 'Planetary', primary: '#c9821a', secondary: '#8b5a2b' },
+    planetary: { name: 'Planetary', primary: '#d99a7a', secondary: '#c75b3c' },
   },
 };
 

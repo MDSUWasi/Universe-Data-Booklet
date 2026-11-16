@@ -1,49 +1,59 @@
-/* THEME 2: DARK — deep-space purples, dark surfaces, glowing accents.
+/* THEME 2: DARK — warm brown/cream dark surfaces, terracotta accents.
    Active when <html> has data-theme="dark". */
 [data-theme="dark"] {
-    --purple-light: #9B6DFF;
-    --purple: #7C5CE6;
-    --purple-deep: #4A3B8A;
-    --tint-1: #1A1626;
-    --tint-2: #241E33;
-    --tint-3: #2E2640;
-    --tint-4: #3D3252;
-    --warm-1: #2A2230;
-    --warm-2: #342A3A;
-    --warm-3: #3E3246;
-    --terracotta: #FF9E7A;
-    --terracotta-deep: #E07A5F;
-    --gold: #F2CC8F;
-    --gold-deep: #E0A944;
-    --coral: #F08080;
-    --sage: #81B29A;
-    --sage-deep: #4E8C6E;
-    --sky: #62B6CB;
-    --sky-deep: #2E7D9A;
-    --plum: #9B8AB8;
-    --ink: #E6DFF5;
-    --ink-soft: #C4B4D8;
-    --ink-mute: #8E7EA8;
-    --ink-on-fill: #1A1626;
-    --surface: rgba(26, 22, 38, 0.9);
-    --surface-solid: #1E1A28;
-    --border: rgba(124, 92, 230, 0.28);
+    --purple-light: #f0c9b0;
+    --purple: #e8b493;
+    --purple-deep: #d99a7a;
+    --tint-1: #3d2418;
+    --tint-2: #4a2f1e;
+    --tint-3: #573a24;
+    --tint-4: #6b4430;
+    --warm-1: #452a1e;
+    --warm-2: #523426;
+    --warm-3: #5e3e2e;
+    --terracotta: #e07a5f;
+    --terracotta-deep: #c75b3c;
+    --gold: #f2cc8f;
+    --gold-deep: #c9821a;
+    --coral: #f08080;
+    --sage: #81b29a;
+    --sage-deep: #4e8c6e;
+    --sky: #62b6cb;
+    --sky-deep: #2e7d9a;
+    --plum: #8b6f4a;
+    --ink: #f5dcc8;
+    --ink-soft: #f0c9b0;
+    --ink-mute: #d99a7a;
+    --ink-on-fill: #3d2418;
+    --surface: rgba(61, 36, 24, 0.9);
+    --surface-solid: #452a1e;
+    --border: rgba(199, 91, 60, 0.28);
     --border-warm: rgba(224, 122, 95, 0.4);
-    --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.4);
-    --shadow-md: 0 8px 26px rgba(0, 0, 0, 0.5);
-    --shadow-lg: 0 18px 50px rgba(0, 0, 0, 0.6);
-    --bg: #120E1C;
+    --shadow-sm: 0 2px 10px rgba(45, 24, 16, 0.4);
+    --shadow-md: 0 8px 26px rgba(45, 24, 16, 0.5);
+    --shadow-lg: 0 18px 50px rgba(45, 24, 16, 0.6);
+    --bg: #2d1810;
     --panel: var(--surface);
     --panel-solid: var(--surface-solid);
     --accent: var(--terracotta-deep);
-    --accent-soft: rgba(155, 109, 255, 0.28);
+    --accent-soft: rgba(199, 91, 60, 0.28);
     --text-primary: var(--ink);
     --text-secondary: var(--ink-soft);
     --text-muted: var(--ink-mute);
-    --grad-a: rgba(124, 92, 230, 0.3);
+    --grad-a: rgba(199, 91, 60, 0.3);
     --grad-b: rgba(224, 122, 95, 0.22);
-    --grad-c: rgba(124, 92, 230, 0.22);
-    --grad-d: #1A1626;
-    --grad-e: #241E33;
-    --grad-f: #2A2230;
+    --grad-c: rgba(199, 91, 60, 0.22);
+    --grad-d: #3d2418;
+    --grad-e: #4a2f1e;
+    --grad-f: #452a1e;
+
+    /* Background glow layers (body::before) — warm terracotta-cream. */
+    --bg-grad-a: rgba(224, 122, 95, 0.22);
+    --bg-grad-b: rgba(244, 162, 97, 0.18);
+    --bg-grad-c: rgba(201, 130, 26, 0.10);
+
+    /* RGB fallbacks for rgba(var(...)) usage in style.css */
+    --color-space-900-rgb: 74, 47, 30;
+    --color-space-850-rgb: 87, 58, 36;
+    --color-space-800-rgb: 107, 68, 48;
 }

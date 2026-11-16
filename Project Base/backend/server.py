@@ -29,6 +29,7 @@ try:
         routes,
         tiles,
         weather,
+        elevation,
     )
 except ImportError:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -41,6 +42,7 @@ except ImportError:
         routes,
         tiles,
         weather,
+        elevation,
     )
 
 FRONTEND = ROOT / "frontend"
@@ -89,8 +91,6 @@ class AppHandler(SimpleHTTPRequestHandler):
             site_id = parsed.path.rsplit("/", 1)[-1]
             self._serve_payload(routes.site_payload(site_id))
         # ---- Real-time / public API endpoints ----
-        elif parsed.path == "/api/nasa/apod":
-            self._serve_payload(routes.apod_payload())
         elif parsed.path == "/api/nasa/earth-events":
             self._serve_payload(routes.earth_events_payload())
         elif parsed.path == "/api/nasa/mars-weather":
@@ -105,6 +105,8 @@ class AppHandler(SimpleHTTPRequestHandler):
             self._serve_payload(routes.earthquakes_payload())
         elif parsed.path == "/api/weather":
             self._weather(parse_qs(parsed.query))
+        elif parsed.path.startswith("/api/elevation"):
+            self._elevation(parse_qs(parsed.query))
         elif parsed.path.startswith("/api/tiles/"):
             self._tile(parsed.path)
         elif parsed.path.startswith("/api/"):
@@ -153,6 +155,25 @@ class AppHandler(SimpleHTTPRequestHandler):
             "X-Cache": state,
         })
 
+    def _elevation(self, query: dict[str, list[str]]) -> None:
+        try:
+            lat_str = query.get("latitude", [""])[0]
+            lng_str = query.get("longitude", [""])[0]
+            latitudes, longitudes = elevation.parse_coordinates(lat_str, lng_str)
+        except (ValueError, OverflowError) as error:
+            self._json(400, {"error": str(error)})
+            return
+
+        try:
+            body, content_type, state = elevation.fetch_elevation(latitudes, longitudes)
+        except UpstreamUnavailable as error:
+            self._json(502, {"error": str(error)})
+            return
+        self._send(200, body, content_type, {
+            "Cache-Control": "no-store",
+            "X-Cache": state,
+        })
+
     # ------------------------------------------------------------------ #
     # Response helpers
     # ------------------------------------------------------------------ #
@@ -172,6 +193,9 @@ class AppHandler(SimpleHTTPRequestHandler):
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(body)))
         self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("X-Frame-Options", "DENY")
+        self.send_header("X-XSS-Protection", "1; mode=block")
+        self.send_header("Referrer-Policy", "no-referrer")
         for name, value in headers.items():
             self.send_header(name, value)
         self.end_headers()

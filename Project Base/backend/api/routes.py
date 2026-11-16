@@ -15,7 +15,7 @@ from pathlib import Path
 
 from .cache import ROOT
 
-from . import encyclopedia, nasa, opennotify, earth_events
+from . import encyclopedia, udb, udb_notify, earth_events
 
 # site name (lowercased, as it appears in the CSV) -> canonical id
 SITE_IDS = {
@@ -195,34 +195,29 @@ def site_payload(site_id: str) -> dict:
 # Real-time / public API endpoints
 # --------------------------------------------------------------------------- #
 
-def apod_payload() -> dict:
-    """NASA Astronomy Picture of the Day."""
-    return nasa.get_apod(), 200
-
-
 def earth_events_payload() -> dict:
     """Recent Earth natural events (EONET)."""
-    return nasa.get_earth_events(), 200
+    return udb.get_earth_events(), 200
 
 
 def mars_weather_payload() -> dict:
     """Latest InSight Mars weather report."""
-    return nasa.get_mars_weather(), 200
+    return udb.get_mars_weather(), 200
 
 
 def space_weather_payload() -> dict:
     """Recent space weather notifications (DONKI)."""
-    return nasa.get_space_weather(), 200
+    return udb.get_space_weather(), 200
 
 
 def iss_position_payload() -> dict:
     """Current ISS position (Open Notify)."""
-    return opennotify.get_iss_position(), 200
+    return udb_notify.get_iss_position(), 200
 
 
 def astronauts_payload() -> dict:
     """Who is in space right now (Open Notify)."""
-    return opennotify.get_astronauts(), 200
+    return udb_notify.get_astronauts(), 200
 
 
 def earthquakes_payload() -> dict:

@@ -115,6 +115,7 @@ Open a Pull Request
 - **[Terms & Conditions](/terms)** — educational-use disclaimer, acceptable use, third-party data licences, limitation of liability.
 - **[Privacy Policy](/privacy)** — no accounts, no cookies, no analytics, no trackers; only `localStorage` preferences on your device.
 - **[Dependencies](/dependencies)** — every bundled library, data source, and encyclopedia image with licence and author.
+- **[Credits](CREDITS.md)** — a consolidated credit for every data source, API, bundled dependency, font, and local image asset (including the Project Base/Planetary Explorer feature).
 - **[Thank You](/thank-you)** — citations for NASA, USGS, Open-Meteo, Open Notify, ESA/Copernicus, and the open-source library authors.
 
 ### 📜 License
@@ -122,6 +123,7 @@ Distributed under the MIT License (Because I want to give the others the many po
 
 ### 🙏 Acknowledgments & Thank You
 - Full citations for every data source and library: see **[THANK_YOU.md](THANK_YOU.md)**.
+- Complete credits for every data source, API, bundled dependency, font, and local image: see **[CREDITS.md](CREDITS.md)**.
 - Bundled dependencies, licenses, and data-source attributions: see **[DEPENDENCIES.md](DEPENDENCIES.md)** (renamed from `THIRD_PARTY_LICENSES.md`). See LICENSE for more information.
 
 - NASA: For providing free, open-access space data APIs.

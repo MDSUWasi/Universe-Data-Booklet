@@ -163,7 +163,7 @@ export function initStarfield() {
   }
   
   function draw() {
-    ctx.fillStyle = '#030712';
+    ctx.fillStyle = '#fef2ea';
     ctx.fillRect(0, 0, width, height);
     
     stars.forEach(star => {

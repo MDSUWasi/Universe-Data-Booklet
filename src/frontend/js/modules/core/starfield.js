@@ -17,7 +17,7 @@
         _frameInterval: 1000 / 40,
         _time: 0,
         _lastFrame: 0,
-        PALETTE: ['#E07A5F', '#8F00FF', '#B200ED', '#F2CC8F', '#FFFFFF'],
+        PALETTE: ['#E07A5F', '#F4A261', '#F2CC8F', '#C9821A', '#FFF3E0'],
 
         init() {
             const canvas = document.getElementById('starfield');

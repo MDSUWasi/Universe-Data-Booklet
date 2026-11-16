@@ -3,9 +3,6 @@ import { fetchApi, escapeHtml, showToast } from '../core/state.js';
 
 const ENDPOINTS = {
   iss: '/api/realtime/iss',
-  astronauts: '/api/realtime/astronauts',
-  apod: '/api/realtime/apod',
-  eonet: '/api/realtime/eonet',
   insight: '/api/realtime/insight',
   donki: '/api/realtime/donki',
   earthquakes: '/api/realtime/earthquakes',
@@ -42,11 +39,8 @@ async function loadAllData() {
   `;
   
   try {
-    const [iss, astronauts, apod, eonet, insight, donki, earthquakes] = await Promise.allSettled([
+    const [iss, insight, donki, earthquakes] = await Promise.allSettled([
       fetchApi(ENDPOINTS.iss),
-      fetchApi(ENDPOINTS.astronauts),
-      fetchApi(ENDPOINTS.apod),
-      fetchApi(ENDPOINTS.eonet),
       fetchApi(ENDPOINTS.insight),
       fetchApi(ENDPOINTS.donki),
       fetchApi(ENDPOINTS.earthquakes),
@@ -54,9 +48,6 @@ async function loadAllData() {
     
     renderDashboard({
       iss: iss.status === 'fulfilled' ? iss.value : null,
-      astronauts: astronauts.status === 'fulfilled' ? astronauts.value : null,
-      apod: apod.status === 'fulfilled' ? apod.value : null,
-      eonet: eonet.status === 'fulfilled' ? eonet.value : null,
       insight: insight.status === 'fulfilled' ? insight.value : null,
       donki: donki.status === 'fulfilled' ? donki.value : null,
       earthquakes: earthquakes.status === 'fulfilled' ? earthquakes.value : null,
@@ -102,47 +93,6 @@ function renderDashboard(data) {
       </div>
       <div style="font-size: 0.6875rem; color: var(--color-space-500);">Updated: ${data.iss.timestamp ? new Date(data.iss.timestamp * 1000).toLocaleTimeString() : '—'}</div>
     `, 'aurora'));
-  }
-  
-  // Astronauts Card
-  if (data.astronauts) {
-    cards.push(createCard('👨‍🚀', 'People in Space', `
-      <div style="font-size: 2.5rem; font-weight: 700; font-family: var(--font-display); color: var(--color-space-50);">${data.astronauts.number || 0}</div>
-      <div style="display: flex; flex-wrap: wrap; gap: 0.375rem; margin-top: 0.75rem;">
-        ${(data.astronauts.people || []).map(p => `
-          <span style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-full); padding: 0.25rem 0.625rem; font-size: 0.6875rem; color: var(--color-space-300);">${escapeHtml(p.name)} (${escapeHtml(p.craft)})</span>
-        `).join('')}
-      </div>
-    `, 'nebula'));
-  }
-  
-  // APOD Card
-  if (data.apod) {
-    cards.push(createCard('🖼️', 'Astronomy Picture of the Day', `
-      ${data.apod.url ? `<img src="${escapeHtml(data.apod.url)}" alt="${escapeHtml(data.apod.title)}" style="width: 100%; border-radius: var(--radius-md); margin-bottom: 0.75rem;" loading="lazy">` : ''}
-      <h4 style="font-family: var(--font-display); font-size: 0.875rem; font-weight: 600; color: var(--color-space-100); margin-bottom: 0.5rem;">${escapeHtml(data.apod.title || 'APOD')}</h4>
-      <p style="font-size: 0.75rem; color: var(--color-space-400); line-height: 1.5;">${escapeHtml((data.apod.explanation || '').slice(0, 200))}...</p>
-      <div style="font-size: 0.6875rem; color: var(--color-space-500); margin-top: 0.5rem;">${data.apod.date || ''} ${data.apod.copyright ? '• ' + escapeHtml(data.apod.copyright) : ''}</div>
-    `, 'solar'));
-  }
-  
-  // EONET Events
-  if (data.eonet?.events?.length) {
-    cards.push(createCard('🌍', 'Earth Events (EONET)', `
-      <div style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 200px; overflow-y: auto;">
-        ${data.eonet.events.slice(0, 5).map(event => `
-          <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: var(--radius-sm); padding: 0.75rem;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem;">
-              <div>
-                <div style="font-weight: 500; color: var(--color-space-100);">${escapeHtml(event.title || 'Event')}</div>
-                <div style="font-size: 0.6875rem; color: var(--color-space-500);">${escapeHtml(event.categories?.[0]?.title || 'Unknown')}</div>
-              </div>
-              <div style="font-size: 0.625rem; color: var(--color-space-500); white-space: nowrap;">${event.geometry?.[0]?.date ? new Date(event.geometry[0].date).toLocaleDateString() : ''}</div>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    `, 'danger'));
   }
   
   // InSight Mars Weather

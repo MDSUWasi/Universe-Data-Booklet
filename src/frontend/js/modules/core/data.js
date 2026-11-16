@@ -48,6 +48,9 @@ export async function loadData(view, reset = true) {
     renderTable(newChunk, reset);
     updatePagination();
     updateCounts(view);
+
+    // Notify live features (e.g. Study & Research Mode) that the dataset changed.
+    if (typeof window !== 'undefined') window.dispatchEvent(new Event('udb:datarefreshed'));
     
   } catch (error) {
     if (error.name !== 'AbortError') {

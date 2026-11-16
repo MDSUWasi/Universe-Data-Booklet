@@ -23,6 +23,11 @@ class TerrainAssetTests(unittest.TestCase):
                 self.assertLessEqual(asset["valid_fraction"], 1)
 
     def test_builder_uses_real_lunar_safe_screen(self):
+        # This test requires the gitignored LRO DEM raster (data/moon/moon_30m.tif).
+        # Skip gracefully when the external data file is not present in the checkout.
+        dem_path = Path(__file__).resolve().parents[1] / "data" / "moon" / "moon_30m.tif"
+        if not dem_path.is_file():
+            self.skipTest("LRO DEM raster not present (gitignored external data)")
         with tempfile.TemporaryDirectory() as directory:
             asset_path = build_asset("moon", SITES["moon"], Path(directory))
             asset = json.loads(asset_path.read_text(encoding="utf-8"))

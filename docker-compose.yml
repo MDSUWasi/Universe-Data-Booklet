@@ -1,0 +1,51 @@
+# Universe Data Booklet - Docker Compose configuration
+# 
+# Usage:
+#   docker compose up -d        # Build and run in detached mode
+#   docker compose logs -f     # Follow logs
+#   docker compose down        # Stop and remove containers
+#
+# For production, override SERVER_PORT and ALLOWED_ORIGINS via environment or .env file.
+
+version: "3.8"
+
+services:
+  universe-booklet:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: universe-data-booklet:latest
+    container_name: universe-data-booklet
+    restart: unless-stopped
+    ports:
+      - "${SERVER_PORT:-8081}:8081"
+    environment:
+      - SERVER_PORT=8081
+      - DEBUG_MODE=false
+      - NASA_API_KEY=${NASA_API_KEY:-DEMO_KEY}
+      - REFRESH_THRESHOLD_DAYS=${REFRESH_THRESHOLD_DAYS:-7}
+      - MAX_CACHE_AGE_DAYS=${MAX_CACHE_AGE_DAYS:-90}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-*}
+      - HOST=0.0.0.0
+    volumes:
+      # Persist runtime-generated cache data
+      - udb-data:/app/src/data
+      # Persist Project Base SQLite cache
+      - udb-pb-cache:/app/Project Base/.cache
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8081/api/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  udb-data:
+    driver: local
+  udb-pb-cache:
+    driver: local

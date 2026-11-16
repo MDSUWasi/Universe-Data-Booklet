@@ -15,7 +15,7 @@ import { initTerrain } from './js/modules/terrain/terrain.js';
 import { initPatches } from './js/modules/patches/patches.js';
 import { initScale } from './js/modules/scale/scale.js';
 import { initCalculator } from './js/modules/calculator/calculator.js';
-import { initPlanner } from './js/modules/planner/planner.js';
+import { initSimilarity } from './js/modules/planner/planner.js';
 import { initCompare } from './js/modules/compare/compare.js';
 import { initStudy } from './js/modules/study/study.js';
 import { initExplorer } from './js/modules/explorer/explorer.js';
@@ -43,7 +43,7 @@ const MODAL_INIT = {
   'modal-patches': initPatches,
   'modal-scale': initScale,
   'modal-calculator': initCalculator,
-  'modal-planner': initPlanner,
+  'modal-planner': initSimilarity,
   'modal-compare': initCompare,
   'modal-study': initStudy,
   'modal-explorer': initExplorer,
@@ -97,6 +97,8 @@ function openModalById(modalId) {
       console.error(`Failed to initialize ${modalId}:`, error);
       showToast(`Failed to load ${modalId.replace('modal-', '')}`, 'error');
     }
+  } else if (modalId === 'modal-compare' && MODAL_INIT[modalId]) {
+    try { MODAL_INIT[modalId](); } catch (e) { console.error(e); }
   }
   
   // Focus close button for accessibility

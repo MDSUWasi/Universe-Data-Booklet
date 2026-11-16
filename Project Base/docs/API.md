@@ -21,13 +21,12 @@ Single source of truth for every API used by Planetary Explorer.
 | 13 | `GET /api/encyclopedia/planet/{id}` | Single planet entry | `backend/api/routes.py:planet_payload` | `backend/server.py` |
 | 14 | `GET /api/encyclopedia/moon/{id}` | Single moon entry | `backend/api/routes.py:moon_payload` | `backend/server.py` |
 | 15 | `GET /api/encyclopedia/site/{id}` | Single terrain site entry | `backend/api/routes.py:site_payload` | `backend/server.py` |
-| 16 | `GET /api/nasa/apod` | NASA Astronomy Picture of the Day | `backend/api/routes.py:apod_payload` | `backend/server.py` |
-| 17 | `GET /api/nasa/earth-events` | Earth natural events (EONET) | `backend/api/routes.py:earth_events_payload` | `backend/server.py` |
-| 18 | `GET /api/nasa/mars-weather` | InSight Mars weather report | `backend/api/routes.py:mars_weather_payload` | `backend/server.py` |
-| 19 | `GET /api/nasa/space-weather` | Space weather notifications (DONKI) | `backend/api/routes.py:space_weather_payload` | `backend/server.py` |
-| 20 | `GET /api/space/iss` | Current ISS position (Open Notify) | `backend/api/routes.py:iss_position_payload` | `backend/server.py` |
-| 21 | `GET /api/space/astronauts` | Who is in space (Open Notify) | `backend/api/routes.py:astronauts_payload` | `backend/server.py` |
-| 22 | `GET /api/earth/earthquakes` | Recent earthquakes worldwide (USGS) | `backend/api/routes.py:earthquakes_payload` | `backend/server.py` |
+| 16 | `GET /api/nasa/earth-events` | Earth natural events (EONET) | `backend/api/routes.py:earth_events_payload` | `backend/server.py` |
+| 17 | `GET /api/nasa/mars-weather` | InSight Mars weather report | `backend/api/routes.py:mars_weather_payload` | `backend/server.py` |
+| 18 | `GET /api/nasa/space-weather` | Space weather notifications (DONKI) | `backend/api/routes.py:space_weather_payload` | `backend/server.py` |
+| 19 | `GET /api/space/iss` | Current ISS position (Open Notify) | `backend/api/routes.py:iss_position_payload` | `backend/server.py` |
+| 20 | `GET /api/space/astronauts` | Who is in space (Open Notify) | `backend/api/routes.py:astronauts_payload` | `backend/server.py` |
+| 21 | `GET /api/earth/earthquakes` | Recent earthquakes worldwide (USGS) | `backend/api/routes.py:earthquakes_payload` | `backend/server.py` |
 
 All upstream calls pass through the shared cache in `backend/api/cache.py:CacheStore`.
 
@@ -51,14 +50,13 @@ All upstream calls pass through the shared cache in `backend/api/cache.py:CacheS
 | E1 | Open-Meteo Elevation API | `backend/api/elevation.py` | 3x3 elevation grid | CC BY 4.0 |
 | E2 | Open-Meteo Forecast API | `backend/api/weather.py` | Current temperature + wind | CC BY 4.0 |
 | E3 | NASA Solar System Treks (WMTS) | `backend/api/tiles.py` | Moon LRO WAC, Mars Viking MDIM21 | Public Domain |
-| E4 | NASA APOD | `backend/api/nasa.py` | Astronomy Picture of the Day | NASA terms (DEMO_KEY) |
-| E5 | NASA EONET | `backend/api/nasa.py` | Earth natural events | NASA terms (DEMO_KEY) |
-| E6 | NASA InSight Weather | `backend/api/nasa.py` | Mars weather | NASA terms (DEMO_KEY) |
-| E7 | NASA DONKI | `backend/api/nasa.py` | Space weather notifications | NASA terms (DEMO_KEY) |
-| E8 | Open Notify ISS | `backend/api/opennotify.py` | Current ISS position | Open Notify terms |
-| E9 | Open Notify Astronauts | `backend/api/opennotify.py` | Who is in space | Open Notify terms |
-| E10 | USGS Earthquakes | `backend/api/earth_events.py` | Recent earthquakes worldwide | USGS terms |
-| E11 | Esri World Imagery | `frontend/js/modules/map/basemaps.js` | Earth satellite basemap | Esri terms |
+| E4 | NASA EONET | `backend/api/udb.py` | Earth natural events | NASA terms (DEMO_KEY) |
+| E5 | NASA InSight Weather | `backend/api/udb.py` | Mars weather | NASA terms (DEMO_KEY) |
+| E6 | NASA DONKI | `backend/api/udb.py` | Space weather notifications | NASA terms (DEMO_KEY) |
+| E7 | Open Notify ISS | `backend/api/udb_notify.py` | Current ISS position | Open Notify terms |
+| E8 | Open Notify Astronauts | `backend/api/udb_notify.py` | Who is in space | Open Notify terms |
+| E9 | USGS Earthquakes | `backend/api/earth_events.py` | Recent earthquakes worldwide | USGS terms |
+| E10 | Esri World Imagery | `frontend/js/modules/map/basemaps.js` | Earth satellite basemap | Esri terms |
 | E12 | USGS The National Map | `frontend/js/modules/map/basemaps.js` | Earth imagery basemap | Public Domain |
 | E13 | OpenStreetMap | `frontend/js/modules/map/basemaps.js` | Earth street basemap | ODbL |
 | E14 | CARTO | `frontend/js/modules/map/basemaps.js` | Earth dark basemap | CARTO terms |
