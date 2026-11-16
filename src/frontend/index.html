@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="terracota">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,6 +13,8 @@
   <script src="lib/leaflet.js"></script>
   <script src="lib/three.min.js"></script>
   <script src="lib/chart.min.js"></script>
+  <script src="js/modules/map/basemaps.js"></script>
+  <script src="js/modules/map/map-viewer.js"></script>
 </head>
 <body>
   <canvas id="stars-canvas" aria-hidden="true"></canvas>
@@ -256,9 +258,21 @@
           <div class="theme-selector">
             <span class="theme-selector-label">Theme</span>
             <div class="theme-options" role="radiogroup" aria-label="Color theme">
+              <button class="theme-option" data-theme="dark" role="radio" aria-checked="false">
+                <span class="theme-option-swatch" style="background: linear-gradient(135deg, #7c5ce6, #06b6d4);"></span>
+                <span>Dark</span>
+              </button>
+              <button class="theme-option" data-theme="light" role="radio" aria-checked="false">
+                <span class="theme-option-swatch" style="background: linear-gradient(135deg, #8f00ff, #e07a5f);"></span>
+                <span>Light</span>
+              </button>
               <button class="theme-option" data-theme="terracota" role="radio" aria-checked="true">
                 <span class="theme-option-swatch" style="background: linear-gradient(135deg, #e07a5f, #f4a261);"></span>
                 <span>Terracota</span>
+              </button>
+              <button class="theme-option" data-theme="planetary" role="radio" aria-checked="false">
+                <span class="theme-option-swatch" style="background: linear-gradient(135deg, #c9821a, #8b5a2b);"></span>
+                <span>Planetary</span>
               </button>
             </div>
           </div>
@@ -385,19 +399,22 @@
         </button>
       </header>
       <div class="modal-body">
-        <p class="modal-intro">Interactive map of catalogued landing sites across Earth, Moon, and Mars. Click markers or use the sidebar to explore terrain metrics.</p>
+        <p class="modal-intro">Interactive map of catalogued landing sites across Earth, Moon, and Mars. Click markers or use the sidebar to explore terrain metrics. Switch to <strong>Space</strong> view to explore Near-Earth Asteroids and Exoplanets.</p>
         
         <div style="display: grid; grid-template-columns: 280px 1fr; gap: 1rem; height: 500px;">
           <div style="display: flex; flex-direction: column; gap: 1rem;">
             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;" role="group" aria-label="Planetary body filters">
-              <button class="btn btn-sm" data-layer="earth" aria-pressed="true" style="background: linear-gradient(135deg, rgba(34,197,94,0.2), rgba(34,197,94,0.1)); border-color: rgba(34,197,94,0.3); color: var(--color-success-400);">● Earth</button>
-              <button class="btn btn-sm" data-layer="moon" aria-pressed="false" style="background: linear-gradient(135deg, rgba(107,114,128,0.2), rgba(107,114,128,0.1)); border-color: rgba(107,114,128,0.3); color: var(--color-space-400);">○ Moon</button>
-              <button class="btn btn-sm" data-layer="mars" aria-pressed="false" style="background: linear-gradient(135deg, rgba(239,68,68,0.2), rgba(239,68,68,0.1)); border-color: rgba(239,68,68,0.3); color: var(--color-danger-400);">▲ Mars</button>
+              <button class="btn btn-sm layer-btn" data-layer="earth" aria-pressed="true" style="background: linear-gradient(135deg, rgba(34,197,94,0.2), rgba(34,197,94,0.1)); border-color: rgba(34,197,94,0.3); color: var(--color-success-400);">● Earth</button>
+              <button class="btn btn-sm layer-btn" data-layer="moon" aria-pressed="false" style="background: linear-gradient(135deg, rgba(107,114,128,0.2), rgba(107,114,128,0.1)); border-color: rgba(107,114,128,0.3); color: var(--color-space-400);">○ Moon</button>
+              <button class="btn btn-sm layer-btn" data-layer="mars" aria-pressed="false" style="background: linear-gradient(135deg, rgba(239,68,68,0.2), rgba(239,68,68,0.1)); border-color: rgba(239,68,68,0.3); color: var(--color-danger-400);">▲ Mars</button>
+              <button class="btn btn-sm layer-btn" data-layer="space" aria-pressed="false" style="background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(168,85,247,0.2)); border-color: rgba(124,58,237,0.3); color: var(--color-nebula-400);">\ud83d\udcab Space</button>
             </div>
             
             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <input type="search" id="map-search" class="input" placeholder="Search sites…" style="width: 100%; padding: 0.5rem; font-size: 0.75rem; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); color: var(--color-space-100);">
               <button class="btn btn-sm btn-secondary" id="map-fit">⤢ Fit All</button>
               <button class="btn btn-sm btn-secondary" id="map-tiles">◇ Basemap</button>
+              <button class="btn btn-sm btn-secondary" id="map-retry">⟳ Retry Tiles</button>
             </div>
             
             <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.04); border-radius: var(--radius-md); padding: 1rem; font-size: 0.75rem; color: var(--color-space-400); line-height: 1.6;">
@@ -415,8 +432,9 @@
             </div>
           </div>
           
-          <div style="position: relative; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid rgba(255,255,255,0.06); background: #0a0f1a;">
+          <div style="position: relative; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid rgba(255,255,255,0.06); background: #0a0f1a; height: 100%;">
             <div id="map" style="width: 100%; height: 100%;"></div>
+            <div id="map-status" style="position: absolute; top: 0.5rem; left: 0.5rem; font-size: 0.6875rem; color: var(--color-space-400); background: rgba(12,18,34,0.85); padding: 0.35rem 0.6rem; border-radius: var(--radius-xs); border: 1px solid rgba(255,255,255,0.06); pointer-events: none;"></div>
             <div id="map-detail" style="position: absolute; bottom: 1rem; left: 1rem; right: 1rem; background: rgba(12,18,34,0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-md); padding: 1rem; transform: translateY(100%); opacity: 0; transition: var(--transition-base);">
               <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
                 <div>

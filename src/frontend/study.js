@@ -7,9 +7,9 @@
         if (text === null || text === undefined) return '';
         return String(text)
             .replace(/&/g, '&amp;')
-            .replace(/</g, '<')
-            .replace(/>/g, '>')
-            .replace(/"/g, '"')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, "&quot;")
             .replace(/'/g, '&#039;');
     }
     function num(v, fallback) {

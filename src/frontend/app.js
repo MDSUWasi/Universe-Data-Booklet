@@ -1,9 +1,7 @@
 // Main Application Entry Point
-import { State, Config, showToast, escapeHtml, openModal, closeModal } from './js/modules/core/state.js';
+import { State, Config, showToast, escapeHtml, openModal, closeModal, fetchApi } from './js/modules/core/state.js';
 import { initTheme, initSidebar, initNavigation, initStarfield, initNavbar, initRefreshButton } from './js/modules/core/ui.js';
 import { loadData, initSearch, initFilters, setCurrentView, getCurrentView, getCurrentData, showDetail } from './js/modules/core/data.js';
-
-// Load OrbitControls and make it globally available for Three.js modules
 import { OrbitControls } from './lib/OrbitControls.js';
 if (typeof THREE !== 'undefined') {
   THREE.OrbitControls = OrbitControls;
@@ -55,6 +53,35 @@ const MODAL_INIT = {
 };
 
 const modalInitialized = new Set();
+
+// Load planetary terrain sites (Earth / Moon / Mars) for the Map View feature.
+async function loadSiteData() {
+  try {
+    const payload = await fetchApi('/api/encyclopedia/sites');
+    const sites = payload && payload.sites ? payload.sites : [];
+    const data = {};
+    sites.forEach(s => {
+      data[s.id] = {
+        id: s.id,
+        name: s.name,
+        body: s.body,
+        region: s.region || '',
+        lat: s.lat,
+        lng: s.lng,
+        area: s.area_km2 || s.area,
+        meanRough: s.mean_rough_m || s.meanRough,
+        p95Rough: s.p95_rough_m || s.p95Rough,
+        maxRough: s.max_rough_m || s.maxRough,
+        siteClass: s.siteClass || '',
+        description: s.description || '',
+      };
+    });
+    window.SITE_DATA = data;
+  } catch (error) {
+    console.warn('Map View: failed to load site data:', error.message);
+    window.SITE_DATA = window.SITE_DATA || {};
+  }
+}
 
 function openModalById(modalId) {
   const modal = document.getElementById(modalId);
@@ -108,6 +135,8 @@ window.closeModal = (modalKey) => {
 };
 
 window.showDetail = showDetail;
+window.showToast = showToast;
+window.State = State;
 window.switchTab = setCurrentView;
 window.App = {
   loadCurrentView: () => loadData(getCurrentView(), true),
@@ -141,6 +170,9 @@ async function initApp() {
   // Refresh button
   initRefreshButton(() => loadData(getCurrentView(), true));
   
+  // Load map site data (Earth / Moon / Mars) for the Map View feature
+  await loadSiteData();
+
   // Load initial data
   await loadData('asteroids', true);
   

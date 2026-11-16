@@ -196,7 +196,22 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
 
             requests.append(now)
             _rate_limit_counters[client_ip] = requests
+
+            # Periodic cleanup of stale IPs (every ~1000 requests)
+            if len(_rate_limit_counters) > 1000:
+                self._cleanup_rate_limit(now)
+
             return False, len(requests)
+
+    def _cleanup_rate_limit(self, now):
+        """Remove IPs with no recent requests to prevent memory leak."""
+        window_start = now - RATE_LIMIT_WINDOW_SECONDS
+        stale_ips = [
+            ip for ip, requests in _rate_limit_counters.items()
+            if not any(ts > window_start for ts in requests)
+        ]
+        for ip in stale_ips:
+            del _rate_limit_counters[ip]
 
     def check_and_refresh_asteroids(self):
         """Fixed: Added thread lock to prevent concurrent cache writes.
@@ -416,31 +431,6 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         # ---- Terrain Lab endpoints ----
-        def _call_pb_api(pb_path, query_params=None):
-            """Call a Project Base API endpoint and return parsed JSON response."""
-            if not PB_AVAILABLE:
-                return None
-            try:
-                _PBHandler = pb_handler_factory(self)
-                if _PBHandler is None:
-                    return None
-                if query_params:
-                    _PBHandler.path = pb_path + '?' + query_params
-                else:
-                    _PBHandler.path = pb_path
-                # Capture response
-                import io
-                old_wfile = _PBHandler.wfile
-                _PBHandler.wfile = io.BytesIO()
-                _PBHandler.do_GET()
-                response_body = _PBHandler.wfile.getvalue()
-                _PBHandler.wfile = old_wfile
-                if response_body:
-                    return json.loads(response_body.decode('utf-8'))
-            except Exception:
-                pass
-            return None
-
         if path == '/api/terrain/data':
             query = parse_qs(parsed.query)
             body = query.get('body', ['Earth'])[0]

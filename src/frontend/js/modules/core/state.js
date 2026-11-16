@@ -16,17 +16,20 @@ export const State = {
 export const Config = {
   apiBase: '/api',
   themes: {
+    dark: { name: 'Dark', primary: '#7c5ce6', secondary: '#06b6d4' },
+    light: { name: 'Light', primary: '#8f00ff', secondary: '#e07a5f' },
     terracota: { name: 'Terracota', primary: '#e07a5f', secondary: '#f4a261' },
+    planetary: { name: 'Planetary', primary: '#c9821a', secondary: '#8b5a2b' },
   },
 };
 
 export function escapeHtml(text) {
   if (text === null || text === undefined) return '';
   return String(text)
-    .replace(/&/g, '&')
-    .replace(/</g, '<')
-    .replace(/>/g, '>')
-    .replace(/"/g, '"')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 }
 

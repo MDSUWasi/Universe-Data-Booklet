@@ -7,13 +7,13 @@ from pathlib import Path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 DATA_DIR = Path(__file__).parent.parent / "data"
-CACHE_DAYS = 14
+CACHE_DAYS = 7
 NASA_API_KEY = "DEMO_KEY"
 
 def ensure_dir(): DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 def cleanup_old():
-    print("🧹 Cleaning cache > 14 days...")
+    print("🧹 Cleaning cache > 7 days...")
     now = time.time()
     for f in DATA_DIR.glob("*.json"):
         if now - os.path.getmtime(f) > CACHE_DAYS * 86400:
