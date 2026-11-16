@@ -1,5 +1,5 @@
-/* Map View Module - Bootstrap for the interactive planetary map.
-   Wires the Leaflet-based MapViewer (map-viewer.js) into the modal defined in index.html.
+/* Map View Module - Bootstrap for the three.js planetary map.
+   Wires the MapViewer (map-viewer.js) into the modal defined in index.html.
    Exports initMap for use by app.js modal management. */
 'use strict';
 
@@ -9,12 +9,6 @@ const M = {
     init() {
         if (this.initialized) return;
         this.initialized = true;
-
-        // Wait for SITE_DATA to be available (populated by app.js from /api/encyclopedia/sites).
-        if (!window.SITE_DATA) {
-            setTimeout(() => this.init(), 50);
-            return;
-        }
 
         // Wire the close-when-clicking-overlay behaviour.
         const overlay = document.getElementById('modal-map');
@@ -31,7 +25,7 @@ const M = {
         if (!modal) return;
 
         // If modal is already open (openModalById adds 'open' before calling initMap),
-        // initialise Leaflet immediately. Otherwise defer until the modal opens.
+        // initialise MapViewer immediately. Otherwise defer until the modal opens.
         if (modal.classList.contains('open')) {
             this.initMapViewer();
         } else {
@@ -52,10 +46,10 @@ const M = {
         if (window.MapViewer) {
             window.MapViewer.open();
         }
-        // Ensure Leaflet recalculates map size once the modal is visible.
+        // Ensure three.js renderer recalculates size once the modal is visible.
         setTimeout(() => {
-            if (window.MapViewer && window.MapViewer.map) {
-                window.MapViewer.map.invalidateSize();
+            if (window.MapViewer) {
+                window.MapViewer.open();
             }
         }, 100);
     },
@@ -67,9 +61,7 @@ const M = {
         document.body.style.overflow = 'hidden';
         if (window.MapViewer) window.MapViewer.open();
         setTimeout(() => {
-            if (window.MapViewer && window.MapViewer.map) {
-                window.MapViewer.map.invalidateSize();
-            }
+            if (window.MapViewer) window.MapViewer.open();
         }, 100);
     },
 

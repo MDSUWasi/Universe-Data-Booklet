@@ -10,7 +10,6 @@ if (typeof THREE !== 'undefined') {
 // Feature modules
 import { initMap } from './js/modules/map/map.js';
 import { initEncyclopedia } from './js/modules/encyclopedia/encyclopedia.js';
-import { initDiscovery } from './js/modules/discovery/discovery.js';
 import { initRealtime } from './js/modules/realtime/realtime.js';
 import { initTerrain } from './js/modules/terrain/terrain.js';
 import { initPatches } from './js/modules/patches/patches.js';
@@ -25,7 +24,6 @@ import { initExplorer } from './js/modules/explorer/explorer.js';
 const MODAL_MAP = {
   map: 'modal-map',
   encyclopedia: 'modal-encyclopedia',
-  discovery: 'modal-discovery',
   realtime: 'modal-realtime',
   terrain: 'modal-terrain',
   patches: 'modal-patches',
@@ -40,7 +38,6 @@ const MODAL_MAP = {
 const MODAL_INIT = {
   'modal-map': initMap,
   'modal-encyclopedia': initEncyclopedia,
-  'modal-discovery': initDiscovery,
   'modal-realtime': initRealtime,
   'modal-terrain': initTerrain,
   'modal-patches': initPatches,

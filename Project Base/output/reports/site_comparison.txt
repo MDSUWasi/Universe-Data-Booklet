@@ -23,50 +23,26 @@
      4.    1.487 km2 | slope 1.64 | rough mean 2.624  p95 4.258  max 8.569
      5.    1.203 km2 | slope 1.74 | rough mean 2.659  p95 4.242  max 5.831
 
-[ analysing McMurdo Dry Valleys ]
+[ analysing Jezero Crater (Mars) ]
    valid coverage   : 100.00%
    flat (<=3 deg)   : 83.674% of valid = 5436.49 km2
    contiguous patches: 2761
-     1. 3122.806 km2 | slope 0.22 | rough mean 0.316  p95 2.434  max 12.344  <-- FILLED (water/ice)
-     2. 1776.883 km2 | slope 0.00 | rough mean 0.000  p95 0.000  max 0.000  <-- FILLED (water/ice)
-     3.  250.242 km2 | slope 1.68 | rough mean 2.294  p95 3.865  max 6.256
-     4.   88.191 km2 | slope 1.73 | rough mean 2.334  p95 3.859  max 5.080
-     5.   14.505 km2 | slope 1.33 | rough mean 1.889  p95 3.705  max 11.156
-
-[ analysing Kerguelen Islands ]
-   valid coverage   : 100.00%
-   flat (<=3 deg)   : 94.924% of valid = 7908.05 km2
-   contiguous patches: 2657
-     1. 7864.628 km2 | slope 0.00 | rough mean 0.006  p95 0.000  max 10.096  <-- FILLED (water/ice)
-     2.    6.552 km2 | slope 0.27 | rough mean 0.448  p95 3.005  max 8.718  <-- FILLED (water/ice)
-     3.    1.241 km2 | slope 0.83 | rough mean 1.352  p95 3.946  max 6.782
-     4.    0.734 km2 | slope 1.81 | rough mean 2.767  p95 4.386  max 9.018
-     5.    0.539 km2 | slope 1.75 | rough mean 2.689  p95 4.478  max 7.729
-
-[ analysing Axel Heiberg Island ]
-   valid coverage   : 100.00%
-   flat (<=3 deg)   : 79.337% of valid = 6613.74 km2
-   contiguous patches: 5659
-     1. 2977.492 km2 | slope 0.00 | rough mean 0.000  p95 0.000  max 0.000  <-- FILLED (water/ice)
-     2. 2975.964 km2 | slope 0.00 | rough mean 0.000  p95 0.000  max 0.000  <-- FILLED (water/ice)
-     3.  107.568 km2 | slope 0.00 | rough mean 0.000  p95 0.000  max 0.000  <-- FILLED (water/ice)
-     4.   89.626 km2 | slope 0.00 | rough mean 0.000  p95 0.000  max 0.000  <-- FILLED (water/ice)
-     5.   81.175 km2 | slope 1.69 | rough mean 2.232  p95 3.611  max 5.371
+     1. 541.358 km2 | slope 1.48 | rough mean 2.085  p95 3.725  max 7.326
+     2.  56.174 km2 | slope 1.73 | rough mean 2.435  p95 3.933  max 5.431
+     3.  28.255 km2 | slope 1.78 | rough mean 2.554  p95 4.000  max 7.359
+     4.  22.404 km2 | slope 1.71 | rough mean 2.421  p95 3.955  max 6.434
+     5.  16.287 km2 | slope 1.74 | rough mean 2.447  p95 3.942  max 5.135
 
 ==========================================================================
   COMPARISON - best non-filled contiguous patch, all at 90 m window
 ==========================================================================
 site                         area km2    r_mean     r_p95     r_max
---------------------------------------------------------------------------
+------------------------------------------------------------------
 Moon South Pole                 3.875     2.462     4.138     7.775
-McMurdo Dry Valleys           250.242     2.294     3.865     6.256
-Kerguelen Islands               1.241     1.352     3.946     6.782
-Axel Heiberg Island            81.175     2.232     3.611     5.371
+Jezero Crater                  506.277     2.110     3.744     7.600
 
   ratio vs Moon (r_mean):
-    McMurdo Dry Valleys      1.07x rougher than Moon
-    Kerguelen Islands        1.82x rougher than Moon
-    Axel Heiberg Island      1.10x rougher than Moon
+    Jezero Crater        0.86x smoother than Moon
 
   NOTE: ratios compare the best non-filled patch per site. They are
   not a site-wide average and should be described as such in any write-up.

@@ -67,11 +67,6 @@
       <span class="nav-title">Encyclopedia</span>
       <span class="nav-desc">Planets, moons &amp; sites</span>
     </button>
-    <button class="side-nav-item" type="button" onclick="UI.openModal('discovery')">
-      <span class="nav-icon">◇</span>
-      <span class="nav-title">Discovery Lab</span>
-      <span class="nav-desc">Screen any Earth coordinate</span>
-    </button>
     <button class="side-nav-item" type="button" onclick="UI.openModal('realtime')">
       <span class="nav-icon">◎</span>
       <span class="nav-title">Realtime Dashboard</span>
@@ -266,37 +261,6 @@
     </div>
   </div>
 
-  <div class="modal-overlay" id="modal-discovery" onclick="UI.overlayClose(event,'discovery')">
-    <div class="modal-panel modal-wide">
-      <div class="modal-head"><h2>◇ Discovery Lab</h2><button class="x" type="button" onclick="UI.closeModal('discovery')" aria-label="Close discovery lab">&times;</button></div>
-      <p class="modal-intro">
-        Enter any <strong>Earth</strong> coordinate. We sample a 33 elevation grid from the
-        <a href="https://open-meteo.com/en/docs/elevation-api" target="_blank" rel="noopener">Open-Meteo elevation API</a>
-        and estimate local slope and relief <em>in your browser</em>. These coarse API-based indicators are not a matched-scale terrain score.
-        Results are cached in this browser to avoid repeat requests.
-      </p>
-      <div class="disc-controls">
-        <label>Latitude<input type="number" id="disc-lat" step="0.0001" placeholder="-77.6" min="-90" max="90"></label>
-        <label>Longitude<input type="number" id="disc-lng" step="0.0001" placeholder="162.2" min="-180" max="180"></label>
-        <button class="btn-primary" id="disc-run" type="button">Analyze Terrain</button>
-        <button class="btn-ghost" id="disc-random" type="button">Surprise Me</button>
-      </div>
-      <div class="disc-result" id="disc-result" aria-live="polite">
-        <div class="disc-placeholder">Awaiting coordinates… discoveries are screened, not guessed — we only claim what open data can support.</div>
-      </div>
-      <details class="disc-cache">
-        <summary>⚙️ Smart-cache internals <span id="cache-summary"></span></summary>
-        <div class="cache-grid">
-          <div>Hits: <strong id="cache-hits">0</strong></div>
-          <div>Misses: <strong id="cache-misses">0</strong></div>
-          <div>Entries: <strong id="cache-entries">0</strong></div>
-          <div>In-flight dedup: <strong id="cache-live">0</strong></div>
-        </div>
-        <button class="btn-ghost btn-small" type="button" onclick="Cache.clear(); Discovery.renderCacheStats(); Toast.show('Cache cleared')">Clear cache</button>
-      </details>
-    </div>
-  </div>
-
   <div class="modal-overlay" id="modal-selector" onclick="UI.overlayClose(event,'selector')">
     <div class="modal-panel">
       <div class="modal-head"><h2>◆ Base Site Selector</h2><button class="x" type="button" onclick="UI.closeModal('selector')" aria-label="Close selector">&times;</button></div>
@@ -478,7 +442,6 @@
     <table class="cmp-table">
       <thead><tr><th>Service</th><th>Used for</th><th>Licence</th></tr></thead>
       <tbody>
-        <tr><td><b>Open-Meteo Elevation API</b></td><td>Discovery Lab 33 elevation grid</td><td>CC BY 4.0</td></tr>
         <tr><td><b>Open-Meteo Forecast API</b></td><td>Current temperature &amp; wind</td><td>CC BY 4.0</td></tr>
         <tr><td><b>NASA Solar System Treks (WMTS)</b></td><td>Moon LRO WAC Mosaic, Mars Viking MDIM21</td><td>Public domain</td></tr>
         <tr><td><b>Esri World Imagery</b></td><td>Earth satellite basemap</td><td>Esri terms</td></tr>
@@ -555,7 +518,6 @@
 <script src="js/modules/core/cache.js"></script>
 <script src="js/modules/core/theme.js"></script>
 
-<script src="js/modules/discovery/discovery.js"></script>
 <script src="js/modules/map/basemaps.js"></script>
 <script src="js/modules/map/map-viewer.js"></script>
 <script src="js/modules/map/map-viewer-2.js"></script>

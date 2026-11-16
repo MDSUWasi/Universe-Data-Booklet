@@ -68,7 +68,7 @@ def _load_project_base():
     backend_pkg.api = api_pkg  # type: ignore[attr-defined]
 
     api_dir = PB_BACKEND_DIR / "api"
-    for sub in ("cache", "elevation", "weather", "tiles", "routes",
+    for sub in ("cache", "weather", "tiles", "routes",
                 "encyclopedia", "nasa", "opennotify", "earth_events"):
         _load_module(f"backend.api.{sub}", api_dir / f"{sub}.py")
 

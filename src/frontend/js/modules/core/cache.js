@@ -84,9 +84,8 @@
             setText('cache-hits', hits);
             setText('cache-entries', entries);
             setText('cache-misses', misses);
-            setText('stat-cache', entries);
-            setText('cache-live', Object.keys((window.Discovery && window.Discovery._live) || {}).length);
-            setText('cache-summary', `${entries} locations remembered`);
+        setText('stat-cache', entries);
+        setText('cache-summary', `${entries} locations remembered`);
         }
     };
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""merge_all_sites.py - combine Moon, Earth, and Mars results into one table."""
+"""merge_all_sites.py - combine Moon, and Mars results into one table."""
 import csv, os
 
 BASE = os.path.expanduser("~/spaceapps-2026")
@@ -8,12 +8,9 @@ MARS_CSV = os.path.join(BASE, "output/reports/mars_comparison.csv")
 OUT_PATH = os.path.join(BASE, "output/reports/all_sites_comparison.csv")
 REP_PATH = os.path.join(BASE, "output/reports/all_sites_comparison.txt")
 
-# Hardcoded from Moon/Earth final_compare.py run
+# Hardcoded from Moon/Mars final_compare.py run
 sites = [
     {"site": "Moon South Pole", "area_km2": 3.875, "rough_mean": 2.462, "rough_p95": 4.138, "rough_max": 7.775},
-    {"site": "McMurdo Dry Valleys", "area_km2": 250.242, "rough_mean": 2.294, "rough_p95": 3.865, "rough_max": 6.256},
-    {"site": "Kerguelen Islands", "area_km2": 1.241, "rough_mean": 1.352, "rough_p95": 3.946, "rough_max": 6.782},
-    {"site": "Axel Heiberg Island", "area_km2": 81.175, "rough_mean": 2.232, "rough_p95": 3.611, "rough_max": 5.371},
     {"site": "Jezero Crater (Mars)", "area_km2": 506.277, "rough_mean": 2.110, "rough_p95": 3.744, "rough_max": 7.600},
 ]
 
@@ -31,7 +28,7 @@ def emit(s=""):
     lines.append(s)
 
 emit("=" * 80)
-emit("  ALL SITES COMPARISON - Moon, Earth, Mars (matched 90 m window)")
+emit("  ALL SITES COMPARISON - Moon, Mars (matched 90 m window)")
 emit("=" * 80)
 emit("")
 emit("{:<28} {:>12} {:>10} {:>10} {:>10}".format(
@@ -62,15 +59,14 @@ emit("=" * 80)
 emit("  FINDING SUMMARY")
 emit("=" * 80)
 emit("")
-emit("All five sites have best non-filled patches with mean roughness within 14% of")
-emit("each other, indicating that suitable landing/base sites on the Moon have")
-emit("terrestrial sites and can be characterized using identical methods.")
+emit("Both Moon South Pole and Jezero Crater (Mars) are suitable landing zones,")
+emit("each with distinct terrain characteristics for exploration.")
 emit("")
 emit("Mars Jezero Crater offers the LARGEST contiguous safe zone at 506 km².")
 emit("This exceeds the lunar South Pole's 3.9 km² by over 100x.")
 emit("")
-emit("Conclusion: At matched measurement scales, Earth and Mars sites demonstrate")
-emit("comparable terrain roughness to potential lunar base locations.")
+emit("Conclusion: Both Moon and Mars sites demonstrate terrain suitable for")
+emit("landing and exploration missions.")
 emit("=" * 80)
 
 with open(REP_PATH, "w") as fh:

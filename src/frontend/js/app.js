@@ -17,21 +17,6 @@ window.onload = () => {
     // consistent from the first paint.
     if (window.Theme) window.Theme.init();
 
-    const discRun = document.getElementById('disc-run');
-    const discRand = document.getElementById('disc-random');
-    if (discRun) discRun.onclick = () => {
-        const lat = parseFloat(document.getElementById('disc-lat').value);
-        const lng = parseFloat(document.getElementById('disc-lng').value);
-        if (isNaN(lat) || isNaN(lng)) { if (window.Toast) window.Toast.show('Please enter valid coordinates'); return; }
-        if (window.Discovery) window.Discovery.analyze(lat, lng);
-    };
-    if (discRand) discRand.onclick = () => { if (window.Discovery) window.Discovery.random(); };
-
-    const retryBtn = document.getElementById('map-retry');
-    if (retryBtn) retryBtn.addEventListener('click', () => {
-        if (window.MapViewer) window.MapViewer.retryTiles();
-    });
-
     // Mission Planner: wire the wizard buttons (independent of the step UI).
     const plannerBack = document.getElementById('planner-back');
     const plannerNext = document.getElementById('planner-next');

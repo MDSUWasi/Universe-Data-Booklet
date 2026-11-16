@@ -27,7 +27,7 @@ class DataEndpointTests(unittest.TestCase):
     def test_sites_endpoint_reads_all_five_summary_records(self):
         payload = self.call_endpoint(AppHandler._sites)
         self.assertEqual(payload["source"], "output/reports/all_sites_comparison.csv")
-        self.assertEqual({site["id"] for site in payload["sites"]}, {"moon", "mcmurdo", "axel", "kerguelen", "jezero"})
+        self.assertEqual({site["id"] for site in payload["sites"]}, {"moon", "jezero"})
         moon = next(site for site in payload["sites"] if site["id"] == "moon")
         self.assertEqual(moon["max_rough_m"], 7.775)
 
@@ -35,7 +35,7 @@ class DataEndpointTests(unittest.TestCase):
         payload = self.call_endpoint(AppHandler._patches)
         records = payload["records"]
         self.assertGreater(len(records), 5)
-        self.assertEqual({record["body"] for record in records}, {"Moon", "Earth", "Mars"})
+        self.assertEqual({record["body"] for record in records}, {"Moon", "Mars"})
         self.assertTrue(any(record["filled"] for record in records))
         self.assertTrue(any(not record["filled"] for record in records))
 

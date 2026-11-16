@@ -26,7 +26,6 @@ try:
         CacheStore,
         UpstreamUnavailable,
         cache_key,
-        elevation,
         routes,
         tiles,
         weather,
@@ -39,7 +38,6 @@ except ImportError:
         CacheStore,
         UpstreamUnavailable,
         cache_key,
-        elevation,
         routes,
         tiles,
         weather,
@@ -105,8 +103,6 @@ class AppHandler(SimpleHTTPRequestHandler):
             self._serve_payload(routes.astronauts_payload())
         elif parsed.path == "/api/earth/earthquakes":
             self._serve_payload(routes.earthquakes_payload())
-        elif parsed.path == "/api/elevation":
-            self._elevation(parse_qs(parsed.query))
         elif parsed.path == "/api/weather":
             self._weather(parse_qs(parsed.query))
         elif parsed.path.startswith("/api/tiles/"):
@@ -119,26 +115,6 @@ class AppHandler(SimpleHTTPRequestHandler):
     # ------------------------------------------------------------------ #
     # Upstream-backed endpoints
     # ------------------------------------------------------------------ #
-    def _elevation(self, query: dict[str, list[str]]) -> None:
-        try:
-            latitudes, longitudes = elevation.parse_coordinates(
-                query.get("latitude", [""])[0],
-                query.get("longitude", [""])[0],
-            )
-        except (ValueError, OverflowError) as error:
-            self._json(400, {"error": str(error)})
-            return
-
-        try:
-            body, content_type, state = elevation.fetch_elevation(latitudes, longitudes)
-        except UpstreamUnavailable as error:
-            self._json(502, {"error": str(error)})
-            return
-        self._send(200, body, content_type, {
-            "Cache-Control": "no-store",
-            "X-Cache": state,
-        })
-
     def _weather(self, query: dict[str, list[str]]) -> None:
         try:
             latitude = float(query.get("lat", [""])[0])

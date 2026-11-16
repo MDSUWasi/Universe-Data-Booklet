@@ -20,9 +20,6 @@ from . import encyclopedia, nasa, opennotify, earth_events
 # site name (lowercased, as it appears in the CSV) -> canonical id
 SITE_IDS = {
     "moon south pole": "moon",
-    "mcmurdo dry valleys": "mcmurdo",
-    "axel heiberg island": "axel",
-    "kerguelen islands": "kerguelen",
     "jezero crater (mars)": "jezero",
 }
 

@@ -4,7 +4,6 @@ Reorganised from the monolithic ``backend/server.py`` so that each concern lives
 in its own independent module:
 
 * ``cache.py``        -- the SQLite cache store + shared helpers + TTL policy
-* ``elevation.py``    -- Open-Meteo elevation service (Discovery Lab)
 * ``weather.py``      -- Open-Meteo current weather service
 * ``tiles.py``        -- NASA Trek WMTS tile proxy (Moon / Mars)
 * ``routes.py``      -- committed-CSV data endpoints (/api/sites, /api/patches,
@@ -38,7 +37,7 @@ from .cache import (
     cache_key,
     fetch,
 )
-from . import elevation, weather, tiles, routes
+from . import weather, tiles, routes
 
 # Repo root.  ``backend/api/__init__.py`` -> parents[2] is the repo root.
 ROOT = Path(__file__).resolve().parents[2]
@@ -52,7 +51,6 @@ __all__ = [
     "UpstreamUnavailable",
     "cache_key",
     "fetch",
-    "elevation",
     "weather",
     "tiles",
     "routes",

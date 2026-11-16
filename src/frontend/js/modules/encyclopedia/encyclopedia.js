@@ -34,11 +34,7 @@ const BODIES = [
     description: 'Our home world — the only known planet with liquid water, life, and plate tectonics.',
     stats: { radius: '6,371 km', gravity: '9.81 m/s²', temp: '-89 to 58°C', orbit: '365 days' },
     image: 'assets/encyclopedia/earth.jpg',
-    sites: [
-      { name: 'Kerguelen Plateau', desc: 'Submerged microcontinent, analog for ocean worlds' },
-      { name: 'McMurdo Dry Valleys', desc: 'Mars-like polar desert in Antarctica' },
-      { name: 'Axel Heiberg Island', desc: 'High Arctic permafrost and springs' },
-    ],
+    sites: [],
   },
   {
     id: 'mars',

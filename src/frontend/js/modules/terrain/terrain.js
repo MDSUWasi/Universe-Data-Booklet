@@ -8,11 +8,6 @@ let currentMode = 'elevation';
 let exaggeration = 4;
 
 const SITES = {
-  Earth: [
-    { id: 'kerguelen', name: 'Kerguelen Plateau', lat: -49.5, lng: 70.0, file: 'kerguelen.json' },
-    { id: 'mcmurdo', name: 'McMurdo Dry Valleys', lat: -77.8, lng: 166.7, file: 'mcmurdo.json' },
-    { id: 'axel', name: 'Axel Heiberg Island', lat: 79.5, lng: -90.0, file: 'axel.json' },
-  ],
   Moon: [
     { id: 'moon_south', name: 'Lunar South Pole', lat: -89.5, lng: 0.0, file: 'moon.json' },
   ],
@@ -22,9 +17,6 @@ const SITES = {
 };
 
 const SITE_META = {
-  kerguelen: { area: '125 km²', slope: '1.2°', rough: '0.8m', p95: '2.1m', elev: '500m' },
-  mcmurdo: { area: '89 km²', slope: '0.9°', rough: '0.5m', p95: '1.4m', elev: '1200m' },
-  axel: { area: '67 km²', slope: '1.5°', rough: '1.1m', p95: '2.8m', elev: '200m' },
   moon_south: { area: '234 km²', slope: '2.1°', rough: '1.8m', p95: '3.9m', elev: '1500m' },
   jezero: { area: '156 km²', slope: '1.8°', rough: '1.3m', p95: '3.2m', elev: '-2600m' },
 };
@@ -42,7 +34,7 @@ export function initTerrain() {
   if (!bodySelect || !siteSelect || !modeSelect || !exaggerationSlider || !exaggerationValue || !canvas) return;
   
   // Populate body select
-  bodySelect.innerHTML = Object.keys(SITES).map(body => `<option value="${body}">${body === 'Earth' ? '●' : body === 'Moon' ? '○' : '▲'} ${body}</option>`).join('');
+  bodySelect.innerHTML = Object.keys(SITES).map(body => `<option value="${body}">${body === 'Moon' ? '○' : '▲'} ${body}</option>`).join('');
   
   bodySelect.addEventListener('change', () => {
     currentBody = bodySelect.value;

@@ -122,7 +122,10 @@ export function closeAllModals() {
 }
 
 export async function fetchApi(endpoint, options = {}) {
-  const url = `${Config.apiBase}${endpoint}`;
+  // Normalise the endpoint so callers may pass either "/api/..." or just "...".
+  // Prepending Config.apiBase on an already-prefixed path would produce
+  // "/api/api/..." and 404 every request (the Discovery "Analysis Failed" bug).
+  const url = endpoint.startsWith('/api/') ? endpoint : `${Config.apiBase}${endpoint}`;
   const response = await fetch(url, {
     headers: { 'Content-Type': 'application/json', ...options.headers },
     ...options,

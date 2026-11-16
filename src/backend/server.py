@@ -434,16 +434,13 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
         if path == '/api/terrain/data':
             query = parse_qs(parsed.query)
             body = query.get('body', ['Earth'])[0]
-            site = query.get('site', ['kerguelen'])[0]
+            site = query.get('site', ['moon_south'])[0]
             # Generate procedural terrain data for visualization
             import random
             random.seed(hash(site) % 10000)
             
             # Site-specific terrain profiles
             terrain_profiles = {
-                'kerguelen': {'base': 500, 'variation': 100, 'feature': 'plateau'},  # Submerged plateau
-                'mcmurdo': {'base': 1200, 'variation': 200, 'feature': 'valleys'},    # Dry valleys
-                'axel': {'base': 200, 'variation': 150, 'feature': 'arctic'},         # Arctic island
                 'moon_south': {'base': 1500, 'variation': 500, 'feature': 'cratered'}, # Lunar south pole
                 'jezero': {'base': -2600, 'variation': 300, 'feature': 'crater'},      # Mars crater
             }
