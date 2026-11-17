@@ -1,7 +1,7 @@
-<h5 align="right"><i>Last README Update: 11 November 2026</i></h4>
+<h5 align="right"><i>Last README Update: 17 November 2026</i></h4>
 <h1 align="center"> 🌌 Universe Data Booklet</h1>
 
-> **An interactive data explorer for Near-Earth Asteroids, Exoplanets, and planetary terrain.**  
+> **An interactive data explorer for Near-Earth Asteroids, Exoplanets, Planets (of Solar System) and planetary terrain.**  
 > *Built for students, educators and for study purpose* 
 
 <h3>
@@ -13,7 +13,7 @@
 ![Hackatime](https://hackatime.hackclub.com/api/v1/badge/U0B5XFH01GQ/MDSUWasi/Universe-Data-Booklet)
 
 
-Universe Data Booklet is an interactive astronomy and planetary-science website (its name says "booklet" but it is a web app) that transforms raw space data into an intuitive, graphical experience. It is **not limited to exoplanets and asteroids** -- it also embeds the **Planetary Explorer** research tool for terrain across Earth, the Moon, and Mars. Whether you are tracking potentially hazardous asteroids, analyzing the habitability of distant exoplanets, or screening candidate landing sites for slope and roughness, this tool provides insights with **zero latency** thanks to its intelligent local caching architecture.
+Universe Data Booklet is an interactive astronomy and planetary-science website (its name says "booklet" but it is a web app) that transforms raw space data into an intuitive, graphical experience. It is **not limited to exoplanets and asteroids**, it also embeds the **Planetary Explorer** research tool for terrain across Earth, the Moon, and Mars. Whether you are tracking potentially hazardous asteroids, analyzing the habitability of distant exoplanets, or screening candidate landing sites for slope and roughness, this tool provides insights with **zero latency** thanks to its intelligent local caching architecture. And everything is not limited to those!
 
 ---
 
@@ -28,7 +28,6 @@ Universe Data Booklet covers three domains, not just two:
 ### 🎨 **Immersive Visualization & Features**
 - **Dynamic Charts:** Real-time bar charts pop up powered by Chart.js to visualize size and velocity distributions.
 - **3D Interactive View:** Explore objects as 3D spheres (Three.js) (pop up) with orbit rings and drag-to-rotate camera. Exoplanets and Asteroids have 2 different 3D view. Asteroids have a solar system simulation type 3D view.
-- **Theme Switcher:** Toggle between **Cream**,**Neon**, **Solar**, and **Lab** themes (persisted in localStorage).
 - **Detail Modal:** Click any row for a deep-dive into the object's data.
 - **Search & Stats:** Client-side search across the NEO and exoplanet datasets plus live stat cards.
 - **Map View:** A visual map for locating both data. (Make sure to press the "more" button before viewing the map for exoplanets. because there are approximately 6,000 exoplanets and all of those data are not shown at once untill the more button is clicked and the Map view works on how many data is present on the interface.)
