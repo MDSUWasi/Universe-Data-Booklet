@@ -44,6 +44,9 @@ const BODIES = [
     description: 'The Red Planet — once wet, now cold and dry, with the largest volcano and canyon in the solar system.',
     stats: { radius: '3,390 km', gravity: '3.71 m/s²', temp: '-143 to 35°C', orbit: '687 days' },
     image: 'assets/encyclopedia/mars.jpg',
+    license: 'CC BY-SA 3.0 IGO',
+    licenseUrl: 'https://creativecommons.org/licenses/by-sa/3.0/igo/',
+    author: 'ESA & MPS for OSIRIS Team (Rosetta)',
     sites: [
       { name: 'Jezero Crater', desc: 'Ancient lake delta, Perseverance rover site' },
       { name: 'Olympus Mons', desc: 'Largest volcano, 21 km high' },
@@ -174,6 +177,9 @@ const BODIES = [
     description: 'Largest moon in the solar system — bigger than Mercury, with its own magnetic field.',
     stats: { radius: '2,634 km', gravity: '1.43 m/s²', temp: '-160°C', orbit: '7.2 days' },
     image: 'assets/encyclopedia/ganymede.jpg',
+    license: 'CC BY 2.0',
+    licenseUrl: 'https://creativecommons.org/licenses/by/2.0/',
+    author: 'NASA/JPL-Caltech/SwRI/MSSS/Kevin M. Gill (Juno)',
     sites: [
       { name: 'Magnetosphere', desc: 'Only moon with intrinsic magnetic field' },
       { name: 'Grooved Terrain', desc: 'Ancient tectonic patterns' },
@@ -212,6 +218,9 @@ const BODIES = [
     description: 'Tiny ocean world erupting geysers — direct access to subsurface ocean.',
     stats: { radius: '252 km', gravity: '0.11 m/s²', temp: '-201°C', orbit: '1.4 days' },
     image: 'assets/encyclopedia/enceladus.jpg',
+    license: 'CC BY-SA 2.0',
+    licenseUrl: 'https://creativecommons.org/licenses/by-sa/2.0/',
+    author: 'NASA/JPL-Caltech/Space Science Institute (Cassini)',
     sites: [
       { name: 'Tiger Stripes', desc: 'Fractures erupting water ice plumes' },
       { name: 'Organic Plumes', desc: 'Complex organics detected in spray' },
@@ -328,6 +337,7 @@ export function initEncyclopedia() {
               </div>
             `).join('')}
           </div>
+          ${body.license ? `<div style="font-size: 0.625rem; color: var(--color-space-400); margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.04); display: flex; flex-direction: column; gap: 0.125rem;"><div>Image credit: ${body.author}</div><div><a href="${body.licenseUrl}" target="_blank" rel="noopener" style="color: var(--color-aurora-400); text-decoration: underline;">${body.license}</a> (attribution required; image unmodified)</div></div>` : ''}
         </div>
       </div>
     </article>

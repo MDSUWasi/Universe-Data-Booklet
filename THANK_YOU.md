@@ -113,13 +113,6 @@ Full license texts and copyright notices are bundled with the libraries under
 
 ---
 
-## 👤 Author
-
-- **MDSUWasi** (Shafiun Wasi) — creator of Universe Data Booklet and the
-  integrated Planetary Explorer (Project Base).
-
----
-
 ## 🙏 Acknowledgments
 
 - The NASA, USGS, Open-Meteo, Open Notify, and ESA/Copernicus teams for making

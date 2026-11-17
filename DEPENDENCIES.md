@@ -88,11 +88,9 @@ as required by that license — even when the app runs fully offline.
   **CC BY-SA 3.0 IGO (Mars)** require **attribution** to the named author and a
   link to the license.  Attribution is printed on each encyclopedia card and in
   this file.  CC BY-SA also requires that derivative works be shared under the
-  same license — this project does not modify those images.
-- **CC0 (Uranus, Neptune)** is a public-domain dedication; no further
-  obligations, though attribution is still given.
-- **Public-domain / NASA images** may be used freely; NASA/JPL-Caltech
-  attribution is given as a courtesy.
+  same license, this project does not modify those images.
+- **CC0 (Uranus, Neptune)** is a public-domain dedication.
+- **Public-domain / NASA images** may be used freely; NASA/JPL-Caltech.
 - All images are **retrieved from Wikimedia Commons under CC BY / CC BY-SA /
   CC0 / public-domain licenses**; see each file's
   [Commons page](https://commons.wikimedia.org) for the full terms.

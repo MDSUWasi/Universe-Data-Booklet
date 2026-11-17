@@ -725,15 +725,16 @@ class SecureHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         # ---- Legal / info pages ----
-        # /terms and /privacy live in docs/; /dependencies, /credits,
-        # /thank-you and /license live at the repo root.
+        # /terms and /privacy live in docs/ (markdown source of truth);
+        # /dependencies, /thank-you are served as self-contained HTML subpages
+        # from src/frontend/. /credits and /license stay markdown/plain.
         DOC_ROOT = os.path.join(SRC_DIR, '..', 'docs')
         DOC_ROUTES = {
-            '/terms': (os.path.join(DOC_ROOT, 'terms.md'), 'text/markdown; charset=utf-8'),
-            '/privacy': (os.path.join(DOC_ROOT, 'privacy.md'), 'text/markdown; charset=utf-8'),
-            '/dependencies': (os.path.join(SRC_DIR, '..', 'DEPENDENCIES.md'), 'text/markdown; charset=utf-8'),
+            '/terms': (os.path.join(FRONTEND_DIR, 'terms.html'), 'text/html; charset=utf-8'),
+            '/privacy': (os.path.join(FRONTEND_DIR, 'privacy.html'), 'text/html; charset=utf-8'),
+            '/dependencies': (os.path.join(FRONTEND_DIR, 'dependencies.html'), 'text/html; charset=utf-8'),
+            '/thank-you': (os.path.join(FRONTEND_DIR, 'thank-you.html'), 'text/html; charset=utf-8'),
             '/credits': (os.path.join(SRC_DIR, '..', 'CREDITS.md'), 'text/markdown; charset=utf-8'),
-            '/thank-you': (os.path.join(SRC_DIR, '..', 'THANK_YOU.md'), 'text/markdown; charset=utf-8'),
             '/license': (os.path.join(SRC_DIR, '..', 'LICENSE'), 'text/plain; charset=utf-8'),
         }
         if path in DOC_ROUTES:

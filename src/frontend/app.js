@@ -142,6 +142,10 @@ window.App = {
   refreshData: () => loadData(getCurrentView(), true),
 };
 
+// Save current table as PDF (Asteroids / Exoplanets)
+const btnSavePdf = document.getElementById('btn-save-pdf');
+if (btnSavePdf) btnSavePdf.onclick = () => { if (window.exportPDF) window.exportPDF(); };
+
 // Initialize application
 async function initApp() {
   // Core initialization

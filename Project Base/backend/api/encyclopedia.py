@@ -200,6 +200,8 @@ PLANETS: dict[str, dict[str, Any]] = {
         "image": "mars.jpg",
         "image_source": "Wikimedia Commons: OSIRIS Mars true colour (ESA/Rosetta/MPS for OSIRIS Team)",
         "image_attribution": "ESA/Rosetta/MPS",
+        "image_license": "CC BY-SA 3.0 IGO",
+        "image_license_url": "https://creativecommons.org/licenses/by-sa/3.0/igo/",
     },
     "jupiter": {
         "id": "jupiter",
@@ -522,6 +524,8 @@ MOONS: dict[str, dict[str, Any]] = {
         "image": "ganymede.jpg",
         "image_source": "Wikimedia Commons: Ganymede - Perijove 34 Composite (NASA/JPL-Caltech/Space Science Institute)",
         "image_attribution": "NASA/JPL-Caltech/Space Science Institute",
+        "image_license": "CC BY 2.0",
+        "image_license_url": "https://creativecommons.org/licenses/by/2.0/",
     },
 "callisto": {
         "id": "callisto",
@@ -587,7 +591,9 @@ MOONS: dict[str, dict[str, Any]] = {
         "color": "#F7F9F9",
         "image": "enceladus.jpg",
         "image_source": "Wikimedia Commons: Enceladus with Saturn (NASA/JPL-Caltech/Space Science Institute)",
-        "image_attribution": "NASA/JPL-Caltech/Space Science Institute"
+        "image_attribution": "NASA/JPL-Caltech/Space Science Institute",
+        "image_license": "CC BY-SA 2.0",
+        "image_license_url": "https://creativecommons.org/licenses/by-sa/2.0/",
     },
     "triton": {
         "id": "triton",

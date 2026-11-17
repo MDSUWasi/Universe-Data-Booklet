@@ -66,6 +66,11 @@
             });
         },
 
+        licenseHtml(item) {
+            if (!item.image_license || !item.image_license_url) return '';
+            return ` · <a href="${item.image_license_url}" target="_blank" rel="noopener" style="text-decoration:underline">${item.image_license}</a> (attribution required; image unmodified)`;
+        },
+
         /* ---------------- Planets ---------------- */
 
         _planetsList() {
@@ -101,7 +106,7 @@
                   <tr><td>Atmosphere</td><td>${phys.atmosphere !== undefined ? phys.atmosphere : '—'}</td></tr>
                   <tr><td>Natural satellites</td><td>${phys.natural_satellites !== undefined ? phys.natural_satellites : '—'}</td></tr>
                 </table>
-                <div class="ency-footer">Encyclopedia entry · Data: NASA / USGS / ESA (public domain & open data) · Image: ${p.image_attribution || 'Wikimedia Commons'}</div>
+                <div class="ency-footer">Encyclopedia entry · Data: NASA / USGS / ESA (public domain & open data) · Image: ${p.image_attribution || 'Wikimedia Commons'}${licenseHtml(p)}</div>
               </article>
             `;
         },
@@ -136,7 +141,7 @@
                   <tr><td>Albedo</td><td>${phys.albedo !== undefined ? phys.albedo : '—'}</td></tr>
                   <tr><td>Shape</td><td>${phys.shape !== undefined ? phys.shape : '—'}</td></tr>
                 </table>
-                <div class="ency-footer">Encyclopedia entry · Data: NASA / USGS (public domain) · Image: ${m.image_attribution || 'Wikimedia Commons'}</div>
+                <div class="ency-footer">Encyclopedia entry · Data: NASA / USGS (public domain) · Image: ${m.image_attribution || 'Wikimedia Commons'}${licenseHtml(m)}</div>
               </article>
             `;
         },

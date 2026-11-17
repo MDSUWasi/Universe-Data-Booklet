@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thank You — Universe Data Booklet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-space-950: #fef2ea;
+      --color-space-900: #fce8dd;
+      --color-space-850: #f5dcc8;
+      --color-space-800: #f0c9b0;
+      --color-space-750: #e8b493;
+      --color-space-700: #d99a7a;
+      --color-space-600: #c75b3c;
+      --color-space-500: #a0452a;
+      --color-space-400: #7a3320;
+      --color-space-300: #5c2a1a;
+      --color-space-200: #3d1f14;
+      --color-space-100: #2d1810;
+      --color-space-50: #1a0f08;
+
+      --color-aurora-500: #a0452a;
+      --color-aurora-400: #c75b3c;
+      --color-aurora-300: #d99a7a;
+      --color-aurora-200: #e8b493;
+      --color-aurora-100: #f5dcc8;
+
+      --color-nebula-500: #c75b3c;
+      --color-nebula-400: #d99a7a;
+      --color-nebula-300: #e8b493;
+
+      --color-solar-400: #e8b493;
+      --color-success-400: #c75b3c;
+      --color-danger-400: #d99a7a;
+
+      --font-display: 'Space Grotesk', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --font-ui: 'Space Grotesk', system-ui, sans-serif;
+
+      --shadow-md: 0 8px 24px rgba(45, 24, 16, 0.25);
+      --shadow-lg: 0 16px 48px rgba(45, 24, 16, 0.3);
+      --shadow-xl: 0 24px 64px rgba(45, 24, 16, 0.35);
+      --shadow-glow-nebula: 0 0 32px rgba(199, 91, 60, 0.3);
+
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+      --radius-full: 9999px;
+
+      --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { font-size: 16px; scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+
+    body {
+      font-family: var(--font-ui);
+      background: var(--color-space-950);
+      color: var(--color-space-50);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      padding: 2rem 1rem;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 20% 0%, rgba(224, 122, 95, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(244, 162, 97, 0.12) 0%, transparent 50%),
+        radial-gradient(ellipse 40% 30% at 50% 50%, rgba(201, 130, 26, 0.08) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .subpage {
+      position: relative;
+      z-index: 400;
+      max-width: 900px;
+      margin: 2rem auto;
+      background: var(--color-space-900);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-xl);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      animation: slide-up var(--transition-base) var(--transition-bounce);
+    }
+
+    @keyframes slide-up {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .subpage-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .subpage-title {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--color-space-50);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      line-height: 1.2;
+    }
+
+    .subpage-title-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.125rem;
+      background: linear-gradient(135deg, var(--color-nebula-500), var(--color-aurora-500));
+      box-shadow: var(--shadow-glow-nebula);
+    }
+
+    .subpage-close {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--color-space-400);
+      cursor: pointer;
+      transition: var(--transition-fast);
+      font-size: 1rem;
+    }
+
+    .subpage-close:hover {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: var(--color-danger-400);
+      transform: rotate(90deg);
+    }
+
+    .subpage-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem;
+    }
+
+    .subpage-footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      padding: 1.25rem 1.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(1.5rem, 4vw, 2rem); line-height: 1.2; margin: 1rem 0 0.5rem; color: var(--color-space-50); }
+    h2 { font-family: var(--font-display); font-weight: 600; font-size: 1.25rem; color: var(--color-space-400); margin: 1.5rem 0 0.75rem; }
+    h3 { font-family: var(--font-display); font-weight: 600; font-size: 1rem; color: var(--color-space-400); margin: 1rem 0 0.5rem; }
+    p { margin: 0.75rem 0; color: var(--color-space-300); }
+    ul, ol { margin: 0.75rem 0 0.75rem 1.5rem; color: var(--color-space-300); }
+    li { margin: 0.35rem 0; }
+    strong { color: var(--color-space-100); }
+    a { color: var(--color-aurora-400); text-decoration: none; border-bottom: 1px solid rgba(199, 91, 60, 0.3); }
+    a:hover { color: var(--color-nebula-500); border-bottom-color: var(--color-nebula-500); }
+    code { font-family: var(--font-mono); font-size: 0.8125rem; background: rgba(255, 255, 255, 0.03); padding: 0.125rem 0.375rem; border-radius: 4px; color: var(--color-space-100); }
+    blockquote { border-left: 3px solid var(--color-nebula-500); padding-left: 1rem; margin: 0.75rem 0; color: var(--color-space-400); font-style: italic; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; margin: 1rem 0; }
+    th { text-align: left; padding: 0.75rem 1rem; font-family: var(--font-ui); font-size: 0.625rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-space-500); border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
+    td { padding: 0.75rem 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.04); color: var(--color-space-300); vertical-align: top; }
+    tr:nth-child(even) td { background: rgba(255, 255, 255, 0.02); }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.625rem;
+      border-radius: var(--radius-full); font-size: 0.625rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .badge-pd { background: rgba(6, 182, 212, 0.2); color: var(--color-aurora-400); border: 1px solid rgba(6, 182, 212, 0.3); }
+    .badge-cc-by { background: rgba(245, 158, 11, 0.2); color: var(--color-solar-400); border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-cc0 { background: rgba(107, 114, 128, 0.2); color: var(--color-space-400); border: 1px solid rgba(107, 114, 128, 0.3); }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+      padding: 0.625rem 1.25rem; border: 1px solid transparent; border-radius: var(--radius-md);
+      font-family: var(--font-ui); font-size: 0.8125rem; font-weight: 500; cursor: pointer;
+      transition: var(--transition-fast); white-space: nowrap;
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.1); color: var(--color-space-300);
+    }
+    .btn-secondary:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.2); color: var(--color-space-100); }
+
+    .muted { font-size: 0.8125rem; color: var(--color-space-500); }
+
+    hr { border: none; border-top: 1px solid rgba(255, 255, 255, 0.06); margin: 1.5rem 0; }
+
+    @media (max-width: 640px) {
+      body { padding: 1rem 0.75rem; }
+      .subpage { margin: 1rem auto; border-radius: var(--radius-lg); }
+      .subpage-header, .subpage-body, .subpage-footer { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="subpage">
+    <header class="subpage-header">
+      <div class="subpage-title">
+        <span class="subpage-title-icon" aria-hidden="true">🙏</span>
+        Thank You
+      </div>
+      <button class="subpage-close" aria-label="Close thank you" onclick="window.close()">✕</button>
+    </header>
+
+    <div class="subpage-body">
+      <p>This project would not have been possible without the people, teams, and open data sources listed below. Universe Data Booklet is built on top of their free, public work.</p>
+
+      <hr>
+
+      <h2>🛰️ Data & API Providers</h2>
+
+      <h3>NASA</h3>
+      <ul>
+        <li><strong>NASA NEO Web API</strong> — Near-Earth Object close-approach data (<code>api.nasa.gov/neo</code>)</li>
+        <li><strong>NASA DONKI</strong> — Solar storm / geomagnetic data</li>
+        <li><strong>NASA InSight Mars Weather</strong></li>
+        <li><strong>NASA Solar System Treks</strong> — LRO WAC Mosaic (Moon) & Viking MDIM21 (Mars) tile rasters, served through the NASA/JPL Trek WMTS</li>
+        <li><strong>NASA Exoplanet Archive</strong> (via IPAC) — confirmed exoplanet catalog</li>
+        <li><strong>NASA/JPL Small-Body Database</strong></li>
+      </ul>
+      <p class="muted">NASA data is public domain. Attribution: "NASA/JPL-Caltech" where applicable.</p>
+
+      <h3>USGS</h3>
+      <ul>
+        <li><strong>USGS Earthquake Hazards Program</strong> — real-time earthquake feed (<code>earthquake.usgs.gov</code>). USGS data is public domain.</li>
+      </ul>
+
+      <h3>Open-Meteo</h3>
+      <ul>
+        <li><strong>Open-Meteo</strong> — elevation & current-weather API. Licensed <strong>CC BY 4.0</strong>. Cite as: <em>Open-Meteo (https://open-meteo.com)</em>.</li>
+      </ul>
+
+      <h3>Open Notify</h3>
+      <ul>
+        <li><strong>Open Notify</strong> — live ISS position and "who is in space" endpoints. Open-source; see <code>open-notify.org</code>.</li>
+      </ul>
+
+      <h3>ESA / Copernicus</h3>
+      <ul>
+        <li><strong>ESA / Copernicus DEM</strong> — elevation reference data used by the Planetary Explorer terrain comparisons.</li>
+      </ul>
+
+      <h3>Full Solar System encyclopedia data</h3>
+      <p>The encyclopedia covers the Sun, Mercury, Venus, Earth, the Moon, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto, Ceres, and 9 moons (Phobos, Deimos, Io, Europa, Ganymede, Callisto, Titan, Enceladus, Triton). Physical figures (mean diameter, mass, gravity, atmosphere, temperatures, orbits, satellite counts) are compiled from <strong>NASA/JPL-Caltech</strong>, <strong>USGS</strong>, <strong>ESA</strong>, and other public-domain sources and are suitable for educational use.</p>
+
+      <hr>
+
+      <h2>🖼️ Encyclopedia Reference Images</h2>
+      <p>The Planetary Explorer encyclopedia renders a reference photo for every body. All 21 images are bundled <strong>offline</strong> under <code>Project Base/frontend/assets/encyclopedia/</code>, sourced from <strong>Wikimedia Commons</strong>. Each carries its source file, license, and author/credit as required by that license — even when the app runs fully offline.</p>
+
+      <table>
+        <thead><tr><th>Body</th><th>Wikimedia Commons source file</th><th>License</th><th>Author / Credit</th></tr></thead>
+        <tbody>
+          <tr><td>Sun</td><td><code>Sun_Releases_X1_5_Flare_on_August_7,_2023_(SVS14417_-_Aug_7_X1pt5_Flare_171-131_SDO).gif</code></td><td><span class="badge badge-pd">NASA public domain</span></td><td>NASA/SDO</td></tr>
+          <tr><td>Mercury</td><td><code>Mercury_in_color_-_Prockter07_centered.jpg</code></td><td><span class="badge badge-pd">Public domain</span></td><td>NASA (MESSENGER / Prockter)</td></tr>
+          <tr><td>Venus</td><td><code>Venus_from_Mariner_10.jpg</code></td><td><span class="badge badge-pd">Public domain</span></td><td>NASA/JPL-Caltech (Mariner 10)</td></tr>
+          <tr><td>Earth</td><td><code>The_Earth_seen_from_Apollo_17.jpg</code></td><td><span class="badge badge-pd">Public domain</span></td><td>NASA/Apollo 17 crew</td></tr>
+          <tr><td>Moon</td><td><code>LRO_WAC_Nearside_Mosaic.jpg</code></td><td><span class="badge badge-pd">Public domain</span></td><td>NASA/GSFC/Arizona State University (LRO)</td></tr>
+          <tr><td>Mars</td><td><code>OSIRIS_Mars_true_color.jpg</code></td><td><span class="badge badge-cc-by">CC BY-SA 3.0 IGO</span></td><td>ESA & MPS for OSIRIS Team (Rosetta)</td></tr>
+          <tr><td>Jupiter</td><td><code>Portrait_of_Jupiter_from_Cassini.jpg</code></td><td><span class="badge badge-pd">Public domain</span></td><td>NASA/JPL/Space Science Institute (Cassini)</td></tr>
+          <tr><td>Saturn</td><td><code>Saturn_global_view_from_Cassini,_rings_open_Better_Colour.png</code></td><td><span class="badge badge-pd">Public domain</span></td><td>NASA / JPL-Caltech / SSI / color composite by Gordan Ugarkov (Cassini)</td></tr>
+          <tr><td>Uranus</td><td><code>Uranus_Voyager2_color_calibrated.png</code></td><td><span class="badge badge-cc0">CC0</span></td><td>Ardenau4 (Voyager 2 / PDS / OPUS)</td></tr>
+          <tr><td>Neptune</td><td><code>Neptune_Voyager2_color_calibrated.png</code></td><td><span class="badge badge-cc0">CC0</span></td><td>NASA / Voyager 2 / PDS / OPUS / Ardenau4</td></tr>
+          <tr><td>Pluto</td><td><code>Pluto_in_3-D.jpg</code></td><td><span class="badge badge-pd">Public domain</span></td><td>NASA/Johns Hopkins University Applied Physics Laboratory (Hubble)</td></tr>
+          <tr><td>Ceres</td><td><code>Ceres_-_RC3_-_Haulani_Crater_(22381131691)_(cropped).jpg</code></td><td><span class="badge badge-pd">Public domain</span></td><td>NASA/JPL-Caltech/UCLA/MPS/DLR/PSI (Dawn)</td></tr>
+          <tr><td>Io</td><td><code>Io_comparison_with_Earth_and_Moon.png</code></td><td><span class="badge badge-pd">Public domain</span></td><td>NASA / SwRI / MSSS / Jason Perry (Galileo)</td></tr>
+          <tr><td>Europa</td><td><code>PIA19048_realistic_color_Europa_mosaic_edited.jpg</code></td><td><span class="badge badge-pd">Public domain</span></td><td>NASA / JPL-Caltech / SETI Institute (Galileo)</td></tr>
+          <tr><td>Ganymede</td><td><code>Ganymede_-_Perijove_34_Composite.jpg</code></td><td><span class="badge badge-cc-by">CC BY 2.0</span></td><td>NASA/JPL-Caltech/SwRI/MSSS/Kevin M. Gill (Juno)</td></tr>
+          <tr><td>Callisto</td><td><code>Callisto-scarp.jpg</code></td><td><span class="badge badge-pd">Public domain</span></td><td>NASA (Galileo)</td></tr>
+          <tr><td>Titan</td><td><code>Titan_in_front_of_the_ring_and_Saturn.jpg</code></td><td><span class="badge badge-pd">Public domain</span></td><td>Cassini Imaging Team, NASA/JPL-Caltech/Space Science Institute</td></tr>
+          <tr><td>Enceladus</td><td><code>Enceladus_with_Saturn_(20901575102).jpg</code></td><td><span class="badge badge-cc-by">CC BY-SA 2.0</span></td><td>NASA/JPL-Caltech/Space Science Institute (Cassini)</td></tr>
+          <tr><td>Triton</td><td><code>PIA00340_Montage_of_Neptune_and_Triton.jpg</code></td><td><span class="badge badge-pd">Public domain</span></td><td>NASA, JPL (Voyager 2)</td></tr>
+          <tr><td>Phobos</td><td><code>Phobos_PIA10369.jpg</code></td><td><span class="badge badge-pd">Public domain</span></td><td>NASA/JPL-Caltech/University of Arizona (MGS)</td></tr>
+          <tr><td>Deimos</td><td><code>NASA-Deimos-MarsMoon-20090221.jpg</code></td><td><span class="badge badge-pd">Public domain</span></td><td>NASA/JPL/University of Arizona (MGS)</td></tr>
+        </tbody>
+      </table>
+
+      <h4>License obligations honoured</h4>
+      <ul>
+        <li><strong>CC BY 2.0 (Ganymede)</strong>, <strong>CC BY-SA 2.0 (Enceladus)</strong>, and <strong>CC BY-SA 3.0 IGO (Mars)</strong> require attribution to the named author and a link to the license. Attribution is printed on each encyclopedia card and in <a href="/dependencies">DEPENDENCIES</a>. CC BY-SA also requires that derivative works be shared under the same license — this project does not modify those images.</li>
+        <li><strong>CC0 (Uranus, Neptune)</strong> is a public-domain dedication; no further obligations, though attribution is still given.</li>
+        <li>All images are retrieved from Wikimedia Commons under CC BY / CC BY-SA / CC0 / public-domain licenses; see each file's Commons page for the full terms.</li>
+      </ul>
+
+      <blockquote>Cite this project: MDSUWasi, <em>Universe Data Booklet</em> (integrated with Project Base — Planetary Explorer), 2026.</blockquote>
+
+      <hr>
+
+      <h2>💻 Open-Source Libraries</h2>
+      <table>
+        <thead><tr><th>Library</th><th>Authors</th><th>License</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Three.js</strong> (r160)</td><td>mrdoob and the Three.js authors</td><td>MIT</td></tr>
+          <tr><td><strong>Chart.js</strong> (4.4.0)</td><td>Chart.js Contributors</td><td>MIT</td></tr>
+          <tr><td><strong>jsPDF</strong> (2.5.1)</td><td>James Hall & jsPDF Team</td><td>MIT</td></tr>
+          <tr><td><strong>jsPDF-AutoTable</strong> (3.5.28)</td><td>Simon Bengtsson</td><td>MIT</td></tr>
+          <tr><td><strong>Leaflet</strong> (1.9.4)</td><td>Vladimir Agafonkin & Leaflet contributors</td><td>MIT</td></tr>
+          <tr><td><strong>GSAP</strong> (3.12.5)</td><td>GreenSock</td><td>GreenSock Standard License</td></tr>
+        </tbody>
+      </table>
+      <p class="muted">Full license texts and copyright notices are bundled with the libraries under <code>src/frontend/lib/</code> and <code>Project Base/frontend/lib/</code>, and summarised in <a href="/dependencies">DEPENDENCIES</a>.</p>
+
+      <hr>
+
+      <h2>🙏 Acknowledgments</h2>
+      <ul>
+        <li>The NASA, USGS, Open-Meteo, Open Notify, and ESA/Copernicus teams for making planetary and Earth science data freely available.</li>
+        <li>The maintainers of Three.js, Chart.js, jsPDF, Leaflet, and GSAP for building and sustaining these libraries under permissive licenses.</li>
+        <li>Every educator, student, and curious explorer who uses or contributes to this project.</li>
+      </ul>
+
+      <blockquote>Made with 💜 for Curiosity & 💜 for Universe.</blockquote>
+    </div>
+
+    <footer class="subpage-footer">
+      <button class="btn btn-secondary" onclick="window.close()">Close</button>
+    </footer>
+  </div>
+
+</body>
+</html>

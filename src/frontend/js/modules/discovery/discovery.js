@@ -274,6 +274,7 @@ function renderResult(data, lat, lng) {
             <span>Low: ${minElev.toFixed(1)}m</span>
             <span>High: ${maxElev.toFixed(1)}m</span>
           </div>
+          <div style="font-size: 0.625rem; color: var(--color-space-400);"><a href="https://open-meteo.com/" target="_blank" rel="noopener" style="color: var(--color-aurora-400); text-decoration: underline;">Weather &amp; elevation data by Open-Meteo (CC BY 4.0)</a></div>
         </div>
         <div style="display: flex; justify-content: center;">
           ${gridHtml}

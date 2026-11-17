@@ -55,7 +55,7 @@ These are processed offline or bundled as local terrain assets / reports. Regene
 |---|---|---|---|
 | **LRO South Pole DEM** (Moon) | NASA / USGS Astrogeology Science Center | Lunar terrain assets and comparison reports; `moon.json`, `lunar_fingerprints.csv`, `moon_southpole_summary.txt` | Public domain. Credit: "NASA/GSFC/Arizona State University" and "USGS Astrogeology". |
 | **MRO CTX Controlled DTM** (Mars) | NASA / USGS Astrogeology Science Center | Mars terrain assets and comparison reports; `jezero.json`, `site_comparison.csv` | Public domain. Credit: "Data provided by USGS Astrogeology Science Center". |
-| **Copernicus DEM GLO-30** (Earth) | ESA / Airbus (AWS Open Data) | Earth terrain sites (McMurdo, Kerguelen, Axel Heiberg); `Copernicus_DSM_10_S77_00_E162_00.xml` metadata | Free to use with attribution. Credit: **"ESA, Copernicus"**. Source: https://registry.opendata.aws/copernicus-dem/ |
+| **Copernicus DEM GLO-30** (Earth) | ESA / Airbus (AWS Open Data) | Earth terrain sites (McMurdo, Kerguelen, Axel Heiberg); `Copernicus_DSM_10_S77_00_E162_00.xml` metadata | Free to use with attribution. Credit: **"© DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved."** Source: https://registry.opendata.aws/copernicus-dem/ |
 | **Derived slope / roughness rasters and 30 m comparison tables** | Computed locally with GDAL, NumPy, and SciPy | `Project Base/output/reports/*.csv`, `*.txt`, and `frontend/assets/terrain/*.json` | Derived works; inherit source-data terms (NASA/USGS/ESA). |
 
 ### 1.4 Bundled local data files
